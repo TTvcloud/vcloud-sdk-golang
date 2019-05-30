@@ -2,13 +2,20 @@ package base
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
+)
+
+const (
+	AccessKey = "VCLOUD_ACCESSKEY"
+	SecretKey = "VCLOUD_SECRETKEY"
 )
 
 type Client struct {
@@ -25,7 +32,25 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	}
 
 	c := http.Client{Transport: transport}
-	return &Client{Client: c, ServiceInfo: info, ApiInfoList: apiInfoList}
+	client := &Client{Client: c, ServiceInfo: info, ApiInfoList: apiInfoList}
+
+	if os.Getenv(AccessKey) != "" && os.Getenv(SecretKey) != "" {
+		client.ServiceInfo.Credentials.AccessKeyID = AccessKey
+		client.ServiceInfo.Credentials.SecretAccessKey = SecretKey
+	} else if _, err := os.Stat(os.Getenv("HOME") + "/.vcloud/config"); err == nil {
+		if content, err := ioutil.ReadFile(os.Getenv("HOME") + "/.vcloud/config"); err == nil {
+			m := make(map[string]string)
+			json.Unmarshal(content, &m)
+			if accessKey, ok := m["ak"]; ok {
+				client.ServiceInfo.Credentials.AccessKeyID = accessKey
+			}
+			if secretKey, ok := m["sk"]; ok {
+				client.ServiceInfo.Credentials.SecretAccessKey = secretKey
+			}
+		}
+	}
+
+	return client
 }
 
 func (client *Client) SetCredential(c Credentials) {
