@@ -9,7 +9,7 @@ go get github.com/TTvcloud/vcloud-sdk-golang
 
 2. 配置相关的环境变量`VCLOUD_ACCESSKEY`,`VCLOUD_SECRETKEY`
 
-3. 配置在默认的系统文件中`~/./vcloud/config`
+3. 配置在默认的系统文件中`~/.vcloud/config`
 
    config文件结构
 

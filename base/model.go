@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	RegionCNLangFang1 = "cn-langfang-1"
-	RegionCNHuailai1  = "cn-huailai-1"
+	RegionCnNorth1 = "cn-north-1"
 
 	timeFormatV4 = "20060102T150405Z"
 )

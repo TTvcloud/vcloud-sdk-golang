@@ -32,7 +32,7 @@ var (
 		Header: http.Header{
 			"Accept": []string{"application/json"},
 		},
-		Credentials: base.Credentials{Region: base.RegionCNLangFang1, Service: "iam"},
+		Credentials: base.Credentials{Region: base.RegionCnNorth1, Service: "iam"},
 	}
 
 	ApiInfoList = map[string]*base.ApiInfo{
