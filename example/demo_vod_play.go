@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
+
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
 func main() {
 	query := url.Values{}
-	query.Set("video_id", "v0282ccd0000bjpm26vibkthkdq62qf0")
+	query.Set("video_id", "your vid")
+
+	vod.DefaultInstance.SetCredential(base.Credentials{
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk"})
 
 	resp, code, _ := vod.DefaultInstance.GetPlayInfo(query)
 	fmt.Println(code)
