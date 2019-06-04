@@ -23,6 +23,41 @@ func (c Credentials) Sign(request *http.Request) *http.Request {
 	return Sign4(request, c)
 }
 
+func (c Credentials) SignUrl(request *http.Request) string {
+	query := request.URL.Query()
+	ldt := timestampV4()
+	sdt := ldt[:8]
+	meta := new(metadata)
+	meta.date, meta.service, meta.region, meta.signedHeaders, meta.algorithm = sdt, c.Service, c.Region, "", "AWS4-HMAC-SHA256"
+	meta.credentialScope = concat("/", meta.date, meta.region, meta.service, "aws4_request")
+
+	query.Set("X-Amz-Date", ldt)
+	query.Set("X-Amz-NotSignBody", "")
+	query.Set("X-Amz-Credential", c.AccessKeyID+"/"+meta.credentialScope)
+	query.Set("X-Amz-Algorithm", meta.algorithm)
+	query.Set("X-Amz-SignedHeaders", meta.signedHeaders)
+	query.Set("X-Amz-SignedQueries", "")
+	keys := make([]string, 0, len(query))
+	for k := range query {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	query.Set("X-Amz-SignedQueries", strings.Join(keys, ";"))
+
+	// Task 1
+	hashedCanonReq := hashedSimpleCanonicalRequestV4(request, query, meta)
+
+	// Task 2
+	stringToSign := concat("\n", meta.algorithm, ldt, meta.credentialScope, hashedCanonReq)
+
+	// Task 3
+	signingKey := signingKeyV4(c.SecretAccessKey, meta.date, meta.region, meta.service)
+	signature := signatureV4(signingKey, stringToSign)
+
+	query.Set("X-Amz-Signature", signature)
+	return query.Encode()
+}
+
 // Sign4 signs a request with Signed Signature Version 4.
 func Sign4(request *http.Request, credential Credentials) *http.Request {
 	keys := credential
@@ -44,6 +79,18 @@ func Sign4(request *http.Request, credential Credentials) *http.Request {
 	request.Header.Set("Authorization", buildAuthHeaderV4(signature, meta, keys))
 
 	return request
+}
+
+func hashedSimpleCanonicalRequestV4(request *http.Request, query url.Values, meta *metadata) string {
+	payloadHash := hashSHA256([]byte(""))
+
+	if request.URL.Path == "" {
+		request.URL.Path = "/"
+	}
+
+	canonicalRequest := concat("\n", request.Method, normuri(request.URL.Path), normquery(query), "\n", meta.signedHeaders, payloadHash)
+
+	return hashSHA256([]byte(canonicalRequest))
 }
 
 func hashedCanonicalRequestV4(request *http.Request, meta *metadata) string {

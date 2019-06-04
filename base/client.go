@@ -67,6 +67,25 @@ func (client *Client) SetCredential(c Credentials) {
 	}
 }
 
+func (client *Client) GetSignUrl(api string, query url.Values) (string, error) {
+	apiInfo := client.ApiInfoList[api]
+
+	if apiInfo == nil {
+		return "", errors.New("相关api不存在")
+	}
+
+	query = mergeQuery(query, apiInfo.Query)
+
+	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, nil)
+
+	if err != nil {
+		return "", errors.New("构建request失败")
+	}
+
+	return client.ServiceInfo.Credentials.SignUrl(req), nil
+}
+
 func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 	apiInfo := client.ApiInfoList[api]
 
