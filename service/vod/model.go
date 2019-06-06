@@ -44,6 +44,22 @@ type PlayInfo struct {
 	PreloadSize     int
 }
 
+type StartTranscodeRequest struct {
+	Vid        string
+	TemplateId string
+	Input      map[string]interface{}
+	Priority   int
+}
+
+type StartTranscodeResult struct {
+	RunId string
+}
+
+type StartTranscodeResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           *StartTranscodeResult `json:",omitempty"`
+}
+
 type UploadVideoByUrlResult struct {
 	Code    int
 	Message string

@@ -40,6 +40,13 @@ var (
 				"Version": []string{"2019-03-15"},
 			},
 		},
+		"StartTranscode": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action": []string{"StartTranscode"},
+			},
+		},
 		"UploadMediaByUrl": {
 			Method: http.MethodGet,
 			Path:   "/",
