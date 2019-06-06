@@ -44,7 +44,30 @@ var (
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"StartTranscode"},
+				"Action": []string{"StartTranscode"},
+			},
+		},
+		"UploadMediaByUrl": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"UploadMediaByUrl"},
+				"Version": []string{"2018-01-01"},
+			},
+		},
+		"ApplyUpload": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"ApplyUpload"},
+				"Version": []string{"2018-01-01"},
+			},
+		},
+		"CommitUpload": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"CommitUpload"},
 				"Version": []string{"2018-01-01"},
 			},
 		},

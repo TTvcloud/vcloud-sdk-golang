@@ -59,3 +59,157 @@ type StartTranscodeResp struct {
 	ResponseMetadata *base.ResponseMetadata
 	Result           *StartTranscodeResult `json:",omitempty"`
 }
+
+type UploadVideoByUrlResult struct {
+	Code    int
+	Message string
+}
+
+type UploadVideoByUrlResp struct {
+	base.CommonResponse
+	Result UploadVideoByUrlResult
+}
+
+type VideoFormat string
+
+const (
+	MP4  VideoFormat = "mp4"
+	M3U8 VideoFormat = "m3u8"
+)
+
+type UploadVideoByUrlParams struct {
+	SpaceName  string
+	Format     VideoFormat
+	SourceUrls []string
+	Extra      string
+}
+
+type FileType string
+
+const (
+	VIDEO  FileType = "video"
+	IMAGE  FileType = "image"
+	OBJECT FileType = "object"
+)
+
+type ApplyUploadParam struct {
+	SpaceName  string
+	SessionKey string
+	FileType   FileType
+	FileSize   int
+	UploadNum  int
+}
+
+type ApplyUploadResp struct {
+	base.CommonResponse
+	Result ApplyUploadResult
+}
+
+type ApplyUploadResult struct {
+	RequestID     string
+	UploadAddress UploadAddress
+}
+type UploadAddress struct {
+	StoreInfos    []StoreInfo
+	UploadHosts   []string
+	UploadHeader  map[string]string
+	SessionKey    string
+	AdvanceOption AdvanceOption
+}
+
+type StoreInfo struct {
+	StoreUri string
+	Auth     string
+}
+
+type AdvanceOption struct {
+	Parallel  int
+	Stream    int
+	SliceSize int
+}
+
+type CommitUploadParam struct {
+	SpaceName string
+	Body      CommitUploadBody
+}
+
+type CommitUploadBody struct {
+	CallbackArgs string
+	SessionKey   string
+	Functions    []Function
+}
+
+type Function struct {
+	Name  string
+	Input interface{}
+}
+
+type SnapshotInput struct {
+	SnapshotTime float64
+}
+
+type EntryptionInput struct {
+	Config       map[string]string
+	PolicyParams map[string]string
+}
+
+type OptionInfo struct {
+	Title       string
+	Tags        string
+	Description string
+	Category    string
+}
+
+type WorkflowInput struct {
+	TemplateId string
+}
+
+type CommitUploadResp struct {
+	base.CommonResponse
+	Result CommitUploadResult
+}
+
+type CommitUploadResult struct {
+	RequestId string
+	Results   []UploadResult
+}
+
+type UploadResult struct {
+	Vid         string
+	VideoMeta   VideoMeta
+	ImageMeta   ImageMeta
+	ObjectMeta  ObjectMeta
+	Encryption  Encryption
+	SnapshotUri string
+}
+type VideoMeta struct {
+	Uri      string
+	Height   int
+	Width    int
+	Duration float64
+	Bitrate  int
+	Md5      string
+	Format   string
+	Size     int
+}
+
+type ImageMeta struct {
+	Uri    string
+	Height int
+	Width  int
+	Md5    string
+}
+
+type ObjectMeta struct {
+	Uri string
+	Md5 string
+}
+
+type Encryption struct {
+	Uri       string
+	SecretKey string
+	Algorithm string
+	Version   string
+	SourceMd5 string
+	Extra     map[string]string
+}
