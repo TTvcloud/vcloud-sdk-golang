@@ -215,3 +215,25 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, func
 	}
 	return commitResp, nil
 }
+
+// SetVideoPublishStatus 媒资相关
+func (p *Vod) SetVideoPublishStatus(SpaceName, Vid, Status string) (*SetVideoPublishStatusResp, int, error) {
+	jsonTemp := `{
+		"SpaceName" : "%v",
+		"Vid" : "%v",
+		"Status" : "%v"
+	}`
+
+	body := fmt.Sprintf(jsonTemp, SpaceName, Vid, Status)
+	respBody, status, err := p.Json("SetVideoPublishStatus", nil, body)
+	if err != nil {
+		return nil, status, err
+	}
+
+	output := new(SetVideoPublishStatusResp)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, status, err
+	}
+	output.ResponseMetadata.Service = "vod"
+	return output, status, nil
+}

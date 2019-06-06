@@ -213,3 +213,8 @@ type Encryption struct {
 	SourceMd5 string
 	Extra     map[string]string
 }
+
+// SetVideoPublishStatus
+type SetVideoPublishStatusResp struct {
+	ResponseMetadata *base.ResponseMetadata
+}
