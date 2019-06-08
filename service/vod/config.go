@@ -67,7 +67,14 @@ var (
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"CommitUpload"},
+				"Action": []string{"CommitUpload"},
+			},
+		},
+		"SetVideoPublishStatus": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"SetVideoPublishStatus"},
 				"Version": []string{"2018-01-01"},
 			},
 		},
