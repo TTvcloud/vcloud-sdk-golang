@@ -2,6 +2,7 @@ package vod
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"hash/crc32"
@@ -236,4 +237,31 @@ func (p *Vod) SetVideoPublishStatus(SpaceName, Vid, Status string) (*SetVideoPub
 	}
 	output.ResponseMetadata.Service = "vod"
 	return output, status, nil
+}
+
+func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
+	return p.GetSignUrl("GetPlayInfo", query)
+}
+
+func (p *Vod) GetUploadAuthToken(space string) (string, error) {
+	ret := map[string]string{
+		"Version": "v1",
+	}
+	query := url.Values{}
+	query.Set("SpaceName", space)
+
+	if applyUploadToken, err := p.GetSignUrl("ApplyUpload", query); err == nil {
+		ret["ApplyUploadToken"] = applyUploadToken
+	} else {
+		return "", err
+	}
+
+	if commitUploadToken, err := p.GetSignUrl("CommitUpload", query); err == nil {
+		ret["CommitUploadToken"] = commitUploadToken
+	} else {
+		return "", err
+	}
+
+	b, _ := json.Marshal(ret)
+	return base64.StdEncoding.EncodeToString(b), nil
 }
