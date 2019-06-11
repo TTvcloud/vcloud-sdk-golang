@@ -44,7 +44,8 @@ var (
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action": []string{"StartTranscode"},
+				"Action":  []string{"StartTranscode"},
+				"Version": []string{"2018-01-01"},
 			},
 		},
 		"UploadMediaByUrl": {
@@ -67,7 +68,8 @@ var (
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action": []string{"CommitUpload"},
+				"Action":  []string{"CommitUpload"},
+				"Version": []string{"2018-01-01"},
 			},
 		},
 		"SetVideoPublishStatus": {
