@@ -149,7 +149,7 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, func
 		FileType:  fileType,
 	}
 
-	resp, err := DefaultInstance.ApplyUpload(params)
+	resp, err := p.ApplyUpload(params)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, func
 			Functions:    funcs,
 		},
 	}
-	commitResp, err := DefaultInstance.CommitUpload(param)
+	commitResp, err := p.CommitUpload(param)
 	if err != nil {
 		return nil, err
 	}
