@@ -66,7 +66,7 @@ func (p *Vod) UploadVideoByUrl(params UploadVideoByUrlParams) (*UploadVideoByUrl
 	query.Add("SpaceName", params.SpaceName)
 	query.Add("Format", string(params.Format))
 	query.Add("SourceUrls", strings.Join(params.SourceUrls, ","))
-	query.Add("Extra", params.Extra)
+	query.Add("CallbackArgs", params.CallbackArgs)
 	respBody, status, err := p.Query("UploadMediaByUrl", query)
 	if err != nil {
 		return nil, err

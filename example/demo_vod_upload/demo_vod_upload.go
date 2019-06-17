@@ -4,22 +4,27 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
 const spaceName = "your-space-name"
 
 func main() {
+	vod.DefaultInstance.SetCredential(base.Credentials{
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk",
+	})
 	uploadAll()
 	uploadVideoByUrl()
 }
 
 func uploadVideoByUrl() {
 	params := vod.UploadVideoByUrlParams{
-		SpaceName:  spaceName,
-		Format:     vod.MP4,
-		SourceUrls: []string{"video-url"},
-		Extra:      "xxx",
+		SpaceName:    spaceName,
+		Format:       vod.MP4,
+		SourceUrls:   []string{"video-url"},
+		CallbackArgs: "xxx",
 	}
 	resp, err := vod.DefaultInstance.UploadVideoByUrl(params)
 	if err != nil {
@@ -40,7 +45,7 @@ func uploadAll() {
 	fmt.Printf("resp:%+v err:%s", resp, err)
 	resp, err = upload(spaceName, "path-to-img", vod.IMAGE, snapShotFunc)
 	fmt.Printf("resp:%+v err:%s", resp, err)
-	resp, err = upload(spaceName, "path-to-obj", vod.OBJECT, vod.Function{Name: "GetMeta"}, snapShotFunc)
+	resp, err = upload(spaceName, "path-to-obj", vod.OBJECT, getMetaFunc, snapShotFunc)
 	fmt.Printf("resp:%+v err:%s", resp, err)
 }
 

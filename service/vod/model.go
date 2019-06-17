@@ -78,10 +78,10 @@ const (
 )
 
 type UploadVideoByUrlParams struct {
-	SpaceName  string
-	Format     VideoFormat
-	SourceUrls []string
-	Extra      string
+	SpaceName    string
+	Format       VideoFormat
+	SourceUrls   []string
+	CallbackArgs string
 }
 
 type FileType string
