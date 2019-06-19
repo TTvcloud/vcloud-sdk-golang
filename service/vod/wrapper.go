@@ -240,7 +240,17 @@ func (p *Vod) SetVideoPublishStatus(SpaceName, Vid, Status string) (*SetVideoPub
 }
 
 func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
-	return p.GetSignUrl("GetPlayInfo", query)
+	ret := map[string]string{
+		"Version": "v1",
+	}
+	if getPlayInfoToken, err := p.GetSignUrl("GetPlayInfo", query); err == nil {
+		ret["GetPlayInfoToken"] = getPlayInfoToken
+	} else {
+		return "", err
+	}
+
+	b, _ := json.Marshal(ret)
+	return base64.StdEncoding.EncodeToString(b), nil
 }
 
 func (p *Vod) GetUploadAuthToken(space string) (string, error) {
