@@ -69,3 +69,27 @@ type ResponseMetadata struct {
 	Version   string    `json:",omitempty"`
 	Error     *ErrorObj `json:",omitempty"`
 }
+
+type Policy struct {
+	Statement []*Statement
+}
+
+type Statement struct {
+	Effect    string
+	Action    []string
+	Resource  []string
+	Condition string
+}
+
+type SecurityToken2 struct {
+	AccessKeyId     string
+	SecretAccessKey string
+	SessionToken    string
+	ExpiredTime     string
+}
+
+type InnerToken struct {
+	LTAccessKeyId         string
+	SignedSecretAccessKey string
+	Policy                *Policy `json:",omitempty"`
+}

@@ -1,0 +1,119 @@
+package base
+
+import (
+	"encoding/base64"
+	"math/rand"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+
+	"github.com/satori/go.uuid"
+)
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func CreateTempAKSK() (accessKeyId string, plainSk string, err error) {
+	// 生成AccessKeyId
+	if accessKeyId, err = GenerateAccessKeyId("AKTP"); err != nil {
+		return
+	}
+
+	// 生成SecretKey明文
+	plainSk, err = GenerateSecretKey()
+	if err != nil {
+		return
+	}
+	return
+}
+
+func GenerateAccessKeyId(prefix string) (string, error) {
+	// 生成uuid，如：a1fe1d4f-eb56-4a06-86e8-3e5068a1a838
+	uid, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+
+	// 滤掉'-'后，做base64，输出：YTFmZTFkNGZlYjU2NGEwNjg2ZTgzZTUwNjhhMWE4Mzg=
+	uidBase64 := base64.StdEncoding.EncodeToString([]byte(strings.Replace(uid.String(), "-", "", -1)))
+
+	// 去掉"-+/="特殊字符，加上prefix
+	s := strings.Replace(uidBase64, "=", "", -1)
+	s = strings.Replace(s, "/", "", -1)
+	s = strings.Replace(s, "+", "", -1)
+	s = strings.Replace(s, "-", "", -1)
+	return prefix + s, nil
+}
+
+func randStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
+func GenerateSecretKey() (string, error) {
+	randString32 := randStringRunes(32)
+	return AesEncryptCBCWithBase64([]byte(randString32), []byte("ttcloudbestcloud"))
+}
+
+func CreateInnerToken(credential Credentials, secretAccessKey string, inlinePolicy *Policy) (*InnerToken, error) {
+	var err error
+	innerToken := new(InnerToken)
+	innerToken.LTAccessKeyId = credential.AccessKeyID
+	innerToken.SignedSecretAccessKey, err = AesEncryptCBCWithBase64([]byte(secretAccessKey), []byte(credential.SecretAccessKey[:16]))
+	innerToken.Policy = inlinePolicy
+	if err == nil {
+		return innerToken, nil
+	} else {
+		return nil, err
+	}
+}
+
+func getTimeout(serviceTimeout, apiTimeout time.Duration) time.Duration {
+	timeout := time.Second
+	if serviceTimeout != time.Duration(0) {
+		timeout = serviceTimeout
+	}
+	if apiTimeout != time.Duration(0) {
+		timeout = apiTimeout
+	}
+	return timeout
+}
+
+func mergeQuery(query1, query2 url.Values) (query url.Values) {
+	query = url.Values{}
+	if query1 != nil {
+		for k, vv := range query1 {
+			for _, v := range vv {
+				query.Add(k, v)
+			}
+		}
+	}
+
+	if query2 != nil {
+		for k, vv := range query2 {
+			for _, v := range vv {
+				query.Add(k, v)
+			}
+		}
+	}
+	return
+}
+
+func mergeHeader(header1, header2 http.Header) (header http.Header) {
+	header = http.Header{}
+	if header1 != nil {
+		for k, v := range header1 {
+			header.Set(k, strings.Join(v, ";"))
+		}
+	}
+	if header2 != nil {
+		for k, v := range header2 {
+			header.Set(k, strings.Join(v, ";"))
+		}
+	}
+
+	return
+}

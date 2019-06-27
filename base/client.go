@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -84,6 +85,28 @@ func (client *Client) GetSignUrl(api string, query url.Values) (string, error) {
 	}
 
 	return client.ServiceInfo.Credentials.SignUrl(req), nil
+}
+
+func (client *Client) SignSts2(inlinePolicy *Policy, expire time.Duration) (*SecurityToken2, error) {
+	var err error
+	sts := new(SecurityToken2)
+	if sts.AccessKeyId, sts.SecretAccessKey, err = CreateTempAKSK(); err != nil {
+		return nil, err
+	}
+
+	if expire == 0 {
+		sts.ExpiredTime = time.Now().Add(15 * time.Minute).Format("20060102T150405Z")
+	} else {
+		sts.ExpiredTime = time.Now().Add(expire).Format("20060102T150405Z")
+	}
+
+	if innerToken, err := CreateInnerToken(client.ServiceInfo.Credentials, sts.SecretAccessKey, inlinePolicy); err != nil {
+		return nil, err
+	} else {
+		b, _ := json.Marshal(innerToken)
+		sts.SessionToken = base64.StdEncoding.EncodeToString(b)
+		return sts, nil
+	}
 }
 
 func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
@@ -172,51 +195,4 @@ func (client *Client) makeRequest(api string, req *http.Request, timeout time.Du
 	}
 
 	return body, resp.StatusCode, nil
-}
-
-func getTimeout(serviceTimeout, apiTimeout time.Duration) time.Duration {
-	timeout := time.Second
-	if serviceTimeout != time.Duration(0) {
-		timeout = serviceTimeout
-	}
-	if apiTimeout != time.Duration(0) {
-		timeout = apiTimeout
-	}
-	return timeout
-}
-
-func mergeQuery(query1, query2 url.Values) (query url.Values) {
-	query = url.Values{}
-	if query1 != nil {
-		for k, vv := range query1 {
-			for _, v := range vv {
-				query.Add(k, v)
-			}
-		}
-	}
-
-	if query2 != nil {
-		for k, vv := range query2 {
-			for _, v := range vv {
-				query.Add(k, v)
-			}
-		}
-	}
-	return
-}
-
-func mergeHeader(header1, header2 http.Header) (header http.Header) {
-	header = http.Header{}
-	if header1 != nil {
-		for k, v := range header1 {
-			header.Set(k, strings.Join(v, ";"))
-		}
-	}
-	if header2 != nil {
-		for k, v := range header2 {
-			header.Set(k, strings.Join(v, ";"))
-		}
-	}
-
-	return
 }
