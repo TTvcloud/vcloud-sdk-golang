@@ -1,6 +1,7 @@
 package base
 
 import (
+	"crypto/md5"
 	"encoding/base64"
 	"math/rand"
 	"net/http"
@@ -12,6 +13,11 @@ import (
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func init() {
+	// 初始化随机种子
+	rand.Seed(time.Now().Unix())
+}
 
 func CreateTempAKSK() (accessKeyId string, plainSk string, err error) {
 	// 生成AccessKeyId
@@ -62,7 +68,8 @@ func CreateInnerToken(credential Credentials, secretAccessKey string, inlinePoli
 	var err error
 	innerToken := new(InnerToken)
 	innerToken.LTAccessKeyId = credential.AccessKeyID
-	innerToken.SignedSecretAccessKey, err = AesEncryptCBCWithBase64([]byte(secretAccessKey), []byte(credential.SecretAccessKey[:16]))
+	key := md5.Sum([]byte(credential.SecretAccessKey))
+	innerToken.SignedSecretAccessKey, err = AesEncryptCBCWithBase64([]byte(secretAccessKey), key[:])
 	innerToken.Policy = inlinePolicy
 	if err == nil {
 		return innerToken, nil
@@ -116,4 +123,22 @@ func mergeHeader(header1, header2 http.Header) (header http.Header) {
 	}
 
 	return
+}
+
+func NewAllowStatement(actions, resources []string) *Statement {
+	sts := new(Statement)
+	sts.Effect = "Allow"
+	sts.Action = actions
+	sts.Resource = resources
+
+	return sts
+}
+
+func NewDenyStatement(actions, resources []string) *Statement {
+	sts := new(Statement)
+	sts.Effect = "Deny"
+	sts.Action = actions
+	sts.Resource = resources
+
+	return sts
 }

@@ -74,6 +74,11 @@ type Policy struct {
 	Statement []*Statement
 }
 
+const (
+	StatementEffectAllow = "Allow"
+	StatementEffectDeny  = "Deny"
+)
+
 type Statement struct {
 	Effect    string
 	Action    []string
@@ -91,5 +96,6 @@ type SecurityToken2 struct {
 type InnerToken struct {
 	LTAccessKeyId         string
 	SignedSecretAccessKey string
+	ExpiredTime           int64
 	Policy                *Policy `json:",omitempty"`
 }

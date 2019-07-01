@@ -5,11 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
+
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
 func main() {
-	ret, _ := vod.DefaultInstance.SignSts2(nil, time.Hour)
+	inlinePolicy := new(base.Policy)
+
+	// 给一个权限是所有action的allow的statement
+	statement := base.NewAllowStatement([]string{"iam:*"}, []string{})
+	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
+
+	ret, _ := vod.DefaultInstance.SignSts2(inlinePolicy, time.Hour)
 	b, _ := json.Marshal(ret)
 	fmt.Println(string(b))
 }

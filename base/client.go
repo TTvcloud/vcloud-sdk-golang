@@ -94,17 +94,18 @@ func (client *Client) SignSts2(inlinePolicy *Policy, expire time.Duration) (*Sec
 		return nil, err
 	}
 
-	if expire == 0 {
-		sts.ExpiredTime = time.Now().Add(15 * time.Minute).Format("20060102T150405Z")
-	} else {
-		sts.ExpiredTime = time.Now().Add(expire).Format("20060102T150405Z")
-	}
-
 	if innerToken, err := CreateInnerToken(client.ServiceInfo.Credentials, sts.SecretAccessKey, inlinePolicy); err != nil {
 		return nil, err
 	} else {
+		if expire < time.Minute {
+			expire = time.Minute
+		}
+		expireTime := time.Now().Add(expire)
+		sts.ExpiredTime = expireTime.Format("20060102T150405Z")
+		innerToken.ExpiredTime = expireTime.Unix()
+
 		b, _ := json.Marshal(innerToken)
-		sts.SessionToken = base64.StdEncoding.EncodeToString(b)
+		sts.SessionToken = "STS2" + base64.StdEncoding.EncodeToString(b)
 		return sts, nil
 	}
 }
