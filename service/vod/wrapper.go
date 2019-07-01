@@ -9,7 +9,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -251,6 +253,26 @@ func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
 
 	b, _ := json.Marshal(ret)
 	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+//GetRedirectPlayUrl get redirected playback addres
+func (p *Vod) GetRedirectPlayUrl(params RedirectPlayParam) (string, error) {
+	query := url.Values{}
+	query.Add("video_id", params.VideoID)
+	query.Add("expire", strconv.FormatInt(time.Now().Add(params.Expire).Unix(), 10))
+	if params.Definition == "" {
+		return "", errors.New("Defintion not set")
+	}
+	query.Add("definition", string(params.Definition))
+
+	token, err := p.GetSignUrl("RedirectPlay", query)
+	if err != nil {
+		return "", err
+	}
+
+	apiInfo := p.ApiInfoList["RedirectPlay"]
+	url := fmt.Sprintf("http://%s%s?%s", p.ServiceInfo.Host, apiInfo.Path, token)
+	return url, nil
 }
 
 func (p *Vod) GetUploadAuthToken(space string) (string, error) {
