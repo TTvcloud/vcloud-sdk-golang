@@ -40,6 +40,14 @@ var (
 				"Version": []string{"2019-03-15"},
 			},
 		},
+		"RedirectPlay": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"RedirectPlay"},
+				"Version": []string{"2019-03-15"},
+			},
+		},
 		"StartTranscode": {
 			Method: http.MethodPost,
 			Path:   "/",

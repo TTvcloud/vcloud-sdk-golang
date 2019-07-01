@@ -1,6 +1,9 @@
 package vod
 
-import "github.com/TTvcloud/vcloud-sdk-golang/base"
+import (
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
+	"time"
+)
 
 // GetPlayInfo
 type GetPlayInfoResp struct {
@@ -115,6 +118,24 @@ type UploadAddress struct {
 	UploadHeader  map[string]string
 	SessionKey    string
 	AdvanceOption AdvanceOption
+}
+
+type VideoDefinition string
+
+const (
+	D1080P VideoDefinition = "1080p"
+	D720P  VideoDefinition = "720p"
+	D540P  VideoDefinition = "540p"
+	D480P  VideoDefinition = "480p"
+	D360P  VideoDefinition = "360p"
+	D240P  VideoDefinition = "240p"
+)
+
+type RedirectPlayParam struct {
+	VideoID    string
+	Definition VideoDefinition
+	Watermark  string
+	Expire     time.Duration
 }
 
 type StoreInfo struct {
