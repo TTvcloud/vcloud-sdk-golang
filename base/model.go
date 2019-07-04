@@ -83,7 +83,7 @@ type Statement struct {
 	Effect    string
 	Action    []string
 	Resource  []string
-	Condition string
+	Condition string `json:",omitempty"`
 }
 
 type SecurityToken2 struct {
