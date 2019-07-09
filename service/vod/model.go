@@ -239,3 +239,8 @@ type Encryption struct {
 type SetVideoPublishStatusResp struct {
 	ResponseMetadata *base.ResponseMetadata
 }
+
+type GetWeightsResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           map[string]map[string]int `json:",omitempty"`
+}

@@ -88,5 +88,13 @@ var (
 				"Version": []string{"2018-01-01"},
 			},
 		},
+		"GetCdnDomainWeights": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"GetCdnDomainWeights"},
+				"Version": []string{"2019-07-01"},
+			},
+		},
 	}
 )

@@ -297,3 +297,18 @@ func (p *Vod) GetUploadAuthToken(space string) (string, error) {
 	b, _ := json.Marshal(ret)
 	return base64.StdEncoding.EncodeToString(b), nil
 }
+
+func (p *Vod) GetCdnDomainWeights(spaceName string) (*GetWeightsResp, error) {
+	query := url.Values{}
+	query.Set("SpaceName", spaceName)
+	respBody, _, err := p.Query("GetCdnDomainWeights", query)
+	if err != nil {
+		return nil, err
+	}
+
+	output := new(GetWeightsResp)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, err
+	}
+	return output, nil
+}
