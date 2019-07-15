@@ -47,6 +47,26 @@ type PlayInfo struct {
 	PreloadSize     int
 }
 
+// GetOriginVideoPlayInfo
+type GetOriginVideoPlayInfoResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           *GetOriginVideoPlayInfoData `json:",omitempty"`
+}
+
+type GetOriginVideoPlayInfoData struct {
+	MediaType     string
+	Duration      float64
+	Size          int64
+	Height        int64
+	Width         int64
+	Format        string
+	CodecType     string
+	Bitrate       int64
+	FileHash      string
+	MainPlayUrl   string
+	BackupPlayUrl string
+}
+
 type StartTranscodeRequest struct {
 	Vid        string
 	TemplateId string

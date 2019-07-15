@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+//GetPlayInfo 获取播放信息
 func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
@@ -23,6 +24,22 @@ func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
 	}
 
 	output := new(GetPlayInfoResp)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, status, err
+	} else {
+		output.ResponseMetadata.Service = "vod"
+		return output, status, nil
+	}
+}
+
+//GetOriginVideoPlayInfo 获取原片播放信息
+func (p *Vod) GetOriginVideoPlayInfo(query url.Values) (*GetOriginVideoPlayInfoResp, int, error) {
+	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
+	if err != nil {
+		return nil, status, err
+	}
+
+	output := new(GetOriginVideoPlayInfoResp)
 	if err := json.Unmarshal(respBody, output); err != nil {
 		return nil, status, err
 	} else {
