@@ -15,7 +15,7 @@ func main() {
 		SecretAccessKey: "you sk"})
 
 	query := url.Values{}
-	query.Set("video_id", "you vid")
+	query.Set("Vid", "you vid")
 
 	resp, code, _ := vod.DefaultInstance.GetOriginVideoPlayInfo(query)
 	fmt.Printf("resp:%+v code:%d\n", resp, code)

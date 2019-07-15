@@ -15,8 +15,8 @@ func main() {
 
 	params := vod.RedirectPlayParam{
 		VideoID:    vid,
-		Expire:     1 * time.Minute,
 		Definition: vod.D1080P,
+		Wartermark: "",
 	}
 	ret, err := vod.DefaultInstance.GetRedirectPlayUrl(params)
 	fmt.Println(ret, err)

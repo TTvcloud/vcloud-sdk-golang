@@ -45,7 +45,7 @@ var (
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"RedirectPlay"},
-				"Version": []string{"2019-03-15"},
+				"Version": []string{"2018-01-01"},
 			},
 		},
 		"GetOriginVideoPlayInfo": {
@@ -53,7 +53,7 @@ var (
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"GetOriginVideoPlayInfo"},
-				"Version": []string{"2019-03-15"},
+				"Version": []string{"2018-01-01"},
 			},
 		},
 		"StartTranscode": {
