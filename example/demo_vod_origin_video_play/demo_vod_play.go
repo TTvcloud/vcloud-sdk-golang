@@ -11,11 +11,11 @@ import (
 
 func main() {
 	vod.DefaultInstance.SetCredential(base.Credentials{
-		AccessKeyID:     "you ak",
-		SecretAccessKey: "you sk"})
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk"})
 
 	query := url.Values{}
-	query.Set("Vid", "you vid")
+	query.Set("Vid", "your vid")
 
 	resp, code, _ := vod.DefaultInstance.GetOriginVideoPlayInfo(query)
 	fmt.Printf("resp:%+v code:%d\n", resp, code)

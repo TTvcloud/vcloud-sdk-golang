@@ -9,9 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 )
@@ -275,12 +273,14 @@ func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
 //GetRedirectPlayUrl get redirected playback addres
 func (p *Vod) GetRedirectPlayUrl(params RedirectPlayParam) (string, error) {
 	query := url.Values{}
-	query.Add("video_id", params.VideoID)
-	query.Add("expire", strconv.FormatInt(time.Now().Add(params.Expire).Unix(), 10))
+	query.Add("Vid", params.Vid)
+
 	if params.Definition == "" {
 		return "", errors.New("Defintion not set")
 	}
-	query.Add("definition", string(params.Definition))
+	query.Add("Definition", string(params.Definition))
+
+	query.Add("Watermark", params.Watermark)
 
 	token, err := p.GetSignUrl("RedirectPlay", query)
 	if err != nil {

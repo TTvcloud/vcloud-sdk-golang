@@ -2,7 +2,6 @@ package vod
 
 import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-	"time"
 )
 
 // GetPlayInfo
@@ -152,10 +151,9 @@ const (
 )
 
 type RedirectPlayParam struct {
-	VideoID    string
+	Vid        string
 	Definition VideoDefinition
 	Watermark  string
-	Expire     time.Duration
 }
 
 type StoreInfo struct {

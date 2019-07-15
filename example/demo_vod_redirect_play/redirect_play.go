@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
-	"time"
 )
 
 func main() {
@@ -14,9 +13,9 @@ func main() {
 		SecretAccessKey: "your sk"})
 
 	params := vod.RedirectPlayParam{
-		VideoID:    vid,
+		Vid:        vid,
 		Definition: vod.D1080P,
-		Wartermark: "",
+		Watermark:  "",
 	}
 	ret, err := vod.DefaultInstance.GetRedirectPlayUrl(params)
 	fmt.Println(ret, err)
