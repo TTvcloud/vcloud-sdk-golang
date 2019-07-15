@@ -48,6 +48,14 @@ var (
 				"Version": []string{"2019-03-15"},
 			},
 		},
+		"GetOriginVideoPlayInfo": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"GetOriginVideoPlayInfo"},
+				"Version": []string{"2019-03-15"},
+			},
+		},
 		"StartTranscode": {
 			Method: http.MethodPost,
 			Path:   "/",
@@ -86,6 +94,14 @@ var (
 			Query: url.Values{
 				"Action":  []string{"SetVideoPublishStatus"},
 				"Version": []string{"2018-01-01"},
+			},
+		},
+		"GetCdnDomainWeights": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"GetCdnDomainWeights"},
+				"Version": []string{"2019-07-01"},
 			},
 		},
 	}
