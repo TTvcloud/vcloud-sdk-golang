@@ -2,7 +2,6 @@ package vod
 
 import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-	"time"
 )
 
 // GetPlayInfo
@@ -45,6 +44,26 @@ type PlayInfo struct {
 	PreloadMaxStep  int
 	PreloadMinStep  int
 	PreloadSize     int
+}
+
+// GetOriginVideoPlayInfo
+type GetOriginVideoPlayInfoResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           *GetOriginVideoPlayInfoData `json:",omitempty"`
+}
+
+type GetOriginVideoPlayInfoData struct {
+	MediaType     string
+	Duration      float64
+	Size          int64
+	Height        int64
+	Width         int64
+	Format        string
+	CodecType     string
+	Bitrate       int64
+	FileHash      string
+	MainPlayUrl   string
+	BackupPlayUrl string
 }
 
 type StartTranscodeRequest struct {
@@ -132,10 +151,9 @@ const (
 )
 
 type RedirectPlayParam struct {
-	VideoID    string
+	Vid        string
 	Definition VideoDefinition
 	Watermark  string
-	Expire     time.Duration
 }
 
 type StoreInfo struct {

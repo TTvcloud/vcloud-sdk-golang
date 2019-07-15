@@ -9,13 +9,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 )
 
+//GetPlayInfo 获取播放信息
 func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
@@ -23,6 +22,22 @@ func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
 	}
 
 	output := new(GetPlayInfoResp)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, status, err
+	} else {
+		output.ResponseMetadata.Service = "vod"
+		return output, status, nil
+	}
+}
+
+//GetOriginVideoPlayInfo 获取原片播放信息
+func (p *Vod) GetOriginVideoPlayInfo(query url.Values) (*GetOriginVideoPlayInfoResp, int, error) {
+	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
+	if err != nil {
+		return nil, status, err
+	}
+
+	output := new(GetOriginVideoPlayInfoResp)
 	if err := json.Unmarshal(respBody, output); err != nil {
 		return nil, status, err
 	} else {
@@ -258,12 +273,14 @@ func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
 //GetRedirectPlayUrl get redirected playback addres
 func (p *Vod) GetRedirectPlayUrl(params RedirectPlayParam) (string, error) {
 	query := url.Values{}
-	query.Add("video_id", params.VideoID)
-	query.Add("expire", strconv.FormatInt(time.Now().Add(params.Expire).Unix(), 10))
+	query.Add("Vid", params.Vid)
+
 	if params.Definition == "" {
 		return "", errors.New("Defintion not set")
 	}
-	query.Add("definition", string(params.Definition))
+	query.Add("Definition", string(params.Definition))
+
+	query.Add("Watermark", params.Watermark)
 
 	token, err := p.GetSignUrl("RedirectPlay", query)
 	if err != nil {
