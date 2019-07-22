@@ -2,14 +2,18 @@ package vod
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"hash/crc32"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -328,4 +332,147 @@ func (p *Vod) GetCdnDomainWeights(spaceName string) (*GetWeightsResp, error) {
 		return nil, err
 	}
 	return output, nil
+}
+
+// poster image related
+func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*DomainInfo, error) {
+
+	now := time.Now().Unix()
+	if p.LastDomainUpdateTime == -1 || now-p.LastDomainUpdateTime > UPDATE_INTERVAL {
+		resp, err := p.GetCdnDomainWeights(spaceName)
+		if err != nil {
+			p.DomainCache[spaceName] = fallbackWeights
+		}
+		if err := resp.ResponseMetadata.Error; err != nil {
+			p.DomainCache[spaceName] = fallbackWeights
+		}
+		weightsMap, exist := resp.Result[spaceName]
+		if !exist || len(weightsMap) == 0 {
+			p.DomainCache[spaceName] = fallbackWeights
+		}
+
+		p.DomainCache[spaceName] = weightsMap
+		p.LastDomainUpdateTime = now
+	}
+
+	var (
+		mainDomain   string
+		backupDomain string
+	)
+	mainDomain = randWeights(p.DomainCache[spaceName], "")
+	if mainDomain == "" {
+		return nil, errors.New("rand domain failed")
+	}
+
+	backupDomain = randWeights(p.DomainCache[spaceName], mainDomain)
+	if backupDomain == "" {
+		backupDomain = mainDomain
+	}
+	return &DomainInfo{MainDomain: mainDomain, BackupDomain: backupDomain}, nil
+}
+
+func randWeights(weightsMap map[string]int, excludeDomain string) string {
+	var weightSum int
+	for domain, weight := range weightsMap {
+		if domain == excludeDomain {
+			continue
+		}
+		weightSum += weight
+	}
+	if weightSum <= 0 {
+		return ""
+	}
+	r := rand.Intn(weightSum) + 1
+	for domains, weight := range weightsMap {
+		if domains == excludeDomain {
+			continue
+		}
+		r -= weight
+		if r <= 0 {
+			return domains
+		}
+	}
+	return ""
+}
+
+func (p *Vod) GetPosterUrl(spaceName string, uri string, fallbackWeights map[string]int, opts ...OptionFun) (*ImgUrl, error) {
+	domainInfos, err := p.GetDomainInfo(spaceName, fallbackWeights)
+	if err != nil {
+		return nil, err
+	}
+	opt := &option{
+		isHttps: false,
+		format:  FORMAT_ORIGINAL,
+		tpl:     VOD_TPL_NOOP,
+	}
+	for _, op := range opts {
+		op(opt)
+	}
+	proto := HTTP
+	if opt.isHttps {
+		proto = HTTPS
+	}
+	var tpl string
+
+	if opt.tpl == VOD_TPL_OBJ || opt.tpl == VOD_TPL_NOOP {
+		tpl = opt.tpl
+	} else {
+		tpl = fmt.Sprintf("%s:%d:%d", opt.tpl, opt.w, opt.h)
+	}
+
+	return &ImgUrl{
+		MainUrl:   fmt.Sprintf("%s://%s/%s~%s.%s", proto, domainInfos.MainDomain, uri, tpl, opt.format),
+		BackupUrl: fmt.Sprintf("%s://%s/%s~%s.%s", proto, domainInfos.BackupDomain, uri, tpl, opt.format),
+	}, nil
+}
+
+func (p *Vod) GetImageUrl(spaceName string, uri string, fallbackWeights map[string]int, opts ...OptionFun) (*ImgUrl, error) {
+	domainInfos, err := p.GetDomainInfo(spaceName, fallbackWeights)
+	if err != nil {
+		return nil, err
+	}
+	opt := &option{
+		isHttps: false,
+		format:  FORMAT_ORIGINAL,
+		sigKey:  "",
+		kv:      nil,
+		tpl:     VOD_TPL_SIG,
+	}
+	for _, op := range opts {
+		op(opt)
+	}
+	path := fmt.Sprintf("/%s~%s.%s", uri, opt.tpl, opt.format)
+	sigTxt := path
+	if opt.kv != nil {
+		if opt.sigKey != "" && opt.kv.Get(KEY_SIG) != "" {
+			return nil, ErrKvSig
+		}
+		sigTxt = fmt.Sprintf("%s?%s", path, opt.kv.Encode())
+	}
+
+	if opt.sigKey != "" {
+		h := hmac.New(sha1.New, []byte(opt.sigKey))
+		h.Write([]byte(sigTxt))
+		sig := base64.URLEncoding.EncodeToString(h.Sum(nil))
+		if opt.kv == nil {
+			opt.kv = url.Values{}
+		}
+		opt.kv.Add(KEY_SIG, sig)
+		path = fmt.Sprintf("%s?%s", path, opt.kv.Encode())
+	} else {
+		path = sigTxt
+	}
+
+	return domainInfos.makeImageUrl(opt.isHttps, path), nil
+}
+
+func (p *DomainInfo) makeImageUrl(isHttps bool, path string) *ImgUrl {
+	proto := HTTP
+	if isHttps {
+		proto = HTTPS
+	}
+	return &ImgUrl{
+		MainUrl:   fmt.Sprintf("%s://%s%s", proto, p.MainDomain, path),
+		BackupUrl: fmt.Sprintf("%s://%s%s", proto, p.BackupDomain, path),
+	}
 }

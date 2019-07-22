@@ -8,16 +8,25 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
+const (
+	UPDATE_INTERVAL = 10
+)
+
 type Vod struct {
 	*base.Client
+	DomainCache          map[string]map[string]int
+	LastDomainUpdateTime int64
 }
 
 var DefaultInstance = NewInstance()
 
 // static function
 func NewInstance() *Vod {
-	instance := &Vod{}
-	instance.Client = base.NewClient(ServiceInfo, ApiInfoList)
+	instance := &Vod{
+		LastDomainUpdateTime: -1,
+		DomainCache:          make(map[string]map[string]int),
+		Client:               base.NewClient(ServiceInfo, ApiInfoList),
+	}
 	return instance
 }
 

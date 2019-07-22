@@ -262,3 +262,13 @@ type GetWeightsResp struct {
 	ResponseMetadata *base.ResponseMetadata
 	Result           map[string]map[string]int `json:",omitempty"`
 }
+
+type DomainInfo struct {
+	MainDomain   string
+	BackupDomain string
+}
+
+type ImgUrl struct {
+	MainUrl   string
+	BackupUrl string
+}
