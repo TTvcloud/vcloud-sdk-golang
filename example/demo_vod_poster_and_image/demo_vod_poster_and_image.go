@@ -14,7 +14,7 @@ func main() {
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk"})
 
-	spaceName := "your spaceName"
+	spaceName := "your space"
 	fallbackWeights := map[string]int{
 		"v1.test.com": 10,
 		"v3.test.com": 20,

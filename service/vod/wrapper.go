@@ -337,34 +337,68 @@ func (p *Vod) GetCdnDomainWeights(spaceName string) (*GetWeightsResp, error) {
 // poster image related
 func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*DomainInfo, error) {
 
-	now := time.Now().Unix()
-	if p.LastDomainUpdateTime == -1 || now-p.LastDomainUpdateTime > UPDATE_INTERVAL {
-		resp, err := p.GetCdnDomainWeights(spaceName)
-		if err != nil {
-			p.DomainCache[spaceName] = fallbackWeights
-		}
-		if err := resp.ResponseMetadata.Error; err != nil {
-			p.DomainCache[spaceName] = fallbackWeights
-		}
-		weightsMap, exist := resp.Result[spaceName]
-		if !exist || len(weightsMap) == 0 {
-			p.DomainCache[spaceName] = fallbackWeights
-		}
+	var cache map[string]int
+	var ok bool
+	p.Lock.RLock()
+	if cache, ok = p.DomainCache[spaceName]; !ok {
+		p.Lock.RUnlock()
 
-		p.DomainCache[spaceName] = weightsMap
-		p.LastDomainUpdateTime = now
+		p.Lock.Lock()
+		if cache, ok = p.DomainCache[spaceName]; !ok {
+			var weightsMap map[string]int
+			var exist bool
+			resp, err := p.GetCdnDomainWeights(spaceName)
+			if err != nil {
+				weightsMap = fallbackWeights
+			}
+			if err := resp.ResponseMetadata.Error; err != nil {
+				weightsMap = fallbackWeights
+			}
+			weightsMap, exist = resp.Result[spaceName]
+			if !exist || len(weightsMap) == 0 {
+				weightsMap = fallbackWeights
+			}
+			p.DomainCache[spaceName] = weightsMap
+
+			p.Lock.Unlock()
+			cache = p.DomainCache[spaceName]
+
+			go func() {
+				for range time.Tick(UPDATE_INTERVAL * time.Second) {
+					var weightsMap map[string]int
+					resp, err := p.GetCdnDomainWeights(spaceName)
+					if err != nil {
+						weightsMap = fallbackWeights
+					}
+					if err := resp.ResponseMetadata.Error; err != nil {
+						weightsMap = fallbackWeights
+					}
+					weightsMap, exist := resp.Result[spaceName]
+					if !exist || len(weightsMap) == 0 {
+						weightsMap = fallbackWeights
+					}
+					p.Lock.Lock()
+					p.DomainCache[spaceName] = weightsMap
+					p.Lock.Unlock()
+				}
+			}()
+		} else {
+			p.Lock.Unlock()
+		}
+	} else {
+		p.Lock.RUnlock()
 	}
 
 	var (
 		mainDomain   string
 		backupDomain string
 	)
-	mainDomain = randWeights(p.DomainCache[spaceName], "")
+	mainDomain = randWeights(cache, "")
 	if mainDomain == "" {
 		return nil, errors.New("rand domain failed")
 	}
 
-	backupDomain = randWeights(p.DomainCache[spaceName], mainDomain)
+	backupDomain = randWeights(cache, mainDomain)
 	if backupDomain == "" {
 		backupDomain = mainDomain
 	}

@@ -3,6 +3,7 @@ package vod
 import (
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
@@ -15,7 +16,7 @@ const (
 type Vod struct {
 	*base.Client
 	DomainCache          map[string]map[string]int
-	LastDomainUpdateTime int64
+	Lock                 sync.RWMutex
 }
 
 var DefaultInstance = NewInstance()
@@ -23,7 +24,6 @@ var DefaultInstance = NewInstance()
 // static function
 func NewInstance() *Vod {
 	instance := &Vod{
-		LastDomainUpdateTime: -1,
 		DomainCache:          make(map[string]map[string]int),
 		Client:               base.NewClient(ServiceInfo, ApiInfoList),
 	}
