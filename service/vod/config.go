@@ -15,19 +15,22 @@ const (
 
 type Vod struct {
 	*base.Client
-	DomainCache          map[string]map[string]int
-	Lock                 sync.RWMutex
+	DomainCache map[string]map[string]int
+	Lock        sync.RWMutex
 }
 
+var Instance *Vod
 var DefaultInstance = NewInstance()
+var once sync.Once
 
-// static function
 func NewInstance() *Vod {
-	instance := &Vod{
-		DomainCache:          make(map[string]map[string]int),
-		Client:               base.NewClient(ServiceInfo, ApiInfoList),
-	}
-	return instance
+	once.Do(func() {
+		Instance = &Vod{
+			DomainCache: make(map[string]map[string]int),
+			Client:      base.NewClient(ServiceInfo, ApiInfoList),
+		}
+	})
+	return Instance
 }
 
 var (
@@ -111,6 +114,14 @@ var (
 			Query: url.Values{
 				"Action":  []string{"GetCdnDomainWeights"},
 				"Version": []string{"2019-07-01"},
+			},
+		},
+		"ModifyVideoInfo": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"ModifyVideoInfo"},
+				"Version": []string{"2018-01-01"},
 			},
 		},
 	}

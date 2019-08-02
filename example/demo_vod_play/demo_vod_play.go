@@ -5,24 +5,51 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
-
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
-const spaceName = "your-space-name"
-
 func main() {
-	vod.DefaultInstance.SetCredential(base.Credentials{
-		AccessKeyID:     "your ak",
-		SecretAccessKey: "your sk"})
+	// call below method if you dont set ak and sk in ～/.vcloud/config
+	//vod.DefaultInstance.SetCredential(base.Credentials{
+	//	AccessKeyID:     "your ak",
+	//	SecretAccessKey: "your sk",
+	//})
 
+	// or set ak and ak as follow
+	//vod.DefaultInstance.SetAccessKey("")
+	//vod.DefaultInstance.SetSecretKey("")
+
+	vid := "your vid"
+
+	// GetPlayInfo
 	query := url.Values{}
-	query.Set("video_id", "your vid")
+	query.Set("video_id", vid)
 
 	resp, code, _ := vod.DefaultInstance.GetPlayInfo(query)
 	fmt.Printf("resp:%+v code:%d\n", resp, code)
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)
 	fmt.Println(string(b))
+
+	// GetOriginVideoPlayInfo
+	query2 := url.Values{}
+	query2.Set("Vid", vid)
+
+	resp2, code, _ := vod.DefaultInstance.GetOriginVideoPlayInfo(query2)
+	fmt.Printf("resp:%+v code:%d\n", resp2, code)
+	fmt.Println(code)
+	b2, _ := json.Marshal(resp2)
+	fmt.Println(string(b2))
+
+	// GetRedirectPlayUrl
+	params := vod.RedirectPlayParam{
+		Vid:        vid,
+		Definition: vod.D1080P,
+		Watermark:  "",
+		// set expires time of the redirect play url, defalut is 15min(900),
+		// set if if you know the params' meaning exactly.
+		Expires:    "60",
+	}
+	ret, err := vod.DefaultInstance.GetRedirectPlayUrl(params)
+	fmt.Println(ret, err)
 }

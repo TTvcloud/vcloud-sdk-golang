@@ -1,78 +1,71 @@
 ## 使用方式
-#### composer引用
+#### go引用
 ```shell
 go get github.com/TTvcloud/vcloud-sdk-golang
 ```
-#### aksk配置
+### AK/SK设置
+- 在代码里显示调用VodService的方法SetAccessKey/SetSecretKey
 
-1. 配置在业务代码中，直接使用
+- 在当前环境变量中分别设置 VCLOUD_ACCESSKEY="your ak"  VCLOUD_SECRETKEY = "your sk"
 
-2. 配置相关的环境变量`VCLOUD_ACCESSKEY`,`VCLOUD_SECRETKEY`
+- json格式放在～/.vcloud/config中，格式为：{"ak":"your ak","sk":"your sk"}
 
-3. 配置在默认的系统文件中`~/.vcloud/config`
+以上优先级依次降低，建议在代码里显示设置，以便问题排查
 
-   config文件结构
+### API
 
-   ```json
-   {
-       "ak":"your ak",
-       "sk":"your sk"
-   }
-   ```
+#### 上传
 
-## 功能列表
+- 通过指定url地址上传
 
->敬请期待
+[UploadMediaByUrl](https://open.bytedance.com/docs/4/4652/)
 
-## Demo
+- 服务端直接上传
 
-1. 直接调用，会去获取`~/.vcloud/config`下的aksk信息，并且使用服务默认的region信息(这里使用cn-north-1)。
 
-```java
-package main
+上传视频包括 [ApplyUpload](https://open.bytedance.com/docs/4/2915/) 和 [CommitUpload](https://open.bytedance.com/docs/4/2916/) 两步
 
-import (
-	"encoding/json"
-	"fmt"
+上传封面图包括 [ApplyUpload](https://open.bytedance.com/docs/4/2915/) 和 [ModifyVideoInfo](https://open.bytedance.com/docs/4/4367/) 两步
 
-	"github.com/TTvcloud/vcloud-sdk-golang/service/iam"
-)
 
-func main() {
-	resp, code, _ := iam.DefaultInstance.ListAccessKeys(nil)
-	fmt.Println(code)
-	b, _ := json.Marshal(resp)
-	fmt.Println(string(b))
-}
-```
+为方便用户使用，封装方法 UploadVideo 和 UploadPoster， 一步上传
 
-2. 显示的设置aksk的模式
 
-```java
-package main
+#### 转码
+[StartTranscode](https://open.bytedance.com/docs/4/1670/)
 
-import (
-	"encoding/json"
-	"fmt"
-	"net/url"
 
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
+#### 发布
+[SetVideoPublishStatus](https://open.bytedance.com/docs/4/4709/)
 
-	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
-)
 
-func main() {
-	query := url.Values{}
-	query.Set("video_id", "your vid")
+#### 播放
+[GetPlayInfo](https://open.bytedance.com/docs/4/2918/)
 
-	vod.DefaultInstance.SetCredential(base.Credentials{
-		AccessKeyID:     "your ak",
-		SecretAccessKey: "your sk"})
+[GetOriginVideoPlayInfo](https://open.bytedance.com/docs/4/11148/)
 
-	resp, code, _ := vod.DefaultInstance.GetPlayInfo(query)
-	fmt.Println(code)
-	b, _ := json.Marshal(resp)
-	fmt.Println(string(b))
-}
-```
+[GetRedirectPlay](https://open.bytedance.com/docs/4/9205/)
 
+#### 封面图
+[GetPosterUrl]()
+
+#### token相关
+[GetUploadAuthToken](https://open.bytedance.com/docs/4/6275/)
+
+[GetPlayAuthToken](https://open.bytedance.com/docs/4/6275/)
+
+PS: 上述两个接口和 [GetRedirectPlay](https://open.bytedance.com/docs/4/9205/) 接口中均含有 X-Amz-Expires 这个参数
+
+关于这个参数的解释为：设置返回的playAuthToken或uploadToken或follow 302地址的有效期，目前服务端默认该参数为15min（900s），如果用户认为该有效期过长，可以传递该参数来控制过期时间
+。
+
+#### 更多示例参见
+example目录
+
+### Change log
+
+#### 0.0.5
+- 去掉image X 相关
+- 增加封面图上传接口
+- getUploadAuthToken/getPlayAuthToken/RedirectPlay支持X-Amz-Expires参数
+- 代码格式优化

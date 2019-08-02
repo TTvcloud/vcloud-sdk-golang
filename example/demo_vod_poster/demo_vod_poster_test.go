@@ -1,9 +1,10 @@
 package main
 
 import (
+	"testing"
+
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
-	"testing"
 )
 
 func BenchmarkGetPoster(b *testing.B) {

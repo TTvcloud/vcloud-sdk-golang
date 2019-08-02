@@ -53,6 +53,18 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	return client
 }
 
+func (client *Client) SetAccessKey(ak string)  {
+	if ak != "" {
+		client.ServiceInfo.Credentials.AccessKeyID = ak
+	}
+}
+
+func (client *Client) SetSecretKey(sk string)  {
+	if sk != "" {
+		client.ServiceInfo.Credentials.SecretAccessKey = sk
+	}
+}
+
 func (client *Client) SetCredential(c Credentials) {
 	if c.AccessKeyID != "" {
 		client.ServiceInfo.Credentials.AccessKeyID = c.AccessKeyID

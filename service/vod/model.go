@@ -82,14 +82,14 @@ type StartTranscodeResp struct {
 	Result           *StartTranscodeResult `json:",omitempty"`
 }
 
-type UploadVideoByUrlResult struct {
+type UploadMediaByUrlResult struct {
 	Code    int
 	Message string
 }
 
-type UploadVideoByUrlResp struct {
+type UploadMediaByUrlResp struct {
 	base.CommonResponse
-	Result UploadVideoByUrlResult
+	Result UploadMediaByUrlResult
 }
 
 type VideoFormat string
@@ -99,7 +99,7 @@ const (
 	M3U8 VideoFormat = "m3u8"
 )
 
-type UploadVideoByUrlParams struct {
+type UploadMediaByUrlParams struct {
 	SpaceName    string
 	Format       VideoFormat
 	SourceUrls   []string
@@ -154,6 +154,7 @@ type RedirectPlayParam struct {
 	Vid        string
 	Definition VideoDefinition
 	Watermark  string
+	Expires    string
 }
 
 type StoreInfo struct {
@@ -165,6 +166,39 @@ type AdvanceOption struct {
 	Parallel  int
 	Stream    int
 	SliceSize int
+}
+
+type ModifyVideoInfoBody struct {
+	SpaceName string       `json:"SpaceName"`
+	Vid       string       `json:"Vid"`
+	Info      UserMetaInfo `json:"Info"`
+	Tags      TagControl   `json:"Tags"`
+}
+
+type UserMetaInfo struct {
+	Title       string
+	Description string
+	Category    string
+	PosterUri   string
+}
+
+type TagControl struct {
+	Deletes string
+	Adds    string
+}
+
+type ModifyVideoInfoResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           *ModifyVideoInfoBaseResp
+}
+
+type ModifyVideoInfoBaseResp struct {
+	BaseResp *BaseResp
+}
+
+type BaseResp struct {
+	StatusMessage string
+	StatusCode    int
 }
 
 type CommitUploadParam struct {

@@ -2,17 +2,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
-	"net/url"
 	"time"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
 func main() {
+	// call below method if you dont set ak and sk in ～/.vcloud/config
 	vod.DefaultInstance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
-		SecretAccessKey: "your sk"})
+		SecretAccessKey: "your sk",
+	})
+
+	// or set ak and ak as follow
+	//vod.DefaultInstance.SetAccessKey("")
+	//vod.DefaultInstance.SetSecretKey("")
 
 	spaceName := "your space"
 	fallbackWeights := map[string]int{
@@ -35,19 +40,6 @@ func main() {
 	uri := "your uri"
 	// poster
 	ret, err := vod.DefaultInstance.GetPosterUrl(spaceName, uri, fallbackWeights, vod.WithHttps(), vod.WithVodTplSmartCrop(600, 392), vod.WithFormat(vod.FORMAT_AWEBP))
-	if err != nil {
-		fmt.Printf("errMsg:%v", err)
-		return
-	}
-	fmt.Println(ret)
-
-	// image x
-	kv := url.Values{}
-	kv.Add("from", "my测试")
-
-	sig := "your sig"
-
-	ret, err = vod.DefaultInstance.GetImageUrl(spaceName, uri, fallbackWeights, vod.WithFormat(vod.FORMAT_AWEBP), vod.WithHttps(), vod.WithSig(sig), vod.WithKV(kv))
 	if err != nil {
 		fmt.Printf("errMsg:%v", err)
 		return
