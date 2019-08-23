@@ -12,19 +12,19 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.DefaultInstance.SetCredential(base.Credentials{
+	vod.NewInstance().SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
 
 	// or set ak and ak as follow
-	//vod.DefaultInstance.SetAccessKey("")
-	//vod.DefaultInstance.SetSecretKey("")
+	//vod.NewInstance().SetAccessKey("")
+	//vod.NewInstance().SetSecretKey("")
 
 	query := url.Values{}
 	query.Set("Limit", "3")
 
-	resp, code, _ := iam.DefaultInstance.ListUsers(query)
+	resp, code, _ := iam.NewInstance().ListUsers(query)
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)
 	fmt.Println(string(b))

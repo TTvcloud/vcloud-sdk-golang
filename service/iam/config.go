@@ -16,7 +16,7 @@ type Iam struct {
 	*base.Client
 }
 
-var DefaultInstance = NewInstance()
+//var DefaultInstance = NewInstance()
 
 // static function
 func NewInstance() *Iam {

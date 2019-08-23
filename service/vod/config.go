@@ -20,20 +20,62 @@ type Vod struct {
 }
 
 var Instance *Vod
-var DefaultInstance = NewInstance()
 var once sync.Once
 
 func NewInstance() *Vod {
 	once.Do(func() {
 		Instance = &Vod{
 			DomainCache: make(map[string]map[string]int),
-			Client:      base.NewClient(ServiceInfo, ApiInfoList),
+			Client:      base.NewClient(ServiceInfoMap[base.RegionCnNorth1], ApiInfoList),
+		}
+	})
+	return Instance
+}
+
+func NewInstanceWithRegion(region string) *Vod {
+	var serviceInfo *base.ServiceInfo
+	var ok bool
+	if serviceInfo, ok = ServiceInfoMap[region]; !ok {
+		panic("Cant find the region, please check it carefully")
+	}
+
+	once.Do(func() {
+		Instance = &Vod{
+			DomainCache: make(map[string]map[string]int),
+			Client:      base.NewClient(serviceInfo, ApiInfoList),
 		}
 	})
 	return Instance
 }
 
 var (
+	ServiceInfoMap = map[string]*base.ServiceInfo{
+		base.RegionCnNorth1: {
+			Timeout: 5 * time.Second,
+			Host:    "vod.bytedanceapi.com",
+			Header: http.Header{
+				"Accept": []string{"application/json"},
+			},
+			Credentials: base.Credentials{Region: base.RegionCnNorth1, Service: "vod"},
+		},
+		base.RegionApSingapore: {
+			Timeout: 5 * time.Second,
+			Host:    "vod.ap-singapore-1.bytedanceapi.com",
+			Header: http.Header{
+				"Accept": []string{"application/json"},
+			},
+			Credentials: base.Credentials{Region: base.RegionApSingapore, Service: "vod"},
+		},
+		base.RegionUsEast1: {
+			Timeout: 5 * time.Second,
+			Host:    "vod.us-east-1.bytedanceapi.com",
+			Header: http.Header{
+				"Accept": []string{"application/json"},
+			},
+			Credentials: base.Credentials{Region: base.RegionUsEast1, Service: "vod"},
+		},
+	}
+
 	ServiceInfo = &base.ServiceInfo{
 		Timeout: 5 * time.Second,
 		Host:    "vod.bytedanceapi.com",

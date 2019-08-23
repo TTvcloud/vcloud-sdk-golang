@@ -10,14 +10,14 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.DefaultInstance.SetCredential(base.Credentials{
+	vod.NewInstance().SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
 
 	// or set ak and ak as follow
-	//vod.DefaultInstance.SetAccessKey("")
-	//vod.DefaultInstance.SetSecretKey("")
+	//vod.NewInstance().SetAccessKey("")
+	//vod.NewInstance().SetSecretKey("")
 
 	spaceName := "your space"
 	fallbackWeights := map[string]int{
@@ -27,7 +27,7 @@ func main() {
 
 	// domain
 	for i := 0; i < 20; i++ {
-		ret, err := vod.DefaultInstance.GetDomainInfo(spaceName, fallbackWeights)
+		ret, err := vod.NewInstance().GetDomainInfo(spaceName, fallbackWeights)
 		fmt.Println(ret)
 		if err != nil {
 			fmt.Printf("errMsg:%v", err)
@@ -39,7 +39,7 @@ func main() {
 
 	uri := "your uri"
 	// poster
-	ret, err := vod.DefaultInstance.GetPosterUrl(spaceName, uri, fallbackWeights, vod.WithHttps(), vod.WithVodTplSmartCrop(600, 392), vod.WithFormat(vod.FORMAT_AWEBP))
+	ret, err := vod.NewInstance().GetPosterUrl(spaceName, uri, fallbackWeights, vod.WithHttps(), vod.WithVodTplSmartCrop(600, 392), vod.WithFormat(vod.FORMAT_AWEBP))
 	if err != nil {
 		fmt.Printf("errMsg:%v", err)
 		return

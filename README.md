@@ -1,6 +1,6 @@
-## 使用方式
-#### go引用
-```shell
+## Go SDK使用方式
+#### 安装
+```
 go get github.com/TTvcloud/vcloud-sdk-golang
 ```
 ### AK/SK设置
@@ -11,6 +11,20 @@ go get github.com/TTvcloud/vcloud-sdk-golang
 - json格式放在～/.vcloud/config中，格式为：{"ak":"your ak","sk":"your sk"}
 
 以上优先级依次降低，建议在代码里显示设置，以便问题排查
+
+### 地域Region设置
+- 目前已开放三个地域设置，分别为
+  ```
+  - cn-north-1 (默认)
+  - ap-singapore-1
+  - us-east-1
+  ```
+- 默认为cn-north-1（NewInstance初始化即默认为该地域），如果需要调用其它地域服务，请在初始化函数NewInstanceWithRegion中传入指定地域region，例如：
+  ```
+  ret, err := vod.NewInstanceWithRegion("us-east-1").GetRedirectPlayUrl(params)
+  ```
+- 注意1：IAM模块目前只开放cn-north-1区域
+- 注意2：不要同时调用NewInstanceWithRegion 和 NewInstance，因为初始化为单例模式，会导致第二次调用不生效
 
 ### API
 
@@ -47,7 +61,7 @@ go get github.com/TTvcloud/vcloud-sdk-golang
 [GetRedirectPlay](https://open.bytedance.com/docs/4/9205/)
 
 #### 封面图
-[GetPosterUrl]()
+[GetPosterUrl](https://open.bytedance.com/docs/4/5335/)
 
 #### token相关
 [GetUploadAuthToken](https://open.bytedance.com/docs/4/6275/)
@@ -61,11 +75,3 @@ PS: 上述两个接口和 [GetRedirectPlay](https://open.bytedance.com/docs/4/92
 
 #### 更多示例参见
 example目录
-
-### Change log
-
-#### 0.0.5
-- 去掉image X 相关
-- 增加封面图上传接口
-- getUploadAuthToken/getPlayAuthToken/RedirectPlay支持X-Amz-Expires参数
-- 代码格式优化

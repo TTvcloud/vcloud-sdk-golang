@@ -10,14 +10,14 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	//vod.DefaultInstance.SetCredential(base.Credentials{
+	//vod.NewInstance().SetCredential(base.Credentials{
 	//	AccessKeyID:     "your ak",
 	//	SecretAccessKey: "your sk",
 	//})
 
 	// or set ak and ak as follow
-	//vod.DefaultInstance.SetAccessKey("")
-	//vod.DefaultInstance.SetSecretKey("")
+	//vod.NewInstance().SetAccessKey("")
+	//vod.NewInstance().SetSecretKey("")
 
 	vid := "your vid"
 
@@ -25,7 +25,7 @@ func main() {
 	query := url.Values{}
 	query.Set("video_id", vid)
 
-	resp, code, _ := vod.DefaultInstance.GetPlayInfo(query)
+	resp, code, _ := vod.NewInstance().GetPlayInfo(query)
 	fmt.Printf("resp:%+v code:%d\n", resp, code)
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)
@@ -35,7 +35,7 @@ func main() {
 	query2 := url.Values{}
 	query2.Set("Vid", vid)
 
-	resp2, code, _ := vod.DefaultInstance.GetOriginVideoPlayInfo(query2)
+	resp2, code, _ := vod.NewInstance().GetOriginVideoPlayInfo(query2)
 	fmt.Printf("resp:%+v code:%d\n", resp2, code)
 	fmt.Println(code)
 	b2, _ := json.Marshal(resp2)
@@ -48,8 +48,8 @@ func main() {
 		Watermark:  "",
 		// set expires time of the redirect play url, defalut is 15min(900),
 		// set if if you know the params' meaning exactly.
-		Expires:    "60",
+		Expires: "60",
 	}
-	ret, err := vod.DefaultInstance.GetRedirectPlayUrl(params)
+	ret, err := vod.NewInstanceWithRegion("us-east-1").GetRedirectPlayUrl(params)
 	fmt.Println(ret, err)
 }

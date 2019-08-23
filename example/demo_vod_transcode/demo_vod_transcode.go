@@ -9,14 +9,14 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.DefaultInstance.SetCredential(base.Credentials{
+	vod.NewInstance().SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
 
 	// or set ak and ak as follow
-	//vod.DefaultInstance.SetAccessKey("")
-	//vod.DefaultInstance.SetSecretKey("")
+	//vod.NewInstance().SetAccessKey("")
+	//vod.NewInstance().SetSecretKey("")
 
 	StartTranscodeExample()
 }
@@ -33,7 +33,7 @@ func StartTranscodeExample() {
 		Priority:   0,
 	}
 
-	resp, err := vod.DefaultInstance.StartTranscode(req)
+	resp, err := vod.NewInstance().StartTranscode(req)
 	if err != nil {
 		fmt.Println(err)
 		return
