@@ -53,13 +53,13 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	return client
 }
 
-func (client *Client) SetAccessKey(ak string)  {
+func (client *Client) SetAccessKey(ak string) {
 	if ak != "" {
 		client.ServiceInfo.Credentials.AccessKeyID = ak
 	}
 }
 
-func (client *Client) SetSecretKey(sk string)  {
+func (client *Client) SetSecretKey(sk string) {
 	if sk != "" {
 		client.ServiceInfo.Credentials.SecretAccessKey = sk
 	}
@@ -111,12 +111,10 @@ func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 
 	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
 	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, nil)
-	req.Header = header
-
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
-
+	req.Header = header
 	return client.makeRequest(api, req, timeout)
 }
 
@@ -132,11 +130,10 @@ func (client *Client) Json(api string, query url.Values, body string) ([]byte, i
 
 	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
 	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(body))
-	req.Header = header
-
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
+	req.Header = header
 	req.Header.Set("Content-Type", "application/json")
 
 	return client.makeRequest(api, req, timeout)
@@ -155,11 +152,10 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 
 	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
 	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(form.Encode()))
-	req.Header = header
-
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
+	req.Header = header
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return client.makeRequest(api, req, timeout)

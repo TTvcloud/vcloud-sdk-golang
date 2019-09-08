@@ -59,6 +59,7 @@ type BaseResp struct {
 }
 
 type ErrorObj struct {
+	CodeN   int
 	Code    string
 	Message string
 }
