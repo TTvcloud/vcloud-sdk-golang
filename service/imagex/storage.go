@@ -10,11 +10,11 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/pkg/errors"
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
 // ApplyUploadImageFile 获取文件上传地址
-func (x *ImageX) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUploadImageResult, error) {
+func (c *ImageXClient) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUploadImageResult, error) {
 	query := url.Values{}
 	query.Add("ServiceId", params.ServiceId)
 	if params.SessionKey != "" {
@@ -27,26 +27,20 @@ func (x *ImageX) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUploadIm
 		query.Add("StoreKeys", key)
 	}
 
-	respBody, status, err := x.Query("ApplyUploadImageFile", query)
+	respBody, _, err := c.Query("ApplyUploadImageFile", query)
 	if err != nil {
 		return nil, fmt.Errorf("fail to request api ApplyUploadImageFile, %v", err)
 	}
-	if status != http.StatusOK {
-		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
-	}
 
-	resp := new(ApplyUploadImageResp)
-	if err := json.Unmarshal(respBody, resp); err != nil {
-		return nil, fmt.Errorf("fail to unmarshal response, %v", err)
-	} else if err := resp.ResponseMetadata.Error; err != nil && err.CodeN != 0 {
-		return nil, fmt.Errorf("apply upload image request %s error %s",
-			resp.ResponseMetadata.RequestId, err.Message)
+	result := new(ApplyUploadImageResult)
+	if err := base.UnmarshalResultInto(respBody, result); err != nil {
+		return nil, err
 	}
-	return resp.Result, nil
+	return result, nil
 }
 
 // CommitUploadImageFile 文件上传完成上报
-func (x *ImageX) CommitUploadImage(params *CommitUploadImageParam) (*CommitUploadImageResult, error) {
+func (c *ImageXClient) CommitUploadImage(params *CommitUploadImageParam) (*CommitUploadImageResult, error) {
 	query := url.Values{}
 	query.Add("ServiceId", params.ServiceId)
 	query.Add("SessionKey", params.SessionKey)
@@ -56,25 +50,19 @@ func (x *ImageX) CommitUploadImage(params *CommitUploadImageParam) (*CommitUploa
 		return nil, fmt.Errorf("fail to marshal request, %v", err)
 	}
 
-	respBody, status, err := x.Json("CommitUploadImageFile", query, string(bts))
+	respBody, _, err := c.Json("CommitUploadImageFile", query, string(bts))
 	if err != nil {
 		return nil, fmt.Errorf("fail to request api CommitUploadImageFile, %v", err)
 	}
-	if status != http.StatusOK {
-		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
-	}
 
-	resp := new(CommitUploadImageResp)
-	if err := json.Unmarshal(respBody, resp); err != nil {
-		return nil, fmt.Errorf("fail to unmarshal response, %v", err)
-	} else if err := resp.ResponseMetadata.Error; err != nil && err.CodeN != 0 {
-		return nil, fmt.Errorf("commit upload image request %s error %s",
-			resp.ResponseMetadata.RequestId, err.Message)
+	result := new(CommitUploadImageResult)
+	if err := base.UnmarshalResultInto(respBody, result); err != nil {
+		return nil, err
 	}
-	return resp.Result, nil
+	return result, nil
 }
 
-func (x *ImageX) Upload(host string, storeInfo StoreInfo, imageBytes []byte) error {
+func (c *ImageXClient) upload(host string, storeInfo StoreInfo, imageBytes []byte) error {
 	if len(imageBytes) == 0 {
 		return fmt.Errorf("file size is zero")
 	}
@@ -116,7 +104,8 @@ func (x *ImageX) Upload(host string, storeInfo StoreInfo, imageBytes []byte) err
 	return nil
 }
 
-func (x *ImageX) UploadImages(params *ApplyUploadImageParam, images [][]byte) (*CommitUploadImageResult, error) {
+// 上传图片
+func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]byte) (*CommitUploadImageResult, error) {
 	if params.UploadNum == 0 {
 		params.UploadNum = 1
 	}
@@ -125,7 +114,7 @@ func (x *ImageX) UploadImages(params *ApplyUploadImageParam, images [][]byte) (*
 	}
 
 	// 1. apply
-	applyResp, err := x.ApplyUploadImage(params)
+	applyResp, err := c.ApplyUploadImage(params)
 	if err != nil {
 		return nil, err
 	} else if len(applyResp.UploadHosts) == 0 {
@@ -136,7 +125,7 @@ func (x *ImageX) UploadImages(params *ApplyUploadImageParam, images [][]byte) (*
 
 	// 2. upload
 	for i, image := range images {
-		err := x.Upload(applyResp.UploadHosts[0], applyResp.StoreInfos[i], image)
+		err := c.upload(applyResp.UploadHosts[0], applyResp.StoreInfos[i], image)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +136,7 @@ func (x *ImageX) UploadImages(params *ApplyUploadImageParam, images [][]byte) (*
 		ServiceId:  params.ServiceId,
 		SessionKey: applyResp.SessionKey,
 	}
-	commitResp, err := x.CommitUploadImage(commitParams)
+	commitResp, err := c.CommitUploadImage(commitParams)
 	if err != nil {
 		return nil, err
 	}

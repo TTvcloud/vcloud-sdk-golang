@@ -19,23 +19,23 @@ const (
 	ImageXApiVersion  = "2018-08-01"
 )
 
-type ImageX struct {
+type ImageXClient struct {
 	*base.Client
 }
 
-func NewInstance() *ImageX {
-	instance := &ImageX{
+func NewInstance() *ImageXClient {
+	instance := &ImageXClient{
 		Client: base.NewClient(ServiceInfoMap[base.RegionCnNorth1], ApiInfoList),
 	}
 	return instance
 }
 
-func NewInstanceWithRegion(region string) *ImageX {
+func NewInstanceWithRegion(region string) *ImageXClient {
 	serviceInfo, ok := ServiceInfoMap[region]
 	if !ok {
 		panic(fmt.Errorf("can't find region %s, please check it carefully", region))
 	}
-	instance := &ImageX{
+	instance := &ImageXClient{
 		Client: base.NewClient(serviceInfo, ApiInfoList),
 	}
 	return instance

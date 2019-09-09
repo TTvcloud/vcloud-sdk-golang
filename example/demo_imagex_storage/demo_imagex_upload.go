@@ -9,7 +9,11 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/service/imagex"
 )
 
+/*
+ * upload local image files
+ */
 func main() {
+	// default region cn-north-1, for other region, call imagex.NewInstanceWithRegion(region)
 	instance := imagex.NewInstance()
 
 	// call below method if you dont set ak and sk in ～/.vcloud/config

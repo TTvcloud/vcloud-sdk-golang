@@ -164,19 +164,23 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 func (client *Client) makeRequest(api string, req *http.Request, timeout time.Duration) ([]byte, int, error) {
 	req = client.ServiceInfo.Credentials.Sign(req)
 
-	ctx, _ := context.WithTimeout(context.TODO(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 	req = req.WithContext(ctx)
 
 	resp, err := client.Client.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	} else {
-		return []byte(""), 500, errors.New("Bad Request")
+	if err != nil {
+		return []byte(""), 500, fmt.Errorf("fail to request %s", api)
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return []byte(""), resp.StatusCode, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return body, resp.StatusCode, fmt.Errorf("api %s http code %d body %s", api, resp.StatusCode, string(body))
 	}
 
 	return body, resp.StatusCode, nil
