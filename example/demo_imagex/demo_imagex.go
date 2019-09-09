@@ -18,7 +18,7 @@ func main() {
 		SecretAccessKey: "your sk",
 	})
 
-	// or set ak and ak as follow
+	// or set ak and sk as follow
 	//instance.SetAccessKey("")
 	//instance.SetSecretKey("")
 
@@ -34,7 +34,7 @@ func main() {
 		os.Exit(-1)
 	}
 
-	resp, err := instance.UploadImages(params, [][]byte{dat, dat})
+	resp, err := instance.UploadImages(params, [][]byte{dat})
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {

@@ -51,7 +51,7 @@ func (x *ImageX) CommitUploadImage(params *CommitUploadImageParam) (*CommitUploa
 	query.Add("ServiceId", params.ServiceId)
 	query.Add("SessionKey", params.SessionKey)
 
-	bts, err := json.Marshal(params.OptionInfos)
+	bts, err := json.Marshal(params)
 	if err != nil {
 		return nil, fmt.Errorf("fail to marshal request, %v", err)
 	}
@@ -81,7 +81,7 @@ func (x *ImageX) Upload(host string, storeInfo StoreInfo, imageBytes []byte) err
 
 	checkSum := fmt.Sprintf("%x", crc32.ChecksumIEEE(imageBytes))
 	url := fmt.Sprintf("http://%s/%s", host, storeInfo.StoreUri)
-	req, err := http.NewRequest("PUT", url, bytes.NewReader(imageBytes))
+	req, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(imageBytes))
 	if err != nil {
 		return fmt.Errorf("fail to new put request, %v", err)
 	}
