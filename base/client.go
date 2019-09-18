@@ -53,13 +53,13 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	return client
 }
 
-func (client *Client) SetAccessKey(ak string)  {
+func (client *Client) SetAccessKey(ak string) {
 	if ak != "" {
 		client.ServiceInfo.Credentials.AccessKeyID = ak
 	}
 }
 
-func (client *Client) SetSecretKey(sk string)  {
+func (client *Client) SetSecretKey(sk string) {
 	if sk != "" {
 		client.ServiceInfo.Credentials.SecretAccessKey = sk
 	}
@@ -111,12 +111,10 @@ func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 
 	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
 	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, nil)
-	req.Header = header
-
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
-
+	req.Header = header
 	return client.makeRequest(api, req, timeout)
 }
 
@@ -132,11 +130,10 @@ func (client *Client) Json(api string, query url.Values, body string) ([]byte, i
 
 	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
 	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(body))
-	req.Header = header
-
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
+	req.Header = header
 	req.Header.Set("Content-Type", "application/json")
 
 	return client.makeRequest(api, req, timeout)
@@ -155,11 +152,10 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 
 	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
 	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(form.Encode()))
-	req.Header = header
-
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
+	req.Header = header
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return client.makeRequest(api, req, timeout)
@@ -168,19 +164,23 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 func (client *Client) makeRequest(api string, req *http.Request, timeout time.Duration) ([]byte, int, error) {
 	req = client.ServiceInfo.Credentials.Sign(req)
 
-	ctx, _ := context.WithTimeout(context.TODO(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 	req = req.WithContext(ctx)
 
 	resp, err := client.Client.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	} else {
-		return []byte(""), 500, errors.New("Bad Request")
+	if err != nil {
+		return []byte(""), 500, fmt.Errorf("fail to request %s", api)
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return []byte(""), resp.StatusCode, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return body, resp.StatusCode, fmt.Errorf("api %s http code %d body %s", api, resp.StatusCode, string(body))
 	}
 
 	return body, resp.StatusCode, nil
