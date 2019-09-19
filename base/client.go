@@ -88,8 +88,13 @@ func (client *Client) GetSignUrl(api string, query url.Values) (string, error) {
 
 	query = mergeQuery(query, apiInfo.Query)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, nil)
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), nil)
 
 	if err != nil {
 		return "", errors.New("构建request失败")
@@ -109,8 +114,13 @@ func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 	header := mergeHeader(client.ServiceInfo.Header, apiInfo.Header)
 	query = mergeQuery(query, apiInfo.Query)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, nil)
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), nil)
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
@@ -128,8 +138,13 @@ func (client *Client) Json(api string, query url.Values, body string) ([]byte, i
 	header := mergeHeader(client.ServiceInfo.Header, apiInfo.Header)
 	query = mergeQuery(query, apiInfo.Query)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(body))
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), strings.NewReader(body))
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
@@ -150,8 +165,13 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 	query = mergeQuery(query, apiInfo.Query)
 	form = mergeQuery(form, apiInfo.Form)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(form.Encode()))
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), strings.NewReader(form.Encode()))
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
