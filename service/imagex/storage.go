@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
+
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
@@ -141,4 +143,13 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 		return nil, err
 	}
 	return commitResp, nil
+}
+
+func (c *ImageXClient) GetUploadAuthToken(query url.Values) (string, error) {
+	ins := vod.NewInstanceWithRegion(c.ServiceInfo.Credentials.Region)
+	ins.SetCredential(base.Credentials{
+		AccessKeyID:     c.ServiceInfo.Credentials.AccessKeyID,
+		SecretAccessKey: c.ServiceInfo.Credentials.SecretAccessKey,
+	})
+	return ins.GetUploadAuthToken(query)
 }
