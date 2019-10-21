@@ -17,7 +17,12 @@ func main() {
 	statement := base.NewAllowStatement([]string{"iam:*"}, []string{})
 	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
 
-	ret, _ := vod.DefaultInstance.SignSts2(inlinePolicy, time.Hour)
+	vod.NewInstance().SetCredential(base.Credentials{
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk",
+	})
+
+	ret, _ := vod.Instance.SignSts2(inlinePolicy, time.Hour)
 	b, _ := json.Marshal(ret)
 	fmt.Println(string(b))
 }
