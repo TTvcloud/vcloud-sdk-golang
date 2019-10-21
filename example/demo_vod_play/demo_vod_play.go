@@ -3,71 +3,53 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
-
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
-const spaceName = "your-space-name"
-
 func main() {
-	vod.DefaultInstance.SetCredential(base.Credentials{
-		AccessKeyID:     "your ak",
-		SecretAccessKey: "your sk"})
+	// call below method if you dont set ak and sk in ～/.vcloud/config
+	//vod.NewInstance().SetCredential(base.Credentials{
+	//	AccessKeyID:     "your ak",
+	//	SecretAccessKey: "your sk",
+	//})
 
+	// or set ak and ak as follow
+	//vod.NewInstance().SetAccessKey("")
+	//vod.NewInstance().SetSecretKey("")
+
+	vid := "your vid"
+
+	// GetPlayInfo
 	query := url.Values{}
-	query.Set("video_id", "your vid")
+	query.Set("video_id", vid)
 
-	resp, code, _ := vod.DefaultInstance.GetPlayInfo(query)
+	resp, code, _ := vod.NewInstance().GetPlayInfo(query)
 	fmt.Printf("resp:%+v code:%d\n", resp, code)
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)
 	fmt.Println(string(b))
-	// uploadAll()
-	// uploadVideoByUrl()
-}
 
-func uploadVideoByUrl() {
-	params := vod.UploadVideoByUrlParams{
-		SpaceName:  spaceName,
-		Format:     vod.MP4,
-		SourceUrls: []string{"video-url"},
-		Extra:      "xxx",
-	}
-	resp, err := vod.DefaultInstance.UploadVideoByUrl(params)
-	if err != nil {
-		fmt.Printf("err:%s\n")
-	}
-	if resp.ResponseMetadata.Error != nil {
-		fmt.Println(resp.ResponseMetadata.Error)
-		return
-	}
-	fmt.Println(resp.Result)
-}
+	// GetOriginVideoPlayInfo
+	query2 := url.Values{}
+	query2.Set("Vid", vid)
 
-func uploadAll() {
-	snapShotFunc := vod.Function{Name: "Snapshot", Input: vod.SnapshotInput{SnapshotTime: 2.3}}
-	getMetaFunc := vod.Function{Name: "GetMeta"}
+	resp2, code, _ := vod.NewInstance().GetOriginVideoPlayInfo(query2)
+	fmt.Printf("resp:%+v code:%d\n", resp2, code)
+	fmt.Println(code)
+	b2, _ := json.Marshal(resp2)
+	fmt.Println(string(b2))
 
-	resp, err := upload(spaceName, "path-to-video", vod.VIDEO, getMetaFunc, snapShotFunc)
-	fmt.Printf("resp:%+v err:%s", resp, err)
-	resp, err = upload(spaceName, "path-to-img", vod.IMAGE, snapShotFunc)
-	fmt.Printf("resp:%+v err:%s", resp, err)
-	resp, err = upload(spaceName, "path-to-obj", vod.OBJECT, vod.Function{Name: "GetMeta"}, snapShotFunc)
-	fmt.Printf("resp:%+v err:%s", resp, err)
-}
-
-func upload(spaceName string, filePath string, fileType vod.FileType, funcs ...vod.Function) (*vod.CommitUploadResp, error) {
-	dat, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return nil, err
+	// GetRedirectPlayUrl
+	params := vod.RedirectPlayParam{
+		Vid:        vid,
+		Definition: vod.D1080P,
+		Watermark:  "",
+		// set expires time of the redirect play url, defalut is 15min(900),
+		// set if if you know the params' meaning exactly.
+		Expires: "60",
 	}
-	rsp, err := vod.DefaultInstance.Upload(dat, spaceName, fileType, funcs...)
-	if err != nil {
-		return nil, err
-	}
-	return rsp, nil
+	ret, err := vod.NewInstanceWithRegion("us-east-1").GetRedirectPlayUrl(params)
+	fmt.Println(ret, err)
 }

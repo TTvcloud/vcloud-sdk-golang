@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/url"
+	"io/ioutil"
+	"os"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-	"github.com/TTvcloud/vcloud-sdk-golang/service/iam"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
@@ -21,11 +20,20 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	query := url.Values{}
-	query.Set("Limit", "3")
+	vid := "your vid"
+	spaceName := "your spaceName"
+	filePath := "your filePath"
 
-	resp, code, _ := iam.NewInstance().ListUsers(query)
-	fmt.Println(code)
-	b, _ := json.Marshal(resp)
-	fmt.Println(string(b))
+	dat, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		fmt.Printf("read file from %s error %v", filePath, err)
+		os.Exit(-1)
+	}
+
+	posterUri, err := vod.NewInstance().UploadPoster(vid, dat, spaceName, vod.IMAGE)
+	if err != nil {
+		fmt.Printf("error %v", err)
+	} else {
+		fmt.Printf("success %v", posterUri)
+	}
 }

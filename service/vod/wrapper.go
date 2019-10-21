@@ -7,15 +7,16 @@ import (
 	"fmt"
 	"hash/crc32"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 )
 
+//GetPlayInfo 获取播放信息
 func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
@@ -23,6 +24,22 @@ func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
 	}
 
 	output := new(GetPlayInfoResp)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, status, err
+	} else {
+		output.ResponseMetadata.Service = "vod"
+		return output, status, nil
+	}
+}
+
+//GetOriginVideoPlayInfo 获取原片播放信息
+func (p *Vod) GetOriginVideoPlayInfo(query url.Values) (*GetOriginVideoPlayInfoResp, int, error) {
+	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
+	if err != nil {
+		return nil, status, err
+	}
+
+	output := new(GetOriginVideoPlayInfoResp)
 	if err := json.Unmarshal(respBody, output); err != nil {
 		return nil, status, err
 	} else {
@@ -63,7 +80,7 @@ func (p *Vod) StartTranscode(req *StartTranscodeRequest) (*StartTranscodeResp, e
 	return resp, nil
 }
 
-func (p *Vod) UploadVideoByUrl(params UploadVideoByUrlParams) (*UploadVideoByUrlResp, error) {
+func (p *Vod) UploadMediaByUrl(params UploadMediaByUrlParams) (*UploadMediaByUrlResp, error) {
 	query := url.Values{}
 	query.Add("SpaceName", params.SpaceName)
 	query.Add("Format", string(params.Format))
@@ -77,7 +94,7 @@ func (p *Vod) UploadVideoByUrl(params UploadVideoByUrlParams) (*UploadVideoByUrl
 		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
 	}
 
-	resp := &UploadVideoByUrlResp{}
+	resp := &UploadMediaByUrlResp{}
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, err
 	} else {
@@ -141,9 +158,33 @@ func (p *Vod) CommitUpload(params CommitUploadParam) (*CommitUploadResp, error) 
 	}
 }
 
-func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, funcs ...Function) (*CommitUploadResp, error) {
+func (p *Vod) ModifyVideoInfo(body ModifyVideoInfoBody) (*ModifyVideoInfoResp, error) {
+	query := url.Values{}
+
+	bts, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	respBody, status, err := p.Json("ModifyVideoInfo", query, string(bts))
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
+	}
+	resp := &ModifyVideoInfoResp{}
+	if err := json.Unmarshal(respBody, resp); err != nil {
+		return nil, err
+	} else {
+		resp.ResponseMetadata.Service = "vod"
+		return resp, nil
+	}
+}
+
+func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (string, string, error) {
 	if len(fileBytes) == 0 {
-		return nil, fmt.Errorf("file size is zero")
+		return "", "", fmt.Errorf("file size is zero")
 	}
 
 	params := ApplyUploadParam{
@@ -153,29 +194,30 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, func
 
 	resp, err := p.ApplyUpload(params)
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 
 	if resp.ResponseMetadata.Error != nil && resp.ResponseMetadata.Error.Code != "0" {
-		return nil, fmt.Errorf("%+v", resp.ResponseMetadata.Error)
+		return "", "", fmt.Errorf("%+v", resp.ResponseMetadata.Error)
 	}
 
 	if len(resp.Result.UploadAddress.UploadHosts) == 0 {
-		return nil, fmt.Errorf("no tos host found")
+		return "", "", fmt.Errorf("no tos host found")
 	}
 	if len(resp.Result.UploadAddress.StoreInfos) == 0 {
-		return nil, fmt.Errorf("no store infos found")
+		return "", "", fmt.Errorf("no store infos found")
 	}
 
 	// upload file
 	checkSum := fmt.Sprintf("%x", crc32.ChecksumIEEE(fileBytes))
 	tosHost := resp.Result.UploadAddress.UploadHosts[0]
 	oid := resp.Result.UploadAddress.StoreInfos[0].StoreUri
+	sessionKey := resp.Result.UploadAddress.SessionKey
 	auth := resp.Result.UploadAddress.StoreInfos[0].Auth
 	url := fmt.Sprintf("http://%s/%s", tosHost, oid)
 	req, err := http.NewRequest("PUT", url, bytes.NewReader(fileBytes))
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 	req.Header.Set("Content-CRC32", checkSum)
 	req.Header.Set("Authorization", auth)
@@ -183,11 +225,11 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, func
 	client := &http.Client{}
 	rsp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 	if rsp.StatusCode != http.StatusOK {
 		b, _ := ioutil.ReadAll(rsp.Body)
-		return nil, fmt.Errorf("http status=%v, body=%s, remote_addr=%v", rsp.StatusCode, string(b), req.Host)
+		return "", "", fmt.Errorf("http status=%v, body=%s, remote_addr=%v", rsp.StatusCode, string(b), req.Host)
 	}
 	defer rsp.Body.Close()
 
@@ -197,18 +239,46 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, func
 	}
 	err = json.NewDecoder(rsp.Body).Decode(&tosResp)
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 
 	if tosResp.Success != 0 {
-		return nil, fmt.Errorf("tos err:%+v", tosResp)
+		return "", "", fmt.Errorf("tos err:%+v", tosResp)
+	}
+	return oid, sessionKey, nil
+}
+
+func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileType FileType) (string, error) {
+	oid, _, err := p.Upload(fileBytes, spaceName, fileType)
+	if err != nil {
+		return "", err
+	}
+
+	body := ModifyVideoInfoBody{
+		SpaceName: spaceName,
+		Vid:       vid,
+		Info: UserMetaInfo{
+			PosterUri: oid,
+		},
+	}
+	_, err = p.ModifyVideoInfo(body)
+	if err != nil {
+		return "", err
+	}
+	return oid, nil
+}
+
+func (p *Vod) UploadVideo(fileBytes []byte, spaceName string, fileType FileType, funcs ...Function) (*CommitUploadResp, error) {
+	_, sessionKey, err := p.Upload(fileBytes, spaceName, fileType)
+	if err != nil {
+		return nil, err
 	}
 
 	param := CommitUploadParam{
 		SpaceName: spaceName,
 		Body: CommitUploadBody{
 			CallbackArgs: "",
-			SessionKey:   resp.Result.UploadAddress.SessionKey,
+			SessionKey:   sessionKey,
 			Functions:    funcs,
 		},
 	}
@@ -258,12 +328,19 @@ func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
 //GetRedirectPlayUrl get redirected playback addres
 func (p *Vod) GetRedirectPlayUrl(params RedirectPlayParam) (string, error) {
 	query := url.Values{}
-	query.Add("video_id", params.VideoID)
-	query.Add("expire", strconv.FormatInt(time.Now().Add(params.Expire).Unix(), 10))
-	if params.Definition == "" {
-		return "", errors.New("Defintion not set")
+	if params.Vid == "" {
+		return "", errors.New("Vid not set")
 	}
-	query.Add("definition", string(params.Definition))
+	query.Add("Vid", params.Vid)
+	if params.Definition != "" {
+		query.Add("Definition", string(params.Definition))
+	}
+	if params.Watermark != "" {
+		query.Add("Watermark", params.Watermark)
+	}
+	if params.Expires != "" {
+		query.Add("X-Amz-Expires", params.Expires)
+	}
 
 	token, err := p.GetSignUrl("RedirectPlay", query)
 	if err != nil {
@@ -275,12 +352,10 @@ func (p *Vod) GetRedirectPlayUrl(params RedirectPlayParam) (string, error) {
 	return url, nil
 }
 
-func (p *Vod) GetUploadAuthToken(space string) (string, error) {
+func (p *Vod) GetUploadAuthToken(query url.Values) (string, error) {
 	ret := map[string]string{
 		"Version": "v1",
 	}
-	query := url.Values{}
-	query.Set("SpaceName", space)
 
 	if applyUploadToken, err := p.GetSignUrl("ApplyUpload", query); err == nil {
 		ret["ApplyUploadToken"] = applyUploadToken
@@ -296,4 +371,145 @@ func (p *Vod) GetUploadAuthToken(space string) (string, error) {
 
 	b, _ := json.Marshal(ret)
 	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+func (p *Vod) GetCdnDomainWeights(spaceName string) (*GetWeightsResp, error) {
+	query := url.Values{}
+	query.Set("SpaceName", spaceName)
+	respBody, _, err := p.Query("GetCdnDomainWeights", query)
+	if err != nil {
+		return nil, err
+	}
+
+	output := new(GetWeightsResp)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, err
+	}
+	return output, nil
+}
+
+// poster image related
+func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*DomainInfo, error) {
+
+	var cache map[string]int
+	var ok bool
+	p.Lock.RLock()
+	if cache, ok = p.DomainCache[spaceName]; !ok {
+		p.Lock.RUnlock()
+
+		p.Lock.Lock()
+		if cache, ok = p.DomainCache[spaceName]; !ok {
+			var weightsMap map[string]int
+			var exist bool
+			resp, err := p.GetCdnDomainWeights(spaceName)
+			if err != nil {
+				weightsMap = fallbackWeights
+			}
+			if err := resp.ResponseMetadata.Error; err != nil {
+				weightsMap = fallbackWeights
+			}
+			weightsMap, exist = resp.Result[spaceName]
+			if !exist || len(weightsMap) == 0 {
+				weightsMap = fallbackWeights
+			}
+			p.DomainCache[spaceName] = weightsMap
+
+			p.Lock.Unlock()
+			cache = p.DomainCache[spaceName]
+
+			go func() {
+				for range time.Tick(UPDATE_INTERVAL * time.Second) {
+					var weightsMap map[string]int
+					resp, err := p.GetCdnDomainWeights(spaceName)
+					if err != nil {
+						weightsMap = fallbackWeights
+					}
+					if err := resp.ResponseMetadata.Error; err != nil {
+						weightsMap = fallbackWeights
+					}
+					weightsMap, exist := resp.Result[spaceName]
+					if !exist || len(weightsMap) == 0 {
+						weightsMap = fallbackWeights
+					}
+					p.Lock.Lock()
+					p.DomainCache[spaceName] = weightsMap
+					p.Lock.Unlock()
+				}
+			}()
+		} else {
+			p.Lock.Unlock()
+		}
+	} else {
+		p.Lock.RUnlock()
+	}
+
+	var (
+		mainDomain   string
+		backupDomain string
+	)
+	mainDomain = randWeights(cache, "")
+	if mainDomain == "" {
+		return nil, errors.New("rand domain failed")
+	}
+
+	backupDomain = randWeights(cache, mainDomain)
+	if backupDomain == "" {
+		backupDomain = mainDomain
+	}
+	return &DomainInfo{MainDomain: mainDomain, BackupDomain: backupDomain}, nil
+}
+
+func randWeights(weightsMap map[string]int, excludeDomain string) string {
+	var weightSum int
+	for domain, weight := range weightsMap {
+		if domain == excludeDomain {
+			continue
+		}
+		weightSum += weight
+	}
+	if weightSum <= 0 {
+		return ""
+	}
+	r := rand.Intn(weightSum) + 1
+	for domains, weight := range weightsMap {
+		if domains == excludeDomain {
+			continue
+		}
+		r -= weight
+		if r <= 0 {
+			return domains
+		}
+	}
+	return ""
+}
+
+func (p *Vod) GetPosterUrl(spaceName string, uri string, fallbackWeights map[string]int, opts ...OptionFun) (*ImgUrl, error) {
+	domainInfos, err := p.GetDomainInfo(spaceName, fallbackWeights)
+	if err != nil {
+		return nil, err
+	}
+	opt := &option{
+		isHttps: false,
+		format:  FORMAT_ORIGINAL,
+		tpl:     VOD_TPL_NOOP,
+	}
+	for _, op := range opts {
+		op(opt)
+	}
+	proto := HTTP
+	if opt.isHttps {
+		proto = HTTPS
+	}
+	var tpl string
+
+	if opt.tpl == VOD_TPL_OBJ || opt.tpl == VOD_TPL_NOOP {
+		tpl = opt.tpl
+	} else {
+		tpl = fmt.Sprintf("%s:%d:%d", opt.tpl, opt.w, opt.h)
+	}
+
+	return &ImgUrl{
+		MainUrl:   fmt.Sprintf("%s://%s/%s~%s.%s", proto, domainInfos.MainDomain, uri, tpl, opt.format),
+		BackupUrl: fmt.Sprintf("%s://%s/%s~%s.%s", proto, domainInfos.BackupDomain, uri, tpl, opt.format),
+	}, nil
 }

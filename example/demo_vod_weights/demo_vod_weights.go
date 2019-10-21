@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/url"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-	"github.com/TTvcloud/vcloud-sdk-golang/service/iam"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
+
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
@@ -21,11 +19,8 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	query := url.Values{}
-	query.Set("Limit", "3")
+	spaceName := "your spaceName"
 
-	resp, code, _ := iam.NewInstance().ListUsers(query)
-	fmt.Println(code)
-	b, _ := json.Marshal(resp)
-	fmt.Println(string(b))
+	resp, _ := vod.NewInstance().GetCdnDomainWeights(spaceName)
+	fmt.Println(resp)
 }

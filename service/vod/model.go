@@ -2,7 +2,6 @@ package vod
 
 import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-	"time"
 )
 
 // GetPlayInfo
@@ -47,6 +46,26 @@ type PlayInfo struct {
 	PreloadSize     int
 }
 
+// GetOriginVideoPlayInfo
+type GetOriginVideoPlayInfoResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           *GetOriginVideoPlayInfoData `json:",omitempty"`
+}
+
+type GetOriginVideoPlayInfoData struct {
+	MediaType     string
+	Duration      float64
+	Size          int64
+	Height        int64
+	Width         int64
+	Format        string
+	CodecType     string
+	Bitrate       int64
+	FileHash      string
+	MainPlayUrl   string
+	BackupPlayUrl string
+}
+
 type StartTranscodeRequest struct {
 	Vid        string
 	TemplateId string
@@ -63,14 +82,14 @@ type StartTranscodeResp struct {
 	Result           *StartTranscodeResult `json:",omitempty"`
 }
 
-type UploadVideoByUrlResult struct {
+type UploadMediaByUrlResult struct {
 	Code    int
 	Message string
 }
 
-type UploadVideoByUrlResp struct {
+type UploadMediaByUrlResp struct {
 	base.CommonResponse
-	Result UploadVideoByUrlResult
+	Result UploadMediaByUrlResult
 }
 
 type VideoFormat string
@@ -80,7 +99,7 @@ const (
 	M3U8 VideoFormat = "m3u8"
 )
 
-type UploadVideoByUrlParams struct {
+type UploadMediaByUrlParams struct {
 	SpaceName    string
 	Format       VideoFormat
 	SourceUrls   []string
@@ -132,10 +151,10 @@ const (
 )
 
 type RedirectPlayParam struct {
-	VideoID    string
+	Vid        string
 	Definition VideoDefinition
 	Watermark  string
-	Expire     time.Duration
+	Expires    string
 }
 
 type StoreInfo struct {
@@ -147,6 +166,39 @@ type AdvanceOption struct {
 	Parallel  int
 	Stream    int
 	SliceSize int
+}
+
+type ModifyVideoInfoBody struct {
+	SpaceName string       `json:"SpaceName"`
+	Vid       string       `json:"Vid"`
+	Info      UserMetaInfo `json:"Info"`
+	Tags      TagControl   `json:"Tags"`
+}
+
+type UserMetaInfo struct {
+	Title       string
+	Description string
+	Category    string
+	PosterUri   string
+}
+
+type TagControl struct {
+	Deletes string
+	Adds    string
+}
+
+type ModifyVideoInfoResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           *ModifyVideoInfoBaseResp
+}
+
+type ModifyVideoInfoBaseResp struct {
+	BaseResp *BaseResp
+}
+
+type BaseResp struct {
+	StatusMessage string
+	StatusCode    int
 }
 
 type CommitUploadParam struct {
@@ -238,4 +290,19 @@ type Encryption struct {
 // SetVideoPublishStatus
 type SetVideoPublishStatusResp struct {
 	ResponseMetadata *base.ResponseMetadata
+}
+
+type GetWeightsResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           map[string]map[string]int `json:",omitempty"`
+}
+
+type DomainInfo struct {
+	MainDomain   string
+	BackupDomain string
+}
+
+type ImgUrl struct {
+	MainUrl   string
+	BackupUrl string
 }

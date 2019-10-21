@@ -1,0 +1,10 @@
+### Change log
+
+#### 0.0.6
+- 增加地域设置
+
+#### 0.0.5
+- 去掉image X 相关
+- 增加封面图上传接口
+- getUploadAuthToken/getPlayAuthToken/RedirectPlay支持X-Amz-Expires参数
+- 代码格式优化

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
@@ -22,11 +21,17 @@ func modifyVideoInfo() {
 }
 
 func setVideoPlayStatus() {
-	vod.DefaultInstance.SetCredential(base.Credentials{
-		AccessKeyID:     "your-ak",
-		SecretAccessKey: "your-sk"})
+	// call below method if you dont set ak and sk in ～/.vcloud/config
+	vod.NewInstance().SetCredential(base.Credentials{
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk",
+	})
 
-	resp, code, _ := vod.DefaultInstance.SetVideoPublishStatus("space", "vidxxxxx", "Published")
+	// or set ak and ak as follow
+	//vod.NewInstance().SetAccessKey("")
+	//vod.NewInstance().SetSecretKey("")
+
+	resp, code, _ := vod.NewInstance().SetVideoPublishStatus("space", "vidxxxxx", "Published")
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)
 	fmt.Println(string(b))

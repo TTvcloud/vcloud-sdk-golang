@@ -142,7 +142,7 @@ type UserResp struct {
 }
 
 type UserList struct {
-	Users  []*UserStructure
+	UserMetadata  []*UserStructure
 	Limit  int
 	Offset int
 	Total  int

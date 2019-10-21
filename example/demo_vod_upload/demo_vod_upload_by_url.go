@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/url"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-	"github.com/TTvcloud/vcloud-sdk-golang/service/iam"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
@@ -21,11 +18,22 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	query := url.Values{}
-	query.Set("Limit", "3")
+	spaceName := "your spaceName"
+	videoUrl := "your videoUrl"
 
-	resp, code, _ := iam.NewInstance().ListUsers(query)
-	fmt.Println(code)
-	b, _ := json.Marshal(resp)
-	fmt.Println(string(b))
+	params := vod.UploadMediaByUrlParams{
+		SpaceName:    spaceName,
+		Format:       vod.MP4,
+		SourceUrls:   []string{videoUrl},
+		CallbackArgs: "xxx",
+	}
+	resp, err := vod.NewInstance().UploadMediaByUrl(params)
+	if err != nil {
+		fmt.Printf("err:%s\n")
+	}
+	if resp.ResponseMetadata.Error != nil {
+		fmt.Println(resp.ResponseMetadata.Error)
+		return
+	}
+	fmt.Println(resp.Result)
 }

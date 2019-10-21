@@ -54,6 +54,18 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	return client
 }
 
+func (client *Client) SetAccessKey(ak string) {
+	if ak != "" {
+		client.ServiceInfo.Credentials.AccessKeyID = ak
+	}
+}
+
+func (client *Client) SetSecretKey(sk string) {
+	if sk != "" {
+		client.ServiceInfo.Credentials.SecretAccessKey = sk
+	}
+}
+
 func (client *Client) SetCredential(c Credentials) {
 	if c.AccessKeyID != "" {
 		client.ServiceInfo.Credentials.AccessKeyID = c.AccessKeyID
@@ -77,8 +89,13 @@ func (client *Client) GetSignUrl(api string, query url.Values) (string, error) {
 
 	query = mergeQuery(query, apiInfo.Query)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, nil)
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), nil)
 
 	if err != nil {
 		return "", errors.New("构建request失败")
@@ -121,14 +138,17 @@ func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 	header := mergeHeader(client.ServiceInfo.Header, apiInfo.Header)
 	query = mergeQuery(query, apiInfo.Query)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, nil)
-	req.Header = header
-
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), nil)
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
-
+	req.Header = header
 	return client.makeRequest(api, req, timeout)
 }
 
@@ -142,13 +162,17 @@ func (client *Client) Json(api string, query url.Values, body string) ([]byte, i
 	header := mergeHeader(client.ServiceInfo.Header, apiInfo.Header)
 	query = mergeQuery(query, apiInfo.Query)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(body))
-	req.Header = header
-
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), strings.NewReader(body))
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
+	req.Header = header
 	req.Header.Set("Content-Type", "application/json")
 
 	return client.makeRequest(api, req, timeout)
@@ -165,13 +189,17 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 	query = mergeQuery(query, apiInfo.Query)
 	form = mergeQuery(form, apiInfo.Form)
 
-	url := fmt.Sprintf("http://%s%s?%s", client.ServiceInfo.Host, apiInfo.Path, query.Encode())
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), url, strings.NewReader(form.Encode()))
-	req.Header = header
-
+	u := url.URL{
+		Scheme:   "https",
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), strings.NewReader(form.Encode()))
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
+	req.Header = header
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return client.makeRequest(api, req, timeout)
@@ -180,19 +208,23 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 func (client *Client) makeRequest(api string, req *http.Request, timeout time.Duration) ([]byte, int, error) {
 	req = client.ServiceInfo.Credentials.Sign(req)
 
-	ctx, _ := context.WithTimeout(context.TODO(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 	req = req.WithContext(ctx)
 
 	resp, err := client.Client.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	} else {
-		return []byte(""), 500, errors.New("Bad Request")
+	if err != nil {
+		return []byte(""), 500, fmt.Errorf("fail to request %s", api)
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return []byte(""), resp.StatusCode, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return body, resp.StatusCode, fmt.Errorf("api %s http code %d body %s", api, resp.StatusCode, string(body))
 	}
 
 	return body, resp.StatusCode, nil
