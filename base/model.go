@@ -100,9 +100,13 @@ type SecurityToken2 struct {
 
 type InnerToken struct {
 	LTAccessKeyId         string
+	AccessKeyId           string
 	SignedSecretAccessKey string
 	ExpiredTime           int64
-	Policy                *Policy `json:",omitempty"`
+	PolicyString          string
+	Signature             string
+
+	// Policy                *Policy `json:",omitempty"`
 }
 
 func UnmarshalResultInto(data []byte, result interface{}) error {

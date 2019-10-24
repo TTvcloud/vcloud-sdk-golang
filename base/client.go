@@ -111,20 +111,20 @@ func (client *Client) SignSts2(inlinePolicy *Policy, expire time.Duration) (*Sec
 		return nil, err
 	}
 
-	if innerToken, err := CreateInnerToken(client.ServiceInfo.Credentials, sts.SecretAccessKey, inlinePolicy); err != nil {
-		return nil, err
-	} else {
-		if expire < time.Minute {
-			expire = time.Minute
-		}
-		expireTime := time.Now().Add(expire)
-		sts.ExpiredTime = expireTime.Format("20060102T150405Z")
-		innerToken.ExpiredTime = expireTime.Unix()
-
-		b, _ := json.Marshal(innerToken)
-		sts.SessionToken = "STS2" + base64.StdEncoding.EncodeToString(b)
-		return sts, nil
+	if expire < time.Minute {
+		expire = time.Minute
 	}
+	expireTime := time.Now().Add(expire)
+	sts.ExpiredTime = expireTime.Format("20060102T150405Z")
+
+	innerToken, err := CreateInnerToken(client.ServiceInfo.Credentials, sts, inlinePolicy, expireTime.Unix())
+	if err != nil {
+		return nil, err
+	}
+
+	b, _ := json.Marshal(innerToken)
+	sts.SessionToken = "STS2" + base64.StdEncoding.EncodeToString(b)
+	return sts, nil
 }
 
 func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {

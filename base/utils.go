@@ -3,6 +3,9 @@ package base
 import (
 	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -64,6 +67,7 @@ func GenerateSecretKey() (string, error) {
 	return AesEncryptCBCWithBase64([]byte(randString32), []byte("ttcloudbestcloud"))
 }
 
+/*
 func CreateInnerToken(credential Credentials, secretAccessKey string, inlinePolicy *Policy) (*InnerToken, error) {
 	var err error
 	innerToken := new(InnerToken)
@@ -76,6 +80,36 @@ func CreateInnerToken(credential Credentials, secretAccessKey string, inlinePoli
 	} else {
 		return nil, err
 	}
+}
+*/
+
+func CreateInnerToken(credentials Credentials, sts *SecurityToken2, inlinePolicy *Policy, t int64) (*InnerToken, error) {
+	var err error
+	innerToken := new(InnerToken)
+
+	innerToken.LTAccessKeyId = credentials.AccessKeyID
+	innerToken.AccessKeyId = sts.AccessKeyId
+	innerToken.ExpiredTime = t
+
+	b, _ := json.Marshal(inlinePolicy)
+	innerToken.PolicyString = string(b)
+
+	key := md5.Sum([]byte(credentials.SecretAccessKey))
+	innerToken.SignedSecretAccessKey, err = AesEncryptCBCWithBase64([]byte(sts.SecretAccessKey), key[:])
+	if err != nil {
+		return nil, err
+	}
+
+	// sign signature
+	if inlinePolicy != nil {
+		b, _ := json.Marshal(inlinePolicy)
+		innerToken.PolicyString = string(b)
+	}
+
+	signStr := fmt.Sprintf("%s|%s|%d|%s|%s", innerToken.LTAccessKeyId, innerToken.AccessKeyId, innerToken.ExpiredTime, innerToken.SignedSecretAccessKey, innerToken.PolicyString)
+
+	innerToken.Signature = hex.EncodeToString(hmacSHA256(key[:], signStr))
+	return innerToken, nil
 }
 
 func getTimeout(serviceTimeout, apiTimeout time.Duration) time.Duration {
