@@ -91,21 +91,18 @@ func CreateInnerToken(credentials Credentials, sts *SecurityToken2, inlinePolicy
 	innerToken.AccessKeyId = sts.AccessKeyId
 	innerToken.ExpiredTime = t
 
-	b, _ := json.Marshal(inlinePolicy)
-	innerToken.PolicyString = string(b)
-
 	key := md5.Sum([]byte(credentials.SecretAccessKey))
 	innerToken.SignedSecretAccessKey, err = AesEncryptCBCWithBase64([]byte(sts.SecretAccessKey), key[:])
 	if err != nil {
 		return nil, err
 	}
 
-	// sign signature
 	if inlinePolicy != nil {
 		b, _ := json.Marshal(inlinePolicy)
 		innerToken.PolicyString = string(b)
 	}
 
+	// sign signature
 	signStr := fmt.Sprintf("%s|%s|%d|%s|%s", innerToken.LTAccessKeyId, innerToken.AccessKeyId, innerToken.ExpiredTime, innerToken.SignedSecretAccessKey, innerToken.PolicyString)
 
 	innerToken.Signature = hex.EncodeToString(hmacSHA256(key[:], signStr))
