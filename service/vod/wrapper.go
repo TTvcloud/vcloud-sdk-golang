@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
+
 	"github.com/pkg/errors"
 )
 
@@ -512,4 +514,42 @@ func (p *Vod) GetPosterUrl(spaceName string, uri string, fallbackWeights map[str
 		MainUrl:   fmt.Sprintf("%s://%s/%s~%s.%s", proto, domainInfos.MainDomain, uri, tpl, opt.format),
 		BackupUrl: fmt.Sprintf("%s://%s/%s~%s.%s", proto, domainInfos.BackupDomain, uri, tpl, opt.format),
 	}, nil
+}
+
+func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) (*base.SecurityToken2, error) {
+	inlinePolicy := new(base.Policy)
+	actions := []string{"vod:GetPlayInfo"}
+	resources := make([]string, 0)
+
+	// 设置vid的resource权限
+	if len(vidList) == 0 {
+		resources = append(resources, fmt.Sprintf(ResourceVideoFormat, "*"))
+	} else {
+		for _, vid := range vidList {
+			resources = append(resources, fmt.Sprintf(ResourceVideoFormat, vid))
+		}
+	}
+
+	// 设置streamType的resource权限
+	if len(streamTypeList) == 0 {
+		resources = append(resources, fmt.Sprintf(ResourceStreamTypeFormat, "*"))
+	} else {
+		for _, streamType := range streamTypeList {
+			resources = append(resources, fmt.Sprintf(ResourceStreamTypeFormat, streamType))
+		}
+	}
+
+	// 设置watermark的resource权限
+	if len(watermarkList) == 0 {
+		resources = append(resources, fmt.Sprintf(ResourceWatermarkFormat, "*"))
+	} else {
+		for _, watermark := range watermarkList {
+			resources = append(resources, fmt.Sprintf(ResourceWatermarkFormat, watermark))
+		}
+	}
+
+	statement := base.NewAllowStatement(actions, resources)
+	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
+
+	return p.SignSts2(inlinePolicy, time.Hour)
 }
