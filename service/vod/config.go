@@ -23,11 +23,11 @@ const (
 	// ResourceSpaceFormat space的资源结构
 	ResourceSpaceFormat = "trn:vod:%s:*:space/%s"
 	// ResourceVideoFormat vid的视频结构
-	ResourceVideoFormat = "trn:vod::*:vid/%s"
+	ResourceVideoFormat = "trn:vod::*:video_id/%s"
 	// ResourceStreamTypeFormat  stream type理论和账号无关
 	ResourceStreamTypeFormat = "trn:vod::stream_type/%s"
 	// ResourceWatermarkFormat 水印信息与账号有关,与region无关
-	ResourceWatermarkFormat = "trn:vod:*:watermark/%s"
+	ResourceWatermarkFormat = "trn:vod::*:watermark/%s"
 )
 
 var Instance *Vod
