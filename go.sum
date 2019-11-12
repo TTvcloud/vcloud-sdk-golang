@@ -1,0 +1,7 @@
+github.com/TTvcloud/vcloud-sdk-golang v0.0.0-20191101065714-ab4fcbba6d75 h1:+Y61Z4vmaMajF5ZpL7bCsr7rWiwx77o9DgE8jtjDDEU=
+github.com/TTvcloud/vcloud-sdk-golang v0.0.0-20191101065714-ab4fcbba6d75/go.mod h1:ZIQN18mLM/s36kE3c5bTVWLS08/veWXlLJqPXq0IkKw=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=
+github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b h1:gQZ0qzfKHQIybLANtM3mBXNUtOfsCFXeTsnBqCsx1KM=
+github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=
