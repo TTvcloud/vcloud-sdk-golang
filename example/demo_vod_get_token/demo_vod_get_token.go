@@ -10,7 +10,8 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
@@ -28,7 +29,7 @@ func main() {
 	// set if if you know the params' meaning exactly.
 	query.Set("X-Amz-Expires", "60")
 
-	ret, _ := vod.NewInstance().GetPlayAuthToken(query)
+	ret, _ := instance.GetPlayAuthToken(query)
 	fmt.Println(ret)
 
 	query = url.Values{}
@@ -37,6 +38,6 @@ func main() {
 	// set if if you know the params' meaning exactly.
 	query.Set("X-Amz-Expires", "60")
 
-	ret, _ = vod.NewInstance().GetUploadAuthToken(query)
+	ret, _ = instance.GetUploadAuthToken(query)
 	fmt.Println(ret)
 }

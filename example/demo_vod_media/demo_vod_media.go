@@ -22,7 +22,8 @@ func modifyVideoInfo() {
 
 func setVideoPlayStatus() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
@@ -31,7 +32,7 @@ func setVideoPlayStatus() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	resp, code, _ := vod.NewInstance().SetVideoPublishStatus("space", "vidxxxxx", "Published")
+	resp, code, _ := instance.SetVideoPublishStatus("space", "vidxxxxx", "Published")
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)
 	fmt.Println(string(b))

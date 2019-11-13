@@ -11,7 +11,8 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
@@ -30,7 +31,7 @@ func main() {
 		os.Exit(-1)
 	}
 
-	posterUri, err := vod.NewInstance().UploadPoster(vid, dat, spaceName, vod.IMAGE)
+	posterUri, err := instance.UploadPoster(vid, dat, spaceName, vod.IMAGE)
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {

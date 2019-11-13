@@ -10,7 +10,8 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
@@ -27,7 +28,7 @@ func main() {
 
 	// domain
 	for i := 0; i < 20; i++ {
-		ret, err := vod.NewInstance().GetDomainInfo(spaceName, fallbackWeights)
+		ret, err := instance.GetDomainInfo(spaceName, fallbackWeights)
 		fmt.Println(ret)
 		if err != nil {
 			fmt.Printf("errMsg:%v", err)
@@ -39,7 +40,7 @@ func main() {
 
 	uri := "your uri"
 	// poster
-	ret, err := vod.NewInstance().GetPosterUrl(spaceName, uri, fallbackWeights, vod.WithHttps(), vod.WithVodTplSmartCrop(600, 392), vod.WithFormat(vod.FORMAT_AWEBP))
+	ret, err := instance.GetPosterUrl(spaceName, uri, fallbackWeights, vod.WithHttps(), vod.WithVodTplSmartCrop(600, 392), vod.WithFormat(vod.FORMAT_AWEBP))
 	if err != nil {
 		fmt.Printf("errMsg:%v", err)
 		return

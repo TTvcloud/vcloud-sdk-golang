@@ -35,7 +35,7 @@ func (c *ImageXClient) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUp
 	}
 
 	result := new(ApplyUploadImageResult)
-	if err := base.UnmarshalResultInto(respBody, result); err != nil {
+	if err := UnmarshalResultInto(respBody, result); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -58,7 +58,7 @@ func (c *ImageXClient) CommitUploadImage(params *CommitUploadImageParam) (*Commi
 	}
 
 	result := new(CommitUploadImageResult)
-	if err := base.UnmarshalResultInto(respBody, result); err != nil {
+	if err := UnmarshalResultInto(respBody, result); err != nil {
 		return nil, err
 	}
 	return result, nil

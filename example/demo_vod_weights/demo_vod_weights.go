@@ -7,10 +7,10 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
-
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})

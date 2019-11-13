@@ -8,7 +8,8 @@ import (
 )
 
 func BenchmarkGetPoster(b *testing.B) {
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "ak",
 		SecretAccessKey: "sk"})
 
@@ -21,7 +22,7 @@ func BenchmarkGetPoster(b *testing.B) {
 	uri := "uri"
 
 	for i := 0; i < b.N; i++ {
-		_, err := vod.NewInstance().GetPosterUrl(spaceName, uri, fallbackWeights, vod.WithHttps(), vod.WithVodTplSmartCrop(600, 392), vod.WithFormat(vod.FORMAT_AWEBP))
+		_, err := instance.GetPosterUrl(spaceName, uri, fallbackWeights, vod.WithHttps(), vod.WithVodTplSmartCrop(600, 392), vod.WithFormat(vod.FORMAT_AWEBP))
 		if err != nil {
 			return
 		}

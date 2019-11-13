@@ -22,26 +22,23 @@ func init() {
 	rand.Seed(time.Now().Unix())
 }
 
-func CreateTempAKSK() (accessKeyId string, plainSk string, err error) {
+func createTempAKSK() (accessKeyId string, plainSk string, err error) {
 	// 生成AccessKeyId
-	if accessKeyId, err = GenerateAccessKeyId("AKTP"); err != nil {
+	if accessKeyId, err = generateAccessKeyId("AKTP"); err != nil {
 		return
 	}
 
 	// 生成SecretKey明文
-	plainSk, err = GenerateSecretKey()
+	plainSk, err = generateSecretKey()
 	if err != nil {
 		return
 	}
 	return
 }
 
-func GenerateAccessKeyId(prefix string) (string, error) {
+func generateAccessKeyId(prefix string) (string, error) {
 	// 生成uuid，如：a1fe1d4f-eb56-4a06-86e8-3e5068a1a838
-	uid, err := uuid.NewV4()
-	if err != nil {
-		return "", err
-	}
+	uid := uuid.NewV4()
 
 	// 滤掉'-'后，做base64，输出：YTFmZTFkNGZlYjU2NGEwNjg2ZTgzZTUwNjhhMWE4Mzg=
 	uidBase64 := base64.StdEncoding.EncodeToString([]byte(strings.Replace(uid.String(), "-", "", -1)))
@@ -62,28 +59,13 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
-func GenerateSecretKey() (string, error) {
+func generateSecretKey() (string, error) {
 	randString32 := randStringRunes(32)
-	return AesEncryptCBCWithBase64([]byte(randString32), []byte("ttcloudbestcloud"))
+	// 确保key是128bit即可
+	return aesEncryptCBCWithBase64([]byte(randString32), []byte("bytedance-isgood"))
 }
 
-/*
-func CreateInnerToken(credential Credentials, secretAccessKey string, inlinePolicy *Policy) (*InnerToken, error) {
-	var err error
-	innerToken := new(InnerToken)
-	innerToken.LTAccessKeyId = credential.AccessKeyID
-	key := md5.Sum([]byte(credential.SecretAccessKey))
-	innerToken.SignedSecretAccessKey, err = AesEncryptCBCWithBase64([]byte(secretAccessKey), key[:])
-	innerToken.Policy = inlinePolicy
-	if err == nil {
-		return innerToken, nil
-	} else {
-		return nil, err
-	}
-}
-*/
-
-func CreateInnerToken(credentials Credentials, sts *SecurityToken2, inlinePolicy *Policy, t int64) (*InnerToken, error) {
+func createInnerToken(credentials Credentials, sts *SecurityToken2, inlinePolicy *Policy, t int64) (*InnerToken, error) {
 	var err error
 	innerToken := new(InnerToken)
 
@@ -92,7 +74,7 @@ func CreateInnerToken(credentials Credentials, sts *SecurityToken2, inlinePolicy
 	innerToken.ExpiredTime = t
 
 	key := md5.Sum([]byte(credentials.SecretAccessKey))
-	innerToken.SignedSecretAccessKey, err = AesEncryptCBCWithBase64([]byte(sts.SecretAccessKey), key[:])
+	innerToken.SignedSecretAccessKey, err = aesEncryptCBCWithBase64([]byte(sts.SecretAccessKey), key[:])
 	if err != nil {
 		return nil, err
 	}

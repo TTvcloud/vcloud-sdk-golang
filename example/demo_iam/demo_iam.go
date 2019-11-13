@@ -5,21 +5,11 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/iam"
-	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
-		AccessKeyID:     "your ak",
-		SecretAccessKey: "your sk",
-	})
-
-	// or set ak and ak as follow
-	//vod.NewInstance().SetAccessKey("")
-	//vod.NewInstance().SetSecretKey("")
 
 	query := url.Values{}
 	query.Set("Limit", "3")
