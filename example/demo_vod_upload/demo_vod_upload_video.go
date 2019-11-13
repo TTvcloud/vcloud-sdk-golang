@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"io/ioutil"
 	"os"
+
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
@@ -32,7 +34,7 @@ func main() {
 		os.Exit(-1)
 	}
 
-	resp, err := vod.NewInstance().UploadVideo(dat, spaceName, vod.VIDEO, getMetaFunc, snapShotFunc)
+	resp, err := instance.UploadVideo(dat, spaceName, vod.VIDEO, getMetaFunc, snapShotFunc)
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {

@@ -8,11 +8,12 @@ import (
 )
 
 func main() {
-	ret, _ := vod.NewInstance().GetVideoPlayAuth([]string{"v0282cd70000blsd0bkthbi41ag6kpcg"}, []string{}, []string{})
+	instance := vod.NewInstance()
+	ret, _ := instance.GetVideoPlayAuth([]string{"v0282cd70000blsd0bkthbi41ag6kpcg"}, []string{}, []string{})
 	b, _ := json.Marshal(ret)
 	fmt.Println(string(b))
 
-	ret2, _ := vod.NewInstance().GetVideoPlayAuth([]string{"v0282cd70000blsd0bkthbi41ag6kpcg"}, []string{"evideo"}, []string{})
+	ret2, _ := instance.GetVideoPlayAuth([]string{"v0282cd70000blsd0bkthbi41ag6kpcg"}, []string{"evideo"}, []string{})
 	b2, _ := json.Marshal(ret2)
 	fmt.Println(string(b2))
 }

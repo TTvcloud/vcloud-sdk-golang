@@ -4,16 +4,11 @@ import (
 	"fmt"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
+
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
 func main() {
-	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
-		AccessKeyID:     "your ak",
-		SecretAccessKey: "your sk",
-	})
-
 	// or set ak and ak as follow
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
@@ -22,6 +17,12 @@ func main() {
 }
 
 func StartTranscodeExample() {
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk",
+	})
+
 	input := map[string]interface{}{
 		"watermark_str": "test",
 	}
@@ -33,7 +34,7 @@ func StartTranscodeExample() {
 		Priority:   0,
 	}
 
-	resp, err := vod.NewInstance().StartTranscode(req)
+	resp, err := instance.StartTranscode(req)
 	if err != nil {
 		fmt.Println(err)
 		return

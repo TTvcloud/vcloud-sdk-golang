@@ -9,7 +9,8 @@ import (
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
-	vod.NewInstance().SetCredential(base.Credentials{
+	instance := vod.NewInstance()
+	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
 		SecretAccessKey: "your sk",
 	})
@@ -27,7 +28,7 @@ func main() {
 		SourceUrls:   []string{videoUrl},
 		CallbackArgs: "xxx",
 	}
-	resp, err := vod.NewInstance().UploadMediaByUrl(params)
+	resp, err := instance.UploadMediaByUrl(params)
 	if err != nil {
 		fmt.Printf("err:%s\n")
 	}

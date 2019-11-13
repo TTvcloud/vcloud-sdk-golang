@@ -15,16 +15,18 @@ import (
 )
 
 const (
-	AccessKey = "VCLOUD_ACCESSKEY"
-	SecretKey = "VCLOUD_SECRETKEY"
+	accessKey = "VCLOUD_ACCESSKEY"
+	secretKey = "VCLOUD_SECRETKEY"
 )
 
+// Client 基础客户端
 type Client struct {
 	Client      http.Client
 	ServiceInfo *ServiceInfo
 	ApiInfoList map[string]*ApiInfo
 }
 
+// NewClient 生成一个客户端
 func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	transport := &http.Transport{
 		MaxIdleConns:        1000,
@@ -35,9 +37,9 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	c := http.Client{Transport: transport}
 	client := &Client{Client: c, ServiceInfo: info, ApiInfoList: apiInfoList}
 
-	if os.Getenv(AccessKey) != "" && os.Getenv(SecretKey) != "" {
-		client.ServiceInfo.Credentials.AccessKeyID = AccessKey
-		client.ServiceInfo.Credentials.SecretAccessKey = SecretKey
+	if os.Getenv(accessKey) != "" && os.Getenv(secretKey) != "" {
+		client.ServiceInfo.Credentials.AccessKeyID = accessKey
+		client.ServiceInfo.Credentials.SecretAccessKey = secretKey
 	} else if _, err := os.Stat(os.Getenv("HOME") + "/.vcloud/config"); err == nil {
 		if content, err := ioutil.ReadFile(os.Getenv("HOME") + "/.vcloud/config"); err == nil {
 			m := make(map[string]string)
@@ -54,18 +56,28 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	return client
 }
 
+// SetAccessKey 设置AK
 func (client *Client) SetAccessKey(ak string) {
 	if ak != "" {
 		client.ServiceInfo.Credentials.AccessKeyID = ak
 	}
 }
 
+// SetSecretKey 设置SK
 func (client *Client) SetSecretKey(sk string) {
 	if sk != "" {
 		client.ServiceInfo.Credentials.SecretAccessKey = sk
 	}
 }
 
+// SetHost 设置Host
+func (client *Client) SetHost(host string) {
+	if host != "" {
+		client.ServiceInfo.Host = host
+	}
+}
+
+// SetCredential 设置Credentials
 func (client *Client) SetCredential(c Credentials) {
 	if c.AccessKeyID != "" {
 		client.ServiceInfo.Credentials.AccessKeyID = c.AccessKeyID
@@ -80,6 +92,7 @@ func (client *Client) SetCredential(c Credentials) {
 	}
 }
 
+// GetSignUrl 获取签名字符串
 func (client *Client) GetSignUrl(api string, query url.Values) (string, error) {
 	apiInfo := client.ApiInfoList[api]
 
@@ -104,10 +117,11 @@ func (client *Client) GetSignUrl(api string, query url.Values) (string, error) {
 	return client.ServiceInfo.Credentials.SignUrl(req), nil
 }
 
+// SignSts2 生成sts信息
 func (client *Client) SignSts2(inlinePolicy *Policy, expire time.Duration) (*SecurityToken2, error) {
 	var err error
 	sts := new(SecurityToken2)
-	if sts.AccessKeyId, sts.SecretAccessKey, err = CreateTempAKSK(); err != nil {
+	if sts.AccessKeyId, sts.SecretAccessKey, err = createTempAKSK(); err != nil {
 		return nil, err
 	}
 
@@ -117,7 +131,7 @@ func (client *Client) SignSts2(inlinePolicy *Policy, expire time.Duration) (*Sec
 	expireTime := time.Now().Add(expire)
 	sts.ExpiredTime = expireTime.Format("20060102T150405Z")
 
-	innerToken, err := CreateInnerToken(client.ServiceInfo.Credentials, sts, inlinePolicy, expireTime.Unix())
+	innerToken, err := createInnerToken(client.ServiceInfo.Credentials, sts, inlinePolicy, expireTime.Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -127,6 +141,7 @@ func (client *Client) SignSts2(inlinePolicy *Policy, expire time.Duration) (*Sec
 	return sts, nil
 }
 
+// Query 发起Get的query请求
 func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 	apiInfo := client.ApiInfoList[api]
 
@@ -152,6 +167,7 @@ func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 	return client.makeRequest(api, req, timeout)
 }
 
+// Json 发起Json的post请求
 func (client *Client) Json(api string, query url.Values, body string) ([]byte, int, error) {
 	apiInfo := client.ApiInfoList[api]
 
@@ -178,6 +194,7 @@ func (client *Client) Json(api string, query url.Values, body string) ([]byte, i
 	return client.makeRequest(api, req, timeout)
 }
 
+// Post 发起Post请求
 func (client *Client) Post(api string, query url.Values, form url.Values) ([]byte, int, error) {
 	apiInfo := client.ApiInfoList[api]
 

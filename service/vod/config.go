@@ -30,17 +30,12 @@ const (
 	ResourceWatermarkFormat = "trn:vod::*:watermark/%s"
 )
 
-var Instance *Vod
-var once sync.Once
-
 func NewInstance() *Vod {
-	once.Do(func() {
-		Instance = &Vod{
-			DomainCache: make(map[string]map[string]int),
-			Client:      base.NewClient(ServiceInfoMap[base.RegionCnNorth1], ApiInfoList),
-		}
-	})
-	return Instance
+	instance := &Vod{
+		DomainCache: make(map[string]map[string]int),
+		Client:      base.NewClient(ServiceInfoMap[base.RegionCnNorth1], ApiInfoList),
+	}
+	return instance
 }
 
 func NewInstanceWithRegion(region string) *Vod {
@@ -50,13 +45,11 @@ func NewInstanceWithRegion(region string) *Vod {
 		panic("Cant find the region, please check it carefully")
 	}
 
-	once.Do(func() {
-		Instance = &Vod{
-			DomainCache: make(map[string]map[string]int),
-			Client:      base.NewClient(serviceInfo, ApiInfoList),
-		}
-	})
-	return Instance
+	instance := &Vod{
+		DomainCache: make(map[string]map[string]int),
+		Client:      base.NewClient(serviceInfo, ApiInfoList),
+	}
+	return instance
 }
 
 var (
