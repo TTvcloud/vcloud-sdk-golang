@@ -211,7 +211,7 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (str
 	}
 
 	// upload file
-	checkSum := fmt.Sprintf("%x", crc32.ChecksumIEEE(fileBytes))
+	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(fileBytes))
 	tosHost := resp.Result.UploadAddress.UploadHosts[0]
 	oid := resp.Result.UploadAddress.StoreInfos[0].StoreUri
 	sessionKey := resp.Result.UploadAddress.SessionKey
