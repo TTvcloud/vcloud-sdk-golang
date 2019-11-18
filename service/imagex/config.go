@@ -79,6 +79,7 @@ var (
 	}
 
 	ApiInfoList = map[string]*base.ApiInfo{
+		// 资源管理相关
 		"ApplyUploadImageFile": {
 			Method: http.MethodGet,
 			Path:   "/",
@@ -92,6 +93,16 @@ var (
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"CommitUploadImageFile"},
+				"Version": []string{ImageXApiVersion},
+			},
+		},
+
+		// 模板相关
+		"GetImageTemplateConf": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"GetImageTemplateConf"},
 				"Version": []string{ImageXApiVersion},
 			},
 		},
