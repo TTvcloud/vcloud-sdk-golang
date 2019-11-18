@@ -54,8 +54,8 @@ type ImageInfo struct {
 
 // GetImageTemplateConf
 type GetTemplateConfParam struct {
-	GroupId   string `json:"GroupId"`
-	GroupName string `json:"GroupName"`
+	GroupId   string `json:"GroupId"`   // 可选参数，若指定则返回该分组的相关配置信息
+	GroupName string `json:"GroupName"` // 可选参数，若指定则返回名称中包含该值的所有分组的相关配置信息
 }
 
 type GetTemplateConfResult struct {
