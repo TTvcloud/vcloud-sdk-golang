@@ -38,8 +38,8 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	client := &Client{Client: c, ServiceInfo: info, ApiInfoList: apiInfoList}
 
 	if os.Getenv(accessKey) != "" && os.Getenv(secretKey) != "" {
-		client.ServiceInfo.Credentials.AccessKeyID = accessKey
-		client.ServiceInfo.Credentials.SecretAccessKey = secretKey
+		client.ServiceInfo.Credentials.AccessKeyID = os.Getenv(accessKey)
+		client.ServiceInfo.Credentials.SecretAccessKey = os.Getenv(secretKey)
 	} else if _, err := os.Stat(os.Getenv("HOME") + "/.vcloud/config"); err == nil {
 		if content, err := ioutil.ReadFile(os.Getenv("HOME") + "/.vcloud/config"); err == nil {
 			m := make(map[string]string)
