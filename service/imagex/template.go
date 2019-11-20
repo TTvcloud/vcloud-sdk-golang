@@ -1,7 +1,6 @@
 package imagex
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -13,11 +12,10 @@ func (c *ImageXClient) GetTemplateConf(param *GetTemplateConfParam) (*GetTemplat
 	if c.ServiceInfo.Credentials.Region != base.RegionCnNorth1 {
 		return nil, fmt.Errorf("Api GetImageTemplateConf not support region %s", c.ServiceInfo.Credentials.Region)
 	}
-	bts, err := json.Marshal(param)
-	if err != nil {
-		return nil, fmt.Errorf("fail to marshal request, %v", err)
-	}
-	respBody, _, err := c.Json("GetImageTemplateConf", url.Values{}, string(bts))
+	query := url.Values{}
+	query.Add("GroupId", param.GroupId)
+	query.Add("GroupName", param.GroupName)
+	respBody, _, err := c.Query("GetImageTemplateConf", query)
 	if err != nil {
 		return nil, fmt.Errorf("fail to request api GetImageTemplateConf, %v", err)
 	}
