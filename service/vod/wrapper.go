@@ -378,6 +378,7 @@ func (p *Vod) GetUploadAuthToken(query url.Values) (string, error) {
 func (p *Vod) GetCdnDomainWeights(spaceName string) (*GetWeightsResp, error) {
 	query := url.Values{}
 	query.Set("SpaceName", spaceName)
+	query.Set("ProductLine", "vcloud")
 	respBody, _, err := p.Query("GetCdnDomainWeights", query)
 	if err != nil {
 		return nil, err

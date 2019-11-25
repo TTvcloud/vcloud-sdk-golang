@@ -4,28 +4,35 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
 const (
+	updateInterval = 10
+
 	ImageXHostCn = "imagex.bytedanceapi.com"
 	ImageXHostVa = "imagex.us-east-1.bytedanceapi.com"
 	ImageXHostSg = "imagex.ap-singapore-1.bytedanceapi.com"
 
-	ImageXTimeout     = 5 * time.Second
-	ImageXServiceName = "ImageX"
-	ImageXApiVersion  = "2018-08-01"
+	ImageXTimeout              = 5 * time.Second
+	ImageXServiceName          = "ImageX"
+	ImageXApiVersion           = "2018-08-01"
+	ImageXDomainWeightsVersion = "2019-07-01"
 )
 
 type ImageXClient struct {
 	*base.Client
+	DomainCache map[string]map[string]int
+	Lock        sync.RWMutex
 }
 
 func NewInstance() *ImageXClient {
 	instance := &ImageXClient{
-		Client: base.NewClient(ServiceInfoMap[base.RegionCnNorth1], ApiInfoList),
+		DomainCache: make(map[string]map[string]int),
+		Client:      base.NewClient(ServiceInfoMap[base.RegionCnNorth1], ApiInfoList),
 	}
 	return instance
 }
@@ -36,7 +43,8 @@ func NewInstanceWithRegion(region string) *ImageXClient {
 		panic(fmt.Errorf("can't find region %s, please check it carefully", region))
 	}
 	instance := &ImageXClient{
-		Client: base.NewClient(serviceInfo, ApiInfoList),
+		DomainCache: make(map[string]map[string]int),
+		Client:      base.NewClient(serviceInfo, ApiInfoList),
 	}
 	return instance
 }
@@ -104,6 +112,15 @@ var (
 			Query: url.Values{
 				"Action":  []string{"GetImageTemplateConf"},
 				"Version": []string{ImageXApiVersion},
+			},
+		},
+		//域名调度相关
+		"GetCdnDomainWeights": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"GetCdnDomainWeights"},
+				"Version": []string{ImageXDomainWeightsVersion},
 			},
 		},
 	}
