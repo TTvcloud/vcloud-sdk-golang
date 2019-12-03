@@ -517,7 +517,7 @@ func (p *Vod) GetPosterUrl(spaceName string, uri string, fallbackWeights map[str
 	}, nil
 }
 
-func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) (*base.SecurityToken2, error) {
+func (p *Vod) GetVideoPlayAuthWithExpiredTime(vidList, streamTypeList, watermarkList []string, expiredTime time.Duration) (*base.SecurityToken2, error) {
 	inlinePolicy := new(base.Policy)
 	actions := []string{"vod:GetPlayInfo"}
 	resources := make([]string, 0)
@@ -552,5 +552,9 @@ func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) 
 	statement := base.NewAllowStatement(actions, resources)
 	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
 
-	return p.SignSts2(inlinePolicy, time.Hour)
+	return p.SignSts2(inlinePolicy, expiredTime)
+}
+
+func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) (*base.SecurityToken2, error) {
+	return p.GetVideoPlayAuthWithExpiredTime(vidList, streamTypeList, watermarkList, time.Hour)
 }
