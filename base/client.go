@@ -128,7 +128,10 @@ func (client *Client) SignSts2(inlinePolicy *Policy, expire time.Duration) (*Sec
 	if expire < time.Minute {
 		expire = time.Minute
 	}
-	expireTime := time.Now().Add(expire)
+
+	now := time.Now()
+	expireTime := now.Add(expire)
+	sts.CurrentTime = now.Format(time.RFC3339)
 	sts.ExpiredTime = expireTime.Format(time.RFC3339)
 
 	innerToken, err := createInnerToken(client.ServiceInfo.Credentials, sts, inlinePolicy, expireTime.Unix())

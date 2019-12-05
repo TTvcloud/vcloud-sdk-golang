@@ -94,6 +94,7 @@ type SecurityToken2 struct {
 	SecretAccessKey string
 	SessionToken    string
 	ExpiredTime     string
+	CurrentTime     string
 }
 
 type InnerToken struct {
