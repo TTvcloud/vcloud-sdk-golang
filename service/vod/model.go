@@ -243,8 +243,9 @@ type CommitUploadResp struct {
 }
 
 type CommitUploadResult struct {
-	RequestId string
-	Results   []UploadResult
+	RequestId    string
+	CallbackArgs string
+	Results      []UploadResult
 }
 
 type UploadResult struct {

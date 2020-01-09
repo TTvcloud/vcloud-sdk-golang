@@ -270,7 +270,15 @@ func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileT
 	return oid, nil
 }
 
+func (p *Vod) UploadVideoWithCallbackArgs(fileBytes []byte, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
+	return p.UploadVideoInner(fileBytes, spaceName, fileType, callbackArgs, funcs...)
+}
+
 func (p *Vod) UploadVideo(fileBytes []byte, spaceName string, fileType FileType, funcs ...Function) (*CommitUploadResp, error) {
+	return p.UploadVideoInner(fileBytes, spaceName, fileType, "", funcs...)
+}
+
+func (p *Vod) UploadVideoInner(fileBytes []byte, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
 	_, sessionKey, err := p.Upload(fileBytes, spaceName, fileType)
 	if err != nil {
 		return nil, err
@@ -279,7 +287,7 @@ func (p *Vod) UploadVideo(fileBytes []byte, spaceName string, fileType FileType,
 	param := CommitUploadParam{
 		SpaceName: spaceName,
 		Body: CommitUploadBody{
-			CallbackArgs: "",
+			CallbackArgs: callbackArgs,
 			SessionKey:   sessionKey,
 			Functions:    funcs,
 		},
