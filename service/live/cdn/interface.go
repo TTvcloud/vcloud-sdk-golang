@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"code.byted.org/gopkg/logs"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/live/cdn/ali"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/live/cdn/byte"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/live/cdn/fcdn"
@@ -54,6 +53,6 @@ func Init() map[string]CDNInterface {
 	registerCdnInstance(mapCdn, CDN_FCDN, &fcdn.CdnHandler{})
 	registerCdnInstance(mapCdn, CDN_BYTE, &byte.CdnHandler{})
 	registerCdnInstance(mapCdn, CDN_FWS, &fws.CdnHandler{})
-	logs.Info("init cdn handlers finished")
+	_, _ = fmt.Fprintf(os.Stdout, "init cdn handlers finished")
 	return mapCdn
 }

@@ -2,12 +2,9 @@ package fws
 
 import (
 	"fmt"
-
-	"code.byted.org/videoarch/common/cdn/base"
 )
 
 type CdnHandler struct {
-	base.CdnBaseInfo
 }
 
 func (c *CdnHandler) GenPullFlvUrl(domain string, appName string, stream string, suffix string) (url string) {
