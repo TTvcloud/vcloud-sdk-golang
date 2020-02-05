@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
+
 	"github.com/pkg/errors"
 )
 
@@ -91,8 +93,13 @@ func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (respons
 			if fallbackErr != nil {
 				return
 			}
-			fallbackResp.ResponseMetadata = response.ResponseMetadata
-			fallbackResp.ResponseMetadata.Error = nil
+
+			fallbackResp.ResponseMetadata = &base.ResponseMetadata{
+				Service: "live",
+				Version: "2019-10-01",
+				Action:  "MGetStreamsPlayInfo",
+				Error:   nil,
+			}
 			response = fallbackResp
 			return
 		}
@@ -230,6 +237,29 @@ func (l *Live) GetStreamTimeShiftInfo(request *GetStreamTimeShiftInfoRequest) (*
 	}
 
 	resp := &GetStreamTimeShiftInfoResponse{}
+	if err := json.Unmarshal(respBody, resp); err != nil {
+		return nil, err
+	} else {
+		resp.ResponseMetadata.Service = "live"
+		return resp, nil
+	}
+}
+
+func (l *Live) CloseStream(request *CloseStreamRequest) (*CloseStreamResponse, error) {
+	bts, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+
+	respBody, status, err := l.Json("CloseStream", nil, string(bts))
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
+	}
+
+	resp := &CloseStreamResponse{}
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, err
 	} else {

@@ -113,7 +113,6 @@ func (s *StreamInfo) deserializeStreamInfo() *StreamBase {
 }
 
 func (l *Live) deserializeElePlayInfo(params *deserializePlayParams) []*ElePlayInfo {
-
 	if params.scheduleResult == nil {
 		return nil
 	}
@@ -184,11 +183,11 @@ func (l *Live) genElePlayURL(params *genElePlayParams) (*ElePlayInfo, error) {
 		switch playType {
 		case "rtmp":
 			domain = params.Cdn.PlayRtmpDomain
-			playUrl.RtmpUrl = replaceSchema(cdnInstance.GenPullRtmpUrl(domain, app, stream, suffix), enableSSL)
+			playUrl.RtmpUrl = formatSchema(cdnInstance.GenPullRtmpUrl(domain, app, stream, suffix), enableSSL)
 
 		case "hls":
 			domain = params.Cdn.PlayHlsDomain
-			playUrl.HlsUrl = replaceSchema(cdnInstance.GenPullHlsUrl(domain, app, stream, suffix), enableSSL)
+			playUrl.HlsUrl = formatSchema(cdnInstance.GenPullHlsUrl(domain, app, stream, suffix), enableSSL)
 
 		case "flv":
 			domain = params.Cdn.PlayFlvDomain
@@ -196,15 +195,15 @@ func (l *Live) genElePlayURL(params *genElePlayParams) (*ElePlayInfo, error) {
 				domain = params.Cdn.AdminFlvDomain
 				enableSSL = true
 			}
-			playUrl.FlvUrl = replaceSchema(cdnInstance.GenPullFlvUrl(domain, app, stream, suffix), enableSSL)
+			playUrl.FlvUrl = formatSchema(cdnInstance.GenPullFlvUrl(domain, app, stream, suffix), enableSSL)
 
 		case "cmaf":
 			domain = params.Cdn.PlayCmafDomain
-			playUrl.CmafUrl = replaceSchema(cdnInstance.GenPullCmafUrl(domain, app, stream, suffix), enableSSL)
+			playUrl.CmafUrl = formatSchema(cdnInstance.GenPullCmafUrl(domain, app, stream, suffix), enableSSL)
 
 		case "dash":
 			domain = params.Cdn.PlayDashDomain
-			playUrl.DashUrl = replaceSchema(cdnInstance.GenPullDashUrl(domain, app, stream, suffix), enableSSL)
+			playUrl.DashUrl = formatSchema(cdnInstance.GenPullDashUrl(domain, app, stream, suffix), enableSSL)
 
 		default:
 			_, _ = fmt.Fprintf(os.Stdout, "unsupported play type: %v", playType)
@@ -228,7 +227,7 @@ func isURLsEmpty(urls *PlayUrlInfo) bool {
 	return false
 }
 
-func replaceSchema(fullUrl string, enableSSL bool) string {
+func formatSchema(fullUrl string, enableSSL bool) string {
 	parsedURL, err := url.Parse(fullUrl)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stdout, "parse url failed: err=%v", err.Error())

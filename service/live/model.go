@@ -343,3 +343,29 @@ type genElePlayParams struct {
 
 	enableSSL bool
 }
+
+// closeStream
+type CloseStreamRequest struct {
+	Stream       string
+	AccountID    int64
+	CreateVod    *CreateVodInfo
+	ForbidAction EForbidAction
+}
+
+type CreateVodInfo struct {
+	StartTimeSecond int64
+	EndTimeSecond   int64
+}
+
+type EForbidAction int64
+
+const (
+	EForbidAction_Omit  EForbidAction = -1
+	EForbidAction_Fobid EForbidAction = 0
+	EForbidAction_Allow EForbidAction = 1
+	EForbidAction_Stop  EForbidAction = 2
+)
+
+type CloseStreamResponse struct {
+	ResponseMetadata *base.ResponseMetadata
+}
