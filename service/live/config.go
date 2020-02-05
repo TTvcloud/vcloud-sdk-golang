@@ -11,15 +11,15 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/service/live/cdn"
 )
 
-const (
-	UPDATE_INTERVAL_SECOND = 300
-)
-
 type Live struct {
 	*base.Client
 	allAppInfosCache
 	cdnMap map[string]cdn.CDNInterface
 }
+
+const (
+	UPDATE_INTERVAL = 300 * time.Second
+)
 
 const (
 	playTypeRtmp = "rtmp"
@@ -57,9 +57,7 @@ func NewInstance() (*Live, error) {
 		},
 		cdnMap: cdn.Init(),
 	}
-	instance.lastCredentials = instance.Client.ServiceInfo.Credentials
 
-	instance.mustUpdateAllAppInfosCache()
 	go instance.autoFlush()
 	return instance, nil
 }
@@ -78,9 +76,7 @@ func NewInstanceWithRegion(region string) (*Live, error) {
 		},
 		cdnMap: cdn.Init(),
 	}
-	instance.lastCredentials = instance.Client.ServiceInfo.Credentials
 
-	instance.mustUpdateAllAppInfosCache()
 	go instance.autoFlush()
 	return instance, nil
 }
@@ -192,6 +188,14 @@ var (
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"GetDesensitizedAllAppInfos"},
+				"Version": []string{"2019-10-01"},
+			},
+		},
+		"CloseStream": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"CloseStream"},
 				"Version": []string{"2019-10-01"},
 			},
 		},

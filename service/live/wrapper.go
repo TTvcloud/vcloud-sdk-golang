@@ -84,10 +84,16 @@ func (l *Live) MGetStreamsPushInfo(request *MGetStreamsPushInfoRequest) (*MGetSt
 	return &MGetStreamsPushInfoResp{Result: pushInfos, ResponseMetadata: resp.ResponseMetadata}, nil
 }
 
-func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (response *MGetStreamsPlayInfoResp, respErr error) {
+func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (response *MGetStreamsPlayInfoResp, err error) {
 	defer func() {
-		if respErr != nil && !request.IsCustomizedStream {
-			response, respErr = l.MGetStreamsFallbackPlayInfo(request)
+		if err != nil && !request.IsCustomizedStream {
+			fallbackResp, fallbackErr := l.mMGetStreamsFallbackPlayInfo(request)
+			if fallbackErr != nil {
+				return
+			}
+			fallbackResp.ResponseMetadata = response.ResponseMetadata
+			fallbackResp.ResponseMetadata.Error = nil
+			response = fallbackResp
 			return
 		}
 	}()

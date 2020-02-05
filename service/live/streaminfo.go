@@ -39,8 +39,9 @@ func (l *Live) getStreamFallbackInfo(stream string) (*StreamInfo, error) {
 	}
 
 	return &StreamInfo{
+		Status:           EStreamStatus_Unknown,
 		Resolutions:      appInfo.Resolutions,
-		PlayTypes:        l.concatPlayTypes(appInfo),
+		PlayTypes:        concatPlayTypes(appInfo),
 		PushMainCdnappId: pushID,
 		LiveId:           stream,
 		Appid:            appInfo.Id,

@@ -6,52 +6,24 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
 type allAppInfosCache struct {
-	lastCredentials base.Credentials
-	count           int
-
 	data *sync.Map
 }
 
 func (l *Live) autoFlush() {
-	for range time.Tick(time.Second) {
-		l.count = (l.count + 1) % UPDATE_INTERVAL_SECOND
-		switch {
-		case l.count == 0:
-			if err := l.updateAllAppInfosCache(); err != nil {
-				_, _ = fmt.Fprintf(os.Stdout, err.Error())
-				l.count--
-				continue
-			}
+	for l.ServiceInfo.Credentials.SecretAccessKey == "" || l.ServiceInfo.Credentials.AccessKeyID == "" {
+	}
 
-		case !l.isLatestCredentials():
-			if err := l.updateAllAppInfosCache(); err != nil {
-				_, _ = fmt.Fprintf(os.Stdout, err.Error())
-				continue
-			}
-			l.setLatestCredentials()
+	for range time.Tick(UPDATE_INTERVAL) {
+		if err := l.updateAllAppInfosCache(); err != nil {
+			_, _ = fmt.Fprintf(os.Stdout, err.Error())
 		}
 	}
 }
 
-func (l *Live) isLatestCredentials() bool {
-	return l.ServiceInfo.Credentials == l.lastCredentials
-}
-
-func (l *Live) setLatestCredentials() {
-	l.lastCredentials = l.ServiceInfo.Credentials
-}
-
 func (l *Live) updateAllAppInfosCache() error {
-	credentials := l.ServiceInfo.Credentials
-	if credentials.AccessKeyID == "" || credentials.SecretAccessKey == "" {
-		return fmt.Errorf("please set credientials' ak sk before use it")
-	}
-
 	result, err := l.GetAllAppInfos()
 	if err != nil || result.ResponseMetadata.Error != nil {
 		return fmt.Errorf("update appinfocache failed, err=%v, resp=%v\n",
@@ -59,23 +31,17 @@ func (l *Live) updateAllAppInfosCache() error {
 	}
 
 	for pushID := range result.Result.Push2AppInfo {
-		l.data.Store(l.genPush2AppInfoKey(pushID), result.Result.Push2AppInfo[pushID])
+		l.data.Store(genPush2AppInfoKey(pushID), result.Result.Push2AppInfo[pushID])
 	}
 
 	for pushID := range result.Result.Push2AllPlayInfos {
-		l.data.Store(l.genPush2AllPlayInfosKey(pushID), result.Result.Push2AllPlayInfos[pushID])
+		l.data.Store(genPush2AllPlayInfosKey(pushID), result.Result.Push2AllPlayInfos[pushID])
 	}
 	return nil
 }
 
-func (l *Live) mustUpdateAllAppInfosCache() {
-	if err := l.updateAllAppInfosCache(); err != nil {
-		panic(err)
-	}
-}
-
 func (l *Live) getAppInfo(pushID int64) (*DesensitizedAppInfo, bool) {
-	app, ok := l.data.Load(l.genPush2AppInfoKey(pushID))
+	app, ok := l.data.Load(genPush2AppInfoKey(pushID))
 	if !ok {
 		return nil, false
 	}
@@ -84,7 +50,7 @@ func (l *Live) getAppInfo(pushID int64) (*DesensitizedAppInfo, bool) {
 }
 
 func (l *Live) getAllPlayInfos(pushID int64) (map[int64]*DesensitizedAllPlayCdnAppInfo, bool) {
-	playInfos, ok := l.data.Load(l.genPush2AllPlayInfosKey(pushID))
+	playInfos, ok := l.data.Load(genPush2AllPlayInfosKey(pushID))
 	if !ok {
 		return nil, false
 	}
@@ -92,15 +58,15 @@ func (l *Live) getAllPlayInfos(pushID int64) (map[int64]*DesensitizedAllPlayCdnA
 	return playInfos.(map[int64]*DesensitizedAllPlayCdnAppInfo), true
 }
 
-func (l *Live) genPush2AppInfoKey(pushID int64) string {
+func genPush2AppInfoKey(pushID int64) string {
 	return fmt.Sprintf("push2App-%v", pushID)
 }
 
-func (l *Live) genPush2AllPlayInfosKey(pushID int64) string {
+func genPush2AllPlayInfosKey(pushID int64) string {
 	return fmt.Sprintf("push2Play-%v", pushID)
 }
 
-func (l *Live) concatPlayTypes(appInfo *DesensitizedAppInfo) string {
+func concatPlayTypes(appInfo *DesensitizedAppInfo) string {
 	if appInfo == nil {
 		return ""
 	}

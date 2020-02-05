@@ -26,7 +26,7 @@ func (l *Live) scheduleByWeight(streamInfos map[string]*StreamInfo) (
 			continue
 		}
 
-		main, err := l.scheduleStreamByWeight(streamInfo, playCdnAppInfos)
+		main, err := scheduleStreamByWeight(playCdnAppInfos)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stdout, "schedule main for stream: %v err: %v", stream, err.Error())
 			continue
@@ -43,7 +43,7 @@ func (l *Live) scheduleByWeight(streamInfos map[string]*StreamInfo) (
 	return result, nil
 }
 
-func (l *Live) scheduleStreamByWeight(streamInfo *StreamInfo, playCdnAppInfos map[int64]*DesensitizedAllPlayCdnAppInfo) (*ScheduleElePlayResult, error) {
+func scheduleStreamByWeight(playCdnAppInfos map[int64]*DesensitizedAllPlayCdnAppInfo) (*scheduleElePlayResult, error) {
 
 	if len(playCdnAppInfos) == 0 {
 		return nil, errors.New("empty playCdnAppInfos")

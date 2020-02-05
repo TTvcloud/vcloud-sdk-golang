@@ -118,10 +118,10 @@ type StreamBase struct {
 	Status     EStreamStatus
 	Extra      string
 	CreateTime int64
-	LiveID     int32
 }
 
 type StreamInfo struct {
+	Status           EStreamStatus
 	Resolutions      string
 	PlayTypes        string
 	PushMainCdnappId int64
@@ -134,9 +134,10 @@ type StreamInfo struct {
 type EStreamStatus int64
 
 const (
-	EStreamStatus_Create EStreamStatus = 0
-	EStreamStatus_Living EStreamStatus = 1
-	EStreamStatus_Stoped EStreamStatus = 8
+	EStreamStatus_Unknown EStreamStatus = -1
+	EStreamStatus_Create  EStreamStatus = 0
+	EStreamStatus_Living  EStreamStatus = 1
+	EStreamStatus_Stoped  EStreamStatus = 8
 )
 
 type ElePushInfo struct {
