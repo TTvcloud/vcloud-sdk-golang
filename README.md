@@ -75,12 +75,19 @@ PS: 上述两个接口和 [GetRedirectPlay](https://open.bytedance.com/docs/4/92
 
 #### 直播相关
 [CreateStream](https://vcloud.bytedance.net/docs/3171/151/)
+
 [MGetStreamsPushInfo](https://vcloud.bytedance.net/docs/3171/184/)
+
 [MGetStreamsPlayInfo](https://vcloud.bytedance.net/docs/3171/185/)
+
 [GetVODs](https://vcloud.bytedance.net/docs/3171/27991/)
+
 [GetRecords](https://vcloud.bytedance.net/docs/3171/27990/)
+
 [GetSnapshots](https://vcloud.bytedance.net/docs/3171/27989/)
+
 [GetOnlineUserNum](https://vcloud.bytedance.net/docs/3171/28269/)
+
 [GetStreamTimeShiftInfo](https://vcloud.bytedance.net/docs/3171/27992/)
 
 #### 更多示例参见
