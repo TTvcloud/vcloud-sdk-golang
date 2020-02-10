@@ -62,16 +62,10 @@ type DesensitizedTemplateInfo struct {
 
 // CreateStream
 type CreateStreamRequest struct {
-	AppID  int32  `json:"AppID" binding:"required"`
-	Stream string `json:"Stream"`
-	Extra  string `json:"Extra"`
-	RefId  string `json:"RefId"`
-
-	IsProtected bool  `json:"IsProtected"`
-	DelayTime   int64 `json:"DelayTime"`
-	// bind info
-	BindPushAppID int64  `json:"BindPushAppID"`
-	BindCDN       string `json:"BindCDN"`
+	AppID     int32
+	Stream    string
+	Extra     string
+	DelayTime int64
 }
 
 type CreateStreamResponse struct {
@@ -344,28 +338,13 @@ type genElePlayParams struct {
 	enableSSL bool
 }
 
-// closeStream
-type CloseStreamRequest struct {
-	Stream       string
-	AccountID    int64
-	CreateVod    *CreateVodInfo
-	ForbidAction EForbidAction
+// ForbidStream
+type ForbidStreamRequest struct {
+	AppID          int64
+	Stream         string
+	ForbidInterval int64
 }
 
-type CreateVodInfo struct {
-	StartTimeSecond int64
-	EndTimeSecond   int64
-}
-
-type EForbidAction int64
-
-const (
-	EForbidAction_Omit  EForbidAction = -1
-	EForbidAction_Fobid EForbidAction = 0
-	EForbidAction_Allow EForbidAction = 1
-	EForbidAction_Stop  EForbidAction = 2
-)
-
-type CloseStreamResponse struct {
+type ForbidStreamResponse struct {
 	ResponseMetadata *base.ResponseMetadata
 }

@@ -20,7 +20,7 @@ func (l *Live) scheduleByWeight(streamInfos map[string]*StreamInfo) (
 			streamInfo: streamInfo,
 		}
 
-		playCdnAppInfos, ok := l.getAllPlayInfos(streamInfo.PushMainCdnappId)
+		playCdnAppInfos, ok := l.getAllPlayInfosByPushID(streamInfo.PushMainCdnappId)
 		if !ok {
 			_, _ = fmt.Fprintf(os.Stdout, "get play cdn app info failed, pushID=%v", streamInfo.PushMainCdnappId)
 			continue

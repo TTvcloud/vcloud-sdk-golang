@@ -42,7 +42,7 @@ func registerCdnInstance(mapCdn map[string]CDNInterface, cdnName string, CI CDNI
 	}
 
 	mapCdn[cdnName] = CI
-	_, _ = fmt.Fprintf(os.Stdout, "Register Cdn: "+cdnName)
+	_, _ = fmt.Fprintf(os.Stdout, "[vcloud-live] Register Cdn: %v \n", cdnName)
 }
 
 func Init() map[string]CDNInterface {
@@ -53,6 +53,6 @@ func Init() map[string]CDNInterface {
 	registerCdnInstance(mapCdn, CDN_FCDN, &fcdn.CdnHandler{})
 	registerCdnInstance(mapCdn, CDN_BYTE, &byte.CdnHandler{})
 	registerCdnInstance(mapCdn, CDN_FWS, &fws.CdnHandler{})
-	_, _ = fmt.Fprintf(os.Stdout, "init cdn handlers finished")
+	_, _ = fmt.Fprintf(os.Stdout, "[vcloud-live] init cdn handlers finished\n")
 	return mapCdn
 }

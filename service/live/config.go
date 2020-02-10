@@ -49,7 +49,7 @@ const (
 	HTTPS HTTPEnum = "https"
 )
 
-func NewInstance() (*Live, error) {
+func NewInstance() *Live {
 	instance := &Live{
 		Client: base.NewClient(ServiceInfoMap[base.RegionCnNorth1], ApiInfoList),
 		allAppInfosCache: allAppInfosCache{
@@ -59,10 +59,10 @@ func NewInstance() (*Live, error) {
 	}
 
 	go instance.autoFlush()
-	return instance, nil
+	return instance
 }
 
-func NewInstanceWithRegion(region string) (*Live, error) {
+func NewInstanceWithRegion(region string) *Live {
 	var serviceInfo *base.ServiceInfo
 	var ok bool
 	if serviceInfo, ok = ServiceInfoMap[region]; !ok {
@@ -78,7 +78,7 @@ func NewInstanceWithRegion(region string) (*Live, error) {
 	}
 
 	go instance.autoFlush()
-	return instance, nil
+	return instance
 }
 
 var (
@@ -191,11 +191,11 @@ var (
 				"Version": []string{"2019-10-01"},
 			},
 		},
-		"CloseStream": {
+		"ForbidStream": {
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"CloseStream"},
+				"Action":  []string{"ForbidStream"},
 				"Version": []string{"2019-10-01"},
 			},
 		},

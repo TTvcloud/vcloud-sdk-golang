@@ -5,15 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
-
-	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/pkg/errors"
 )
 
-func (l *Live) GetAllAppInfos() (*GetDesensitizedAllAppInfosResp, error) {
-	respBody, status, err := l.Query("GetAllAppInfos", nil)
+func (l *Live) GetDesensitizedAllAppInfos() (*GetDesensitizedAllAppInfosResp, error) {
+	respBody, status, err := l.Query("GetDesensitizedAllAppInfos", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -91,16 +90,16 @@ func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (respons
 		if err != nil && !request.IsCustomizedStream {
 			fallbackResp, fallbackErr := l.mMGetStreamsFallbackPlayInfo(request)
 			if fallbackErr != nil {
+				_, _ = fmt.Fprintf(os.Stdout, "[vcloud-live] mget stream fall back play info failed, err=%v", fallbackErr.Error())
 				return
 			}
-
-			fallbackResp.ResponseMetadata = &base.ResponseMetadata{
-				Service: "live",
-				Version: "2019-10-01",
-				Action:  "MGetStreamsPlayInfo",
-				Error:   nil,
+			fallbackResp.ResponseMetadata = response.ResponseMetadata
+			if fallbackResp.ResponseMetadata != nil {
+				fallbackResp.ResponseMetadata.Error = nil
 			}
+
 			response = fallbackResp
+			err = nil
 			return
 		}
 	}()
@@ -125,7 +124,7 @@ func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (respons
 	}
 
 	if resp.Result == nil {
-		return &MGetStreamsPlayInfoResp{ResponseMetadata: resp.ResponseMetadata}, nil
+		return &MGetStreamsPlayInfoResp{ResponseMetadata: resp.ResponseMetadata}, errors.New("[vcloud-live] empty result")
 	}
 	playInfos := map[string]*PlayInfo{}
 	err = json.Unmarshal(resp.Result.PlayInfos, &playInfos)
@@ -245,13 +244,13 @@ func (l *Live) GetStreamTimeShiftInfo(request *GetStreamTimeShiftInfoRequest) (*
 	}
 }
 
-func (l *Live) CloseStream(request *CloseStreamRequest) (*CloseStreamResponse, error) {
+func (l *Live) ForbidStream(request *ForbidStreamRequest) (*ForbidStreamResponse, error) {
 	bts, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
 
-	respBody, status, err := l.Json("CloseStream", nil, string(bts))
+	respBody, status, err := l.Json("ForbidStream", nil, string(bts))
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +258,7 @@ func (l *Live) CloseStream(request *CloseStreamRequest) (*CloseStreamResponse, e
 		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
 	}
 
-	resp := &CloseStreamResponse{}
+	resp := &ForbidStreamResponse{}
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, err
 	} else {

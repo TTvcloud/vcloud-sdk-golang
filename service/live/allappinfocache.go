@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/matryer/try"
 )
 
 type allAppInfosCache struct {
@@ -13,25 +15,37 @@ type allAppInfosCache struct {
 }
 
 func (l *Live) autoFlush() {
+	// waiting for setting ak sk
 	for l.ServiceInfo.Credentials.SecretAccessKey == "" || l.ServiceInfo.Credentials.AccessKeyID == "" {
 	}
 
-	for range time.Tick(UPDATE_INTERVAL) {
-		if err := l.updateAllAppInfosCache(); err != nil {
+	for {
+		err := try.Do(func(attempt int) (retry bool, err error) {
+			err = l.updateAllAppInfosCache()
+			return attempt < 3, err
+		})
+		if err != nil {
 			_, _ = fmt.Fprintf(os.Stdout, err.Error())
+			continue
 		}
+
+		_, _ = fmt.Fprintf(os.Stdout, "[vcloud-live] load all app info cache finished\n")
+		time.Sleep(UPDATE_INTERVAL)
 	}
 }
 
 func (l *Live) updateAllAppInfosCache() error {
-	result, err := l.GetAllAppInfos()
+	result, err := l.GetDesensitizedAllAppInfos()
 	if err != nil || result.ResponseMetadata.Error != nil {
 		return fmt.Errorf("update appinfocache failed, err=%v, resp=%v\n",
 			err, result)
 	}
 
 	for pushID := range result.Result.Push2AppInfo {
-		l.data.Store(genPush2AppInfoKey(pushID), result.Result.Push2AppInfo[pushID])
+		appInfo := result.Result.Push2AppInfo[pushID]
+
+		l.data.Store(genAppInfoKey(appInfo.Id), appInfo)
+		l.data.Store(genPush2AppInfoKey(pushID), appInfo)
 	}
 
 	for pushID := range result.Result.Push2AllPlayInfos {
@@ -40,7 +54,7 @@ func (l *Live) updateAllAppInfosCache() error {
 	return nil
 }
 
-func (l *Live) getAppInfo(pushID int64) (*DesensitizedAppInfo, bool) {
+func (l *Live) getAppInfoByPushID(pushID int64) (*DesensitizedAppInfo, bool) {
 	app, ok := l.data.Load(genPush2AppInfoKey(pushID))
 	if !ok {
 		return nil, false
@@ -49,7 +63,7 @@ func (l *Live) getAppInfo(pushID int64) (*DesensitizedAppInfo, bool) {
 	return app.(*DesensitizedAppInfo), true
 }
 
-func (l *Live) getAllPlayInfos(pushID int64) (map[int64]*DesensitizedAllPlayCdnAppInfo, bool) {
+func (l *Live) getAllPlayInfosByPushID(pushID int64) (map[int64]*DesensitizedAllPlayCdnAppInfo, bool) {
 	playInfos, ok := l.data.Load(genPush2AllPlayInfosKey(pushID))
 	if !ok {
 		return nil, false
@@ -64,6 +78,10 @@ func genPush2AppInfoKey(pushID int64) string {
 
 func genPush2AllPlayInfosKey(pushID int64) string {
 	return fmt.Sprintf("push2Play-%v", pushID)
+}
+
+func genAppInfoKey(appID int64) string {
+	return fmt.Sprintf("app-%v", appID)
 }
 
 func concatPlayTypes(appInfo *DesensitizedAppInfo) string {

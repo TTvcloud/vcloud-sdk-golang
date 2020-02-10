@@ -33,7 +33,7 @@ func (l *Live) getStreamFallbackInfo(stream string) (*StreamInfo, error) {
 		return nil, fmt.Errorf("parse steam id failed, err=%v", err.Error())
 	}
 
-	appInfo, ok := l.getAppInfo(pushID)
+	appInfo, ok := l.getAppInfoByPushID(pushID)
 	if !ok {
 		return nil, fmt.Errorf("not found app info")
 	}
