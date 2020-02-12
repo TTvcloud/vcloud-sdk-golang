@@ -10,6 +10,9 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
+
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
 // ApplyImageUpload 获取图片上传地址
@@ -174,4 +177,29 @@ func (c *ImageXClient) GetUploadAuthToken(query url.Values) (string, error) {
 		return "", err
 	}
 	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+func (c *ImageXClient) GetUploadAuth(serviceIds []string) (*base.SecurityToken2, error) {
+	return c.GetUploadAuthWithExpire(serviceIds, time.Hour)
+}
+
+func (c *ImageXClient) GetUploadAuthWithExpire(serviceIds []string, expire time.Duration) (*base.SecurityToken2, error) {
+	inlinePolicy := new(base.Policy)
+	actions := []string{
+		"ImageX:ApplyImageUpload",
+		"ImageX:CommitImageUpload",
+	}
+
+	resources := make([]string, 0)
+	if len(serviceIds) == 0 {
+		resources = append(resources, fmt.Sprintf(ResourceServiceIdTRN, "*"))
+	} else {
+		for _, sid := range serviceIds {
+			resources = append(resources, fmt.Sprintf(ResourceServiceIdTRN, sid))
+		}
+	}
+
+	statement := base.NewAllowStatement(actions, resources)
+	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
+	return c.SignSts2(inlinePolicy, expire)
 }

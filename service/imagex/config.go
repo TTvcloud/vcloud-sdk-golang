@@ -21,6 +21,8 @@ const (
 	ImageXServiceName          = "ImageX"
 	ImageXApiVersion           = "2018-08-01"
 	ImageXDomainWeightsVersion = "2019-07-01"
+
+	ResourceServiceIdTRN = "trn:ImageX:*:*:ServiceId/%s"
 )
 
 type ImageXClient struct {
