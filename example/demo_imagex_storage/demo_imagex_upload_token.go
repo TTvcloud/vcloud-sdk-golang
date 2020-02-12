@@ -2,15 +2,14 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
+	"net/url"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/imagex"
 )
 
 /*
- * upload local images
+ * get image upload token
  */
 func main() {
 	// default region cn-north-1, for other region, call imagex.NewInstanceWithRegion(region)
@@ -26,21 +25,16 @@ func main() {
 	//instance.SetAccessKey("")
 	//instance.SetSecretKey("")
 
-	params := &imagex.ApplyUploadImageParam{
-		ServiceId: "your service id",
-	}
+	query := url.Values{}
+	query.Set("ServiceId", "your service id")
+	// set expire time of the upload token, default is 15min(900),
+	// set only if you know the params' meaning exactly.
+	query.Set("X-Amz-Expires", "60")
 
-	filePath := "your file path"
-	dat, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		fmt.Printf("read file from %s error %v", filePath, err)
-		os.Exit(-1)
-	}
-
-	resp, err := instance.UploadImages(params, [][]byte{dat})
+	token, err := instance.GetUploadAuthToken(query)
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {
-		fmt.Printf("success %+v", resp)
+		fmt.Printf("token %s", token)
 	}
 }

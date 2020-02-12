@@ -88,19 +88,19 @@ var (
 
 	ApiInfoList = map[string]*base.ApiInfo{
 		// 资源管理相关
-		"ApplyUploadImageFile": {
+		"ApplyImageUpload": {
 			Method: http.MethodGet,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"ApplyUploadImageFile"},
+				"Action":  []string{"ApplyImageUpload"},
 				"Version": []string{ImageXApiVersion},
 			},
 		},
-		"CommitUploadImageFile": {
+		"CommitImageUpload": {
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"CommitUploadImageFile"},
+				"Action":  []string{"CommitImageUpload"},
 				"Version": []string{ImageXApiVersion},
 			},
 		},
