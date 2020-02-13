@@ -2,6 +2,7 @@ package imagex
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"hash/crc32"
@@ -9,16 +10,18 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
+	"time"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
-// ApplyUploadImageFile 获取文件上传地址
+// ApplyImageUpload 获取图片上传地址
 func (c *ImageXClient) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUploadImageResult, error) {
 	query := url.Values{}
 	query.Add("ServiceId", params.ServiceId)
+	if params.SpaceName != "" {
+		query.Add("SpaceName", params.SpaceName)
+	}
 	if params.SessionKey != "" {
 		query.Add("SessionKey", params.SessionKey)
 	}
@@ -29,32 +32,38 @@ func (c *ImageXClient) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUp
 		query.Add("StoreKeys", key)
 	}
 
-	respBody, _, err := c.Query("ApplyUploadImageFile", query)
+	respBody, _, err := c.Query("ApplyImageUpload", query)
 	if err != nil {
-		return nil, fmt.Errorf("fail to request api ApplyUploadImageFile, %v", err)
+		return nil, fmt.Errorf("fail to request api ApplyImageUpload, %v", err)
 	}
 
-	result := new(ApplyUploadImageResult)
+	result := new(struct {
+		UploadAddress ApplyUploadImageResult `json:"UploadAddress"`
+		RequestId     string                 `json:"RequestId"`
+	})
 	if err := UnmarshalResultInto(respBody, result); err != nil {
 		return nil, err
 	}
-	return result, nil
+	result.UploadAddress.RequestId = result.RequestId
+	return &result.UploadAddress, nil
 }
 
-// CommitUploadImageFile 文件上传完成上报
+// CommitImageUpload 图片上传完成上报
 func (c *ImageXClient) CommitUploadImage(params *CommitUploadImageParam) (*CommitUploadImageResult, error) {
 	query := url.Values{}
 	query.Add("ServiceId", params.ServiceId)
-	query.Add("SessionKey", params.SessionKey)
+	if params.SpaceName != "" {
+		query.Add("SpaceName", params.SpaceName)
+	}
 
 	bts, err := json.Marshal(params)
 	if err != nil {
 		return nil, fmt.Errorf("fail to marshal request, %v", err)
 	}
 
-	respBody, _, err := c.Json("CommitUploadImageFile", query, string(bts))
+	respBody, _, err := c.Json("CommitImageUpload", query, string(bts))
 	if err != nil {
-		return nil, fmt.Errorf("fail to request api CommitUploadImageFile, %v", err)
+		return nil, fmt.Errorf("fail to request api CommitImageUpload, %v", err)
 	}
 
 	result := new(CommitUploadImageResult)
@@ -136,6 +145,7 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 	// 3. commit
 	commitParams := &CommitUploadImageParam{
 		ServiceId:  params.ServiceId,
+		SpaceName:  params.SpaceName,
 		SessionKey: applyResp.SessionKey,
 	}
 	commitResp, err := c.CommitUploadImage(commitParams)
@@ -145,11 +155,98 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 	return commitResp, nil
 }
 
+// 获取临时上传凭证
 func (c *ImageXClient) GetUploadAuthToken(query url.Values) (string, error) {
-	ins := vod.NewInstanceWithRegion(c.ServiceInfo.Credentials.Region)
-	ins.SetCredential(base.Credentials{
-		AccessKeyID:     c.ServiceInfo.Credentials.AccessKeyID,
-		SecretAccessKey: c.ServiceInfo.Credentials.SecretAccessKey,
-	})
-	return ins.GetUploadAuthToken(query)
+	ret := map[string]string{
+		"Version": "v1",
+	}
+
+	applyUploadToken, err := c.GetSignUrl("ApplyImageUpload", query)
+	if err != nil {
+		return "", err
+	}
+	ret["ApplyUploadToken"] = applyUploadToken
+
+	commitUploadToken, err := c.GetSignUrl("CommitImageUpload", query)
+	if err != nil {
+		return "", err
+	}
+	ret["CommitUploadToken"] = commitUploadToken
+
+	b, err := json.Marshal(ret)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+// 获取上传临时密钥
+func (c *ImageXClient) GetUploadAuth(serviceIds []string) (*base.SecurityToken2, error) {
+	return c.GetUploadAuthWithExpire(serviceIds, time.Hour)
+}
+
+func (c *ImageXClient) GetUploadAuthWithExpire(serviceIds []string, expire time.Duration) (*base.SecurityToken2, error) {
+	inlinePolicy := new(base.Policy)
+	actions := []string{
+		"ImageX:ApplyImageUpload",
+		"ImageX:CommitImageUpload",
+	}
+
+	resources := make([]string, 0)
+	if len(serviceIds) == 0 {
+		resources = append(resources, fmt.Sprintf(ResourceServiceIdTRN, "*"))
+	} else {
+		for _, sid := range serviceIds {
+			resources = append(resources, fmt.Sprintf(ResourceServiceIdTRN, sid))
+		}
+	}
+
+	statement := base.NewAllowStatement(actions, resources)
+	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
+	return c.SignSts2(inlinePolicy, expire)
+}
+
+func (c *ImageXClient) updateImageUrls(serviceId string, req *UpdateImageUrlPayload) ([]string, error) {
+	query := url.Values{}
+	query.Add("ServiceId", serviceId)
+
+	bts, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("fail to marshal request, %v", err)
+	}
+
+	respBody, _, err := c.Json("UpdateImageUploadFiles", query, string(bts))
+	if err != nil {
+		return nil, fmt.Errorf("fail to request api UpdateImageUploadFiles, %v", err)
+	}
+
+	result := new(UpdateImageUrlPayload)
+	if err := UnmarshalResultInto(respBody, result); err != nil {
+		return nil, err
+	}
+	return result.ImageUrls, nil
+}
+
+func (c *ImageXClient) RefreshImageUrls(serviceId string, urls []string) ([]string, error) {
+	req := &UpdateImageUrlPayload{
+		Action:    ActionRefresh,
+		ImageUrls: urls,
+	}
+	return c.updateImageUrls(serviceId, req)
+}
+
+func (c *ImageXClient) EnableImageUrls(serviceId string, urls []string) ([]string, error) {
+	req := &UpdateImageUrlPayload{
+		Action:    ActionEnable,
+		ImageUrls: urls,
+	}
+	return c.updateImageUrls(serviceId, req)
+}
+
+func (c *ImageXClient) DisableImageUrls(serviceId string, urls []string) ([]string, error) {
+	req := &UpdateImageUrlPayload{
+		Action:    ActionDisable,
+		ImageUrls: urls,
+	}
+	return c.updateImageUrls(serviceId, req)
 }

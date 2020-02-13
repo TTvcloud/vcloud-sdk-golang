@@ -2,15 +2,13 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/imagex"
 )
 
 /*
- * upload local images
+ * update image urls
  */
 func main() {
 	// default region cn-north-1, for other region, call imagex.NewInstanceWithRegion(region)
@@ -26,21 +24,13 @@ func main() {
 	//instance.SetAccessKey("")
 	//instance.SetSecretKey("")
 
-	params := &imagex.ApplyUploadImageParam{
-		ServiceId: "your service id",
-	}
+	serviceId := "your service id"
+	urls := []string{"image urls"}
 
-	filePath := "your file path"
-	dat, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		fmt.Printf("read file from %s error %v", filePath, err)
-		os.Exit(-1)
-	}
-
-	resp, err := instance.UploadImages(params, [][]byte{dat})
+	resp, err := instance.RefreshImageUrls(serviceId, urls)
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {
-		fmt.Printf("success %+v", resp)
+		fmt.Printf("success %v", resp)
 	}
 }

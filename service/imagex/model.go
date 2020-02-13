@@ -7,16 +7,23 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
-// ApplyUploadImageFile
+const (
+	ActionRefresh = 0
+	ActionDisable = 1
+	ActionEnable  = 2
+)
+
+// ApplyImageUpload
 type ApplyUploadImageParam struct {
 	ServiceId  string
+	SpaceName  string
 	SessionKey string
 	UploadNum  int
 	StoreKeys  []string
 }
 
 type ApplyUploadImageResult struct {
-	ServiceId   string      `json:"ServiceId"`
+	RequestId   string      `json:"RequestId"`
 	SessionKey  string      `json:"SessionKey"`
 	UploadHosts []string    `json:"UploadHosts"`
 	StoreInfos  []StoreInfo `json:"StoreInfos"`
@@ -27,10 +34,11 @@ type StoreInfo struct {
 	Auth     string `json:"Auth"`
 }
 
-// CommitUploadImageFile
+// CommitImageUpload
 type CommitUploadImageParam struct {
-	ServiceId   string
-	SessionKey  string
+	ServiceId   string       `json:"-"`
+	SpaceName   string       `json:"-"`
+	SessionKey  string       `json:"SessionKey"`
 	OptionInfos []OptionInfo `json:"OptionInfos"`
 }
 
@@ -40,8 +48,8 @@ type OptionInfo struct {
 }
 
 type CommitUploadImageResult struct {
-	ServiceId  string      `json:"ServiceId"`
-	ImageInfos []ImageInfo `json:"ImageInfos"`
+	RequestId  string      `json:"RequestId"`
+	ImageInfos []ImageInfo `json:"PluginResult"`
 }
 
 type ImageInfo struct {
@@ -50,6 +58,12 @@ type ImageInfo struct {
 	ImageWidth  int    `json:"ImageWidth"`
 	ImageHeight int    `json:"ImageHeight"`
 	ImageMd5    string `json:"ImageMd5"`
+}
+
+// UpdateImageUploadFiles
+type UpdateImageUrlPayload struct {
+	Action    int      `json:"Action"`
+	ImageUrls []string `json:"ImageUrls"`
 }
 
 // GetImageTemplateConf

@@ -21,6 +21,8 @@ const (
 	ImageXServiceName          = "ImageX"
 	ImageXApiVersion           = "2018-08-01"
 	ImageXDomainWeightsVersion = "2019-07-01"
+
+	ResourceServiceIdTRN = "trn:ImageX:*:*:ServiceId/%s"
 )
 
 type ImageXClient struct {
@@ -88,19 +90,27 @@ var (
 
 	ApiInfoList = map[string]*base.ApiInfo{
 		// 资源管理相关
-		"ApplyUploadImageFile": {
+		"ApplyImageUpload": {
 			Method: http.MethodGet,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"ApplyUploadImageFile"},
+				"Action":  []string{"ApplyImageUpload"},
 				"Version": []string{ImageXApiVersion},
 			},
 		},
-		"CommitUploadImageFile": {
+		"CommitImageUpload": {
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"CommitUploadImageFile"},
+				"Action":  []string{"CommitImageUpload"},
+				"Version": []string{ImageXApiVersion},
+			},
+		},
+		"UpdateImageUploadFiles": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"UpdateImageUploadFiles"},
 				"Version": []string{ImageXApiVersion},
 			},
 		},
