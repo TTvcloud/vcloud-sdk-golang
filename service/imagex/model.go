@@ -7,6 +7,12 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
+const (
+	ActionRefresh = 0
+	ActionDisable = 1
+	ActionEnable  = 2
+)
+
 // ApplyImageUpload
 type ApplyUploadImageParam struct {
 	ServiceId  string
@@ -52,6 +58,12 @@ type ImageInfo struct {
 	ImageWidth  int    `json:"ImageWidth"`
 	ImageHeight int    `json:"ImageHeight"`
 	ImageMd5    string `json:"ImageMd5"`
+}
+
+// UpdateImageUploadFiles
+type UpdateImageUrlPayload struct {
+	Action    int      `json:"Action"`
+	ImageUrls []string `json:"ImageUrls"`
 }
 
 // GetImageTemplateConf

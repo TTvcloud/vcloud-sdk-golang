@@ -155,6 +155,7 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 	return commitResp, nil
 }
 
+// 获取临时上传凭证
 func (c *ImageXClient) GetUploadAuthToken(query url.Values) (string, error) {
 	ret := map[string]string{
 		"Version": "v1",
@@ -179,6 +180,7 @@ func (c *ImageXClient) GetUploadAuthToken(query url.Values) (string, error) {
 	return base64.StdEncoding.EncodeToString(b), nil
 }
 
+// 获取上传临时密钥
 func (c *ImageXClient) GetUploadAuth(serviceIds []string) (*base.SecurityToken2, error) {
 	return c.GetUploadAuthWithExpire(serviceIds, time.Hour)
 }
@@ -202,4 +204,49 @@ func (c *ImageXClient) GetUploadAuthWithExpire(serviceIds []string, expire time.
 	statement := base.NewAllowStatement(actions, resources)
 	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
 	return c.SignSts2(inlinePolicy, expire)
+}
+
+func (c *ImageXClient) updateImageUrls(serviceId string, req *UpdateImageUrlPayload) ([]string, error) {
+	query := url.Values{}
+	query.Add("ServiceId", serviceId)
+
+	bts, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("fail to marshal request, %v", err)
+	}
+
+	respBody, _, err := c.Json("UpdateImageUploadFiles", query, string(bts))
+	if err != nil {
+		return nil, fmt.Errorf("fail to request api UpdateImageUploadFiles, %v", err)
+	}
+
+	result := new(UpdateImageUrlPayload)
+	if err := UnmarshalResultInto(respBody, result); err != nil {
+		return nil, err
+	}
+	return result.ImageUrls, nil
+}
+
+func (c *ImageXClient) RefreshImageUrls(serviceId string, urls []string) ([]string, error) {
+	req := &UpdateImageUrlPayload{
+		Action:    ActionRefresh,
+		ImageUrls: urls,
+	}
+	return c.updateImageUrls(serviceId, req)
+}
+
+func (c *ImageXClient) EnableImageUrls(serviceId string, urls []string) ([]string, error) {
+	req := &UpdateImageUrlPayload{
+		Action:    ActionEnable,
+		ImageUrls: urls,
+	}
+	return c.updateImageUrls(serviceId, req)
+}
+
+func (c *ImageXClient) DisableImageUrls(serviceId string, urls []string) ([]string, error) {
+	req := &UpdateImageUrlPayload{
+		Action:    ActionDisable,
+		ImageUrls: urls,
+	}
+	return c.updateImageUrls(serviceId, req)
 }

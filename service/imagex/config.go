@@ -106,6 +106,14 @@ var (
 				"Version": []string{ImageXApiVersion},
 			},
 		},
+		"UpdateImageUploadFiles": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"UpdateImageUploadFiles"},
+				"Version": []string{ImageXApiVersion},
+			},
+		},
 
 		// 模板相关
 		"GetImageTemplateConf": {
