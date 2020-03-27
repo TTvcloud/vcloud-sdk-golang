@@ -11,11 +11,16 @@ const (
 	RegionUsEast1     = "us-east-1"
 	RegionApSingapore = "ap-singapore-1"
 
+	InnerRegionCnNorth1    = "cn-north-1-inner"
+	InnerRegionUsEast1     = "us-east-1-inner"
+	InnerRegionApSingapore = "ap-singapore-1-inner"
+
 	timeFormatV4 = "20060102T150405Z"
 )
 
 type ServiceInfo struct {
 	Timeout     time.Duration
+	Scheme      string
 	Host        string
 	Header      http.Header
 	Credentials Credentials

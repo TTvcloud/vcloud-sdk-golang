@@ -8,7 +8,7 @@ import (
 )
 
 /*
- * get image upload token
+ * get image upload auth
  */
 func main() {
 	// default region cn-north-1, for other region, call imagex.NewInstanceWithRegion(region)
