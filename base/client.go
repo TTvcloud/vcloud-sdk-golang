@@ -238,7 +238,6 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 }
 
 func (client *Client) makeRequest(api string, req *http.Request, timeout time.Duration) ([]byte, int, error) {
-	fmt.Printf("url %s\n", req.URL.String())
 	req = client.ServiceInfo.Credentials.Sign(req)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
