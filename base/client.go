@@ -17,6 +17,8 @@ import (
 const (
 	accessKey = "VCLOUD_ACCESSKEY"
 	secretKey = "VCLOUD_SECRETKEY"
+
+	defaultScheme = "http"
 )
 
 // Client 基础客户端
@@ -36,6 +38,10 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 
 	c := http.Client{Transport: transport}
 	client := &Client{Client: c, ServiceInfo: info, ApiInfoList: apiInfoList}
+
+	if client.ServiceInfo.Scheme == "" {
+		client.ServiceInfo.Scheme = defaultScheme
+	}
 
 	if os.Getenv(accessKey) != "" && os.Getenv(secretKey) != "" {
 		client.ServiceInfo.Credentials.AccessKeyID = os.Getenv(accessKey)
@@ -77,6 +83,12 @@ func (client *Client) SetHost(host string) {
 	}
 }
 
+func (client *Client) SetScheme(scheme string) {
+	if scheme != "" {
+		client.ServiceInfo.Scheme = scheme
+	}
+}
+
 // SetCredential 设置Credentials
 func (client *Client) SetCredential(c Credentials) {
 	if c.AccessKeyID != "" {
@@ -103,7 +115,7 @@ func (client *Client) GetSignUrl(api string, query url.Values) (string, error) {
 	query = mergeQuery(query, apiInfo.Query)
 
 	u := url.URL{
-		Scheme:   "https",
+		Scheme:   client.ServiceInfo.Scheme,
 		Host:     client.ServiceInfo.Host,
 		Path:     apiInfo.Path,
 		RawQuery: query.Encode(),
@@ -157,7 +169,7 @@ func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 	query = mergeQuery(query, apiInfo.Query)
 
 	u := url.URL{
-		Scheme:   "https",
+		Scheme:   client.ServiceInfo.Scheme,
 		Host:     client.ServiceInfo.Host,
 		Path:     apiInfo.Path,
 		RawQuery: query.Encode(),
@@ -182,7 +194,7 @@ func (client *Client) Json(api string, query url.Values, body string) ([]byte, i
 	query = mergeQuery(query, apiInfo.Query)
 
 	u := url.URL{
-		Scheme:   "https",
+		Scheme:   client.ServiceInfo.Scheme,
 		Host:     client.ServiceInfo.Host,
 		Path:     apiInfo.Path,
 		RawQuery: query.Encode(),
@@ -210,7 +222,7 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 	form = mergeQuery(form, apiInfo.Form)
 
 	u := url.URL{
-		Scheme:   "https",
+		Scheme:   client.ServiceInfo.Scheme,
 		Host:     client.ServiceInfo.Host,
 		Path:     apiInfo.Path,
 		RawQuery: query.Encode(),
@@ -226,6 +238,7 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 }
 
 func (client *Client) makeRequest(api string, req *http.Request, timeout time.Duration) ([]byte, int, error) {
+	fmt.Printf("url %s\n", req.URL.String())
 	req = client.ServiceInfo.Credentials.Sign(req)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)

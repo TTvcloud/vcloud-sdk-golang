@@ -17,6 +17,10 @@ const (
 	ImageXHostVa = "imagex.us-east-1.bytedanceapi.com"
 	ImageXHostSg = "imagex.ap-singapore-1.bytedanceapi.com"
 
+	ImageXInnerHostCn = "imagex.byted.org"
+	ImageXInnerHostVa = "imagex.us-east-1.byted.org"
+	ImageXInnerHostSg = "imagex.ap-singapore-1.byted.org"
+
 	ImageXTimeout              = 5 * time.Second
 	ImageXServiceName          = "ImageX"
 	ImageXApiVersion           = "2018-08-01"
@@ -55,6 +59,7 @@ var (
 	ServiceInfoMap = map[string]*base.ServiceInfo{
 		base.RegionCnNorth1: {
 			Timeout: ImageXTimeout,
+			Scheme:  "https",
 			Host:    ImageXHostCn,
 			Header: http.Header{
 				"Accept": []string{"application/json"},
@@ -66,6 +71,7 @@ var (
 		},
 		base.RegionUsEast1: {
 			Timeout: ImageXTimeout,
+			Scheme:  "https",
 			Host:    ImageXHostVa,
 			Header: http.Header{
 				"Accept": []string{"application/json"},
@@ -77,7 +83,44 @@ var (
 		},
 		base.RegionApSingapore: {
 			Timeout: ImageXTimeout,
+			Scheme:  "https",
 			Host:    ImageXHostSg,
+			Header: http.Header{
+				"Accept": []string{"application/json"},
+			},
+			Credentials: base.Credentials{
+				Region:  base.RegionApSingapore,
+				Service: ImageXServiceName,
+			},
+		},
+		base.InnerRegionCnNorth1: {
+			Timeout: ImageXTimeout,
+			Scheme:  "http",
+			Host:    ImageXInnerHostCn,
+			Header: http.Header{
+				"Accept": []string{"application/json"},
+			},
+			Credentials: base.Credentials{
+				Region:  base.RegionCnNorth1,
+				Service: ImageXServiceName,
+			},
+		},
+		base.InnerRegionUsEast1: {
+			Timeout: ImageXTimeout,
+			Scheme:  "http",
+			Host:    ImageXInnerHostVa,
+			Header: http.Header{
+				"Accept": []string{"application/json"},
+			},
+			Credentials: base.Credentials{
+				Region:  base.RegionUsEast1,
+				Service: ImageXServiceName,
+			},
+		},
+		base.InnerRegionApSingapore: {
+			Timeout: ImageXTimeout,
+			Scheme:  "http",
+			Host:    ImageXInnerHostSg,
 			Header: http.Header{
 				"Accept": []string{"application/json"},
 			},
