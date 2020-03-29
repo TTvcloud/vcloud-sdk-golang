@@ -133,6 +133,14 @@ var (
 
 	ApiInfoList = map[string]*base.ApiInfo{
 		// 资源管理相关
+		"DeleteImageUploadFiles": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"DeleteImageUploadFiles"},
+				"Version": []string{ImageXApiVersion},
+			},
+		},
 		"ApplyImageUpload": {
 			Method: http.MethodGet,
 			Path:   "/",

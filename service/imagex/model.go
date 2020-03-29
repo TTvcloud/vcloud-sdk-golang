@@ -13,6 +13,16 @@ const (
 	ActionEnable  = 2
 )
 
+// DeleteImageUploadFiles
+type DeleteImageParam struct {
+	StoreUris []string `json:"StoreUris"`
+}
+
+type DeleteImageResult struct {
+	ServiceId    string   `json:"ServiceId"`
+	DeletedFiles []string `json:"DeletedFiles"`
+}
+
 // ApplyImageUpload
 type ApplyUploadImageParam struct {
 	ServiceId  string
