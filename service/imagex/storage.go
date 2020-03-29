@@ -15,6 +15,30 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
+// DeleteImageUploadFiles 删除图片
+func (c *ImageXClient) DeleteImages(serviceId string, uris []string) (*DeleteImageResult, error) {
+	query := url.Values{}
+	query.Add("ServiceId", serviceId)
+	param := new(DeleteImageParam)
+	param.StoreUris = uris
+
+	body, err := json.Marshal(param)
+	if err != nil {
+		return nil, fmt.Errorf("fail to marshal request, %v", err)
+	}
+
+	data, _, err := c.Json("DeleteImageUploadFiles", query, string(body))
+	if err != nil {
+		return nil, fmt.Errorf("fail to request api DeleteImageUploadFiles, %v", err)
+	}
+
+	result := new(DeleteImageResult)
+	if err := UnmarshalResultInto(data, result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // ApplyImageUpload 获取图片上传地址
 func (c *ImageXClient) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUploadImageResult, error) {
 	query := url.Values{}
