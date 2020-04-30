@@ -23,7 +23,7 @@ var (
 	ServiceInfoMap = map[string]*base.ServiceInfo{
 		base.RegionCnNorth1: {
 			Timeout: 5 * time.Second,
-			Host:    "vod.bytedanceapi.com",
+			Host:    "open.bytedanceapi.com",
 			Header: http.Header{
 				"Accept": []string{"application/json"},
 			},
@@ -33,7 +33,7 @@ var (
 
 	ServiceInfo = &base.ServiceInfo{
 		Timeout: 5 * time.Second,
-		Host:    "vod.bytedanceapi.com",
+		Host:    "open.bytedanceapi.com",
 		Header: http.Header{
 			"Accept": []string{"application/json"},
 		},
