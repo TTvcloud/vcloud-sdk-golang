@@ -28,6 +28,10 @@ const (
 	ResourceStreamTypeFormat = "trn:vod:::stream_type/%s"
 	// ResourceWatermarkFormat 水印信息与账号有关,与region无关
 	ResourceWatermarkFormat = "trn:vod::*:watermark/%s"
+
+	ActionGetPalyInfo = "vod:GetPlayInfo"
+
+	Star = "*"
 )
 
 func NewInstance() *Vod {

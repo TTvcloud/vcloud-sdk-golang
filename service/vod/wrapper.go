@@ -527,40 +527,33 @@ func (p *Vod) GetPosterUrl(spaceName string, uri string, fallbackWeights map[str
 
 func (p *Vod) GetVideoPlayAuthWithExpiredTime(vidList, streamTypeList, watermarkList []string, expiredTime time.Duration) (*base.SecurityToken2, error) {
 	inlinePolicy := new(base.Policy)
-	actions := []string{"vod:GetPlayInfo"}
+	actions := []string{ActionGetPalyInfo}
 	resources := make([]string, 0)
 
 	// 设置vid的resource权限
-	if len(vidList) == 0 {
-		resources = append(resources, fmt.Sprintf(ResourceVideoFormat, "*"))
-	} else {
-		for _, vid := range vidList {
-			resources = append(resources, fmt.Sprintf(ResourceVideoFormat, vid))
-		}
-	}
+	resources = p.AddResourcesFormat(vidList, resources, ResourceVideoFormat)
 
 	// 设置streamType的resource权限
-	if len(streamTypeList) == 0 {
-		resources = append(resources, fmt.Sprintf(ResourceStreamTypeFormat, "*"))
-	} else {
-		for _, streamType := range streamTypeList {
-			resources = append(resources, fmt.Sprintf(ResourceStreamTypeFormat, streamType))
-		}
-	}
+	resources = p.AddResourcesFormat(streamTypeList, resources, ResourceStreamTypeFormat)
 
 	// 设置watermark的resource权限
-	if len(watermarkList) == 0 {
-		resources = append(resources, fmt.Sprintf(ResourceWatermarkFormat, "*"))
-	} else {
-		for _, watermark := range watermarkList {
-			resources = append(resources, fmt.Sprintf(ResourceWatermarkFormat, watermark))
-		}
-	}
+	resources = p.AddResourcesFormat(watermarkList, resources, ResourceWatermarkFormat)
 
 	statement := base.NewAllowStatement(actions, resources)
 	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
 
 	return p.SignSts2(inlinePolicy, expiredTime)
+}
+
+func (p *Vod) AddResourcesFormat(list []string, resources []string, resourceFormat string) []string {
+	if len(list) == 0 {
+		resources = append(resources, fmt.Sprintf(resourceFormat, Star))
+	} else {
+		for _, v := range list {
+			resources = append(resources, fmt.Sprintf(resourceFormat, v))
+		}
+	}
+	return resources
 }
 
 func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) (*base.SecurityToken2, error) {
