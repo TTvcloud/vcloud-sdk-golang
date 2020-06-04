@@ -246,7 +246,7 @@ func (client *Client) makeRequest(api string, req *http.Request, timeout time.Du
 
 	resp, err := client.Client.Do(req)
 	if err != nil {
-		return []byte(""), 500, fmt.Errorf("fail to request %s", api)
+		return []byte(""), 500, err
 	}
 	defer resp.Body.Close()
 
