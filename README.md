@@ -45,6 +45,58 @@ go get github.com/TTvcloud/vcloud-sdk-golang
 为方便用户使用，封装方法 UploadVideo 和 UploadPoster， 一步上传
 
 
+- STS2 鉴权
+
+点播提供的 API
+  
+GetVideoPlayAuth ( vidList,streamTypeList,watermarkList []string)
+  
+vidList、streamTypeList、watermarkList 为3种资源，分别代表视频vid、stream type和水印三种资源，切片为空是代表允许访问所有资源。
+  
+默认的 action 为 vod::GetPlayInfo（不需手动设置）
+  
+默认过期时间为1小时，可以通过如下 API 自定义过期时间
+  
+GetVideoPlayAuthWithExpiredTime(vidList, streamTypeList, watermarkList []string, expiredTime time.Duration)
+  
+示例代码：
+
+```
+func main() {
+       instance := vod.NewInstance()
+       vidList, streamTypeList, watermarkList := make([]string, 0), make([]string, 0), make([]string, 0)
+       ret, _ := instance.GetVideoPlayAuth(vidList, streamTypeList, watermarkList)
+       b, _ := json.Marshal(ret)
+       fmt.Println(string(b))
+}
+```
+  
+自定义 STS2 授权模式
+
+```
+// 第1步 创建 Policy
+inlinePolicy := new(base.Policy)
+
+// 第2步 创建  actions 和 resources
+actions := []string{"service:Method"} // eg: vod:GetPlayInfo
+resources := make([]string, 0)
+// 其中每个 resource 格式类似 "trn:vod::*:video_id/%s"，若允许全部则用 * 替代，否则用实际字符串替代，本例可以填写实际的 vid
+if len(vidList) == 0 {
+       resources = append(resources, fmt.Sprintf(ResourceVideoFormat, "*"))
+} else {
+       for _, vid := range vidList {
+              resources = append(resources, fmt.Sprintf(ResourceVideoFormat, vid))
+       }
+}
+
+// 第3步 创建 Statement,允许的 NewAllowStatement, 拒绝的 NewDenyStatement，并添加到 Policy 对应的 Statement 切片里
+statement := base.NewAllowStatement(actions, resources)
+inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
+
+// 第4步 调用 SignSts2 生成签名
+return SignSts2(inlinePolicy, expiredTime)
+```
+
 #### 转码
 [StartTranscode](https://open.bytedance.com/docs/4/1670/)
 
