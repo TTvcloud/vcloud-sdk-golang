@@ -23,7 +23,7 @@ func aesEncryptCBC(origData, key []byte) (crypted []byte, err error) {
 	}
 
 	blockSize := block.BlockSize()
-	origData = pkcs5Padding(origData, blockSize)
+	origData = zeroPadding(origData, blockSize)
 	blockMode := cipher.NewCBCEncrypter(block, key[:blockSize])
 	crypted = make([]byte, len(origData))
 	blockMode.CryptBlocks(crypted, origData)
@@ -40,7 +40,7 @@ func aesEncryptCBCWithBase64(origData, key []byte) (string, error) {
 	return base64.StdEncoding.EncodeToString(cbc), nil
 }
 
-func pkcs5Padding(ciphertext []byte, blockSize int) []byte {
+func zeroPadding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize
 	if padding == 0 {
 		return ciphertext
