@@ -114,10 +114,12 @@ func (c *ImageXClient) GetDomainInfo(serviceId string, fallbackWeights map[strin
 			if err != nil {
 				weightsMap = fallbackWeights
 			}
-			if err := resp.ResponseMetadata.Error; err != nil {
-				weightsMap = fallbackWeights
+			if resp != nil {
+				if err := resp.ResponseMetadata.Error; err != nil {
+					weightsMap = fallbackWeights
+				}
+				weightsMap, exist = resp.Result[serviceId]
 			}
-			weightsMap, exist = resp.Result[serviceId]
 			if !exist || len(weightsMap) == 0 {
 				weightsMap = fallbackWeights
 			}
@@ -129,14 +131,17 @@ func (c *ImageXClient) GetDomainInfo(serviceId string, fallbackWeights map[strin
 			go func() {
 				for range time.Tick(updateInterval * time.Second) {
 					var weightsMap map[string]int
+					var exist bool
 					resp, err := c.GetCdnDomainWeights(serviceId)
 					if err != nil {
 						weightsMap = fallbackWeights
 					}
-					if err := resp.ResponseMetadata.Error; err != nil {
-						weightsMap = fallbackWeights
+					if resp != nil {
+						if err := resp.ResponseMetadata.Error; err != nil {
+							weightsMap = fallbackWeights
+						}
+						weightsMap, exist = resp.Result[serviceId]
 					}
-					weightsMap, exist := resp.Result[serviceId]
 					if !exist || len(weightsMap) == 0 {
 						weightsMap = fallbackWeights
 					}
