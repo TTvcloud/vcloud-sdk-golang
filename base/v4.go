@@ -94,13 +94,10 @@ func hashedSimpleCanonicalRequestV4(request *http.Request, query url.Values, met
 }
 
 func hashedCanonicalRequestV4(request *http.Request, meta *metadata) string {
-	// TASK 1. http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
-
 	payload := readAndReplaceBody(request)
 	payloadHash := hashSHA256(payload)
 	request.Header.Set("X-Amz-Content-Sha256", payloadHash)
 
-	// Set this in header values to make it appear in the range of headers to sign
 	request.Header.Set("Host", request.Host)
 
 	var sortedHeaderKeys []string
@@ -120,7 +117,6 @@ func hashedCanonicalRequestV4(request *http.Request, meta *metadata) string {
 	for _, key := range sortedHeaderKeys {
 		value := strings.TrimSpace(request.Header.Get(key))
 		if key == "host" {
-			//AWS does not include port in signing request.
 			if strings.Contains(value, ":") {
 				split := strings.Split(value, ":")
 				port := split[1]
@@ -138,8 +134,6 @@ func hashedCanonicalRequestV4(request *http.Request, meta *metadata) string {
 }
 
 func stringToSignV4(request *http.Request, hashedCanonReq string, meta *metadata) string {
-	// TASK 2. http://docs.aws.amazon.com/general/latest/gr/sigv4-create-string-to-sign.html
-
 	requestTs := request.Header.Get("X-Amz-Date")
 
 	meta.algorithm = "AWS4-HMAC-SHA256"
@@ -150,8 +144,6 @@ func stringToSignV4(request *http.Request, hashedCanonReq string, meta *metadata
 }
 
 func signatureV4(signingKey []byte, stringToSign string) string {
-	// TASK 3. http://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html
-
 	return hex.EncodeToString(hmacSHA256(signingKey, stringToSign))
 }
 
@@ -282,10 +274,6 @@ func shouldEscape(c byte) bool {
 
 func normquery(v url.Values) string {
 	queryString := v.Encode()
-
-	// Go encodes a space as '+' but Amazon requires '%20'. Luckily any '+' in the
-	// original query string has been percent escaped so all '+' chars that are left
-	// were originally spaces.
 
 	return strings.Replace(queryString, "+", "%20", -1)
 }
