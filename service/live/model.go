@@ -1,8 +1,6 @@
 package live
 
 import (
-	"encoding/json"
-
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
@@ -60,12 +58,51 @@ type DesensitizedTemplateInfo struct {
 	Suffix string
 }
 
+type EClientInfoAccessCode int64
+
+const (
+	EClientInfoAccessCode_AC_Wifi EClientInfoAccessCode = 1
+	EClientInfoAccessCode_AC_2G   EClientInfoAccessCode = 2
+	EClientInfoAccessCode_AC_3G   EClientInfoAccessCode = 3
+	EClientInfoAccessCode_AC_4G   EClientInfoAccessCode = 4
+	EClientInfoAccessCode_AC_5G   EClientInfoAccessCode = 5
+)
+
+type EClientInfoDevicePlatform int64
+
+const (
+	EClientInfoDevicePlatform_DP_Unknown EClientInfoDevicePlatform = 1
+	EClientInfoDevicePlatform_DP_IOS     EClientInfoDevicePlatform = 2
+	EClientInfoDevicePlatform_DP_Android EClientInfoDevicePlatform = 3
+	EClientInfoDevicePlatform_DP_PC      EClientInfoDevicePlatform = 4
+	EClientInfoDevicePlatform_DP_Web     EClientInfoDevicePlatform = 5
+)
+
+type ClientInfo struct {
+	DeviceId       *string                    `thrift:"DeviceId,1" json:"DeviceId"`
+	UserId         *string                    `thrift:"UserId,2" json:"UserId"`
+	ClientIp       *string                    `thrift:"ClientIp,3" json:"ClientIp"`
+	DeviceType     *string                    `thrift:"DeviceType,5" json:"DeviceType"`
+	AccessCode     *EClientInfoAccessCode     `thrift:"AccessCode,4" json:"AccessCode"`
+	DevicePlatform *EClientInfoDevicePlatform `thrift:"DevicePlatform,6" json:"DevicePlatform"`
+	ABVersion      *string                    `thrift:"ABVersion,7" json:"ABVersion"`
+	Resolution     *string                    `thrift:"Resolution,8" json:"Resolution"`
+	DPI            *int64                     `thrift:"DPI,9" json:"DPI"`
+	OsVersion      *string                    `thrift:"OsVersion,10" json:"OsVersion"`
+	AId            *string                    `thrift:"AId,11" json:"AId"`
+	SdkVersion     *string                    `thrift:"SdkVersion,13" json:"SdkVersion"`
+	AppVersionCode *int64                     `thrift:"AppVersionCode,14" json:"AppVersionCode"`
+	BitrateLevel   *int64                     `thrift:"BitrateLevel,15" json:"BitrateLevel"`
+	UpdateVersion  *int64                     `thrift:"UpdateVersion,16" json:"UpdateVersion"`
+}
+
 // CreateStream
 type CreateStreamRequest struct {
-	AppID     int32
-	Stream    string
-	Extra     string
-	DelayTime int64
+	AppID      int32
+	Stream     string
+	Extra      string
+	DelayTime  int64
+	ClientInfo *ClientInfo
 }
 
 type CreateStreamResponse struct {
@@ -84,18 +121,13 @@ type MGetStreamsPushInfoRequest struct {
 	Streams []string
 }
 
-type mGetStreamsPushInfoResp struct {
-	ResponseMetadata *base.ResponseMetadata
-	Result           *mGetStreamsPushInfoResult `json:",omitempty"`
-}
-
-type mGetStreamsPushInfoResult struct {
-	PushInfos json.RawMessage
-}
-
 type MGetStreamsPushInfoResp struct {
-	Result           map[string]*PushInfo `json:",omitempty"`
 	ResponseMetadata *base.ResponseMetadata
+	Result           *MGetStreamsPushInfoResult `json:",omitempty"`
+}
+
+type MGetStreamsPushInfoResult struct {
+	PushInfos map[string]*PushInfo
 }
 
 type PushInfo struct {
@@ -146,20 +178,17 @@ type MGetStreamsPlayInfoRequest struct {
 	Streams            []string
 	EnableSSL          bool
 	IsCustomizedStream bool
-}
-
-type mGetStreamsPlayInfoResp struct {
-	ResponseMetadata *base.ResponseMetadata
-	Result           *mGetStreamsPlayInfoResult `json:",omitempty"`
-}
-
-type mGetStreamsPlayInfoResult struct {
-	PlayInfos json.RawMessage
+	ClientInfo         *ClientInfo
+	EnableStreamData   bool
 }
 
 type MGetStreamsPlayInfoResp struct {
-	Result           map[string]*PlayInfo `json:",omitempty"`
 	ResponseMetadata *base.ResponseMetadata
+	Result           *MGetStreamsPlayInfoResult `json:",omitempty"`
+}
+
+type MGetStreamsPlayInfoResult struct {
+	PlayInfos map[string]*PlayInfo `json:",omitempty"`
 }
 
 type PlayInfo struct {
@@ -171,13 +200,38 @@ type PlayInfo struct {
 	StreamSizes         []string
 	MainRecommendInfo   *Recommendation
 	BackupRecommendInfo *Recommendation
+	Common              *string
+}
+
+func (p PlayInfo) GetCommon() string {
+	if p.Common == nil {
+		return ""
+	}
+	return *p.Common
 }
 
 type ElePlayInfo struct {
-	VCodec    *string
-	Size      *string
-	Url       *PlayUrlInfo
-	SdkParams *string
+	VCodec     *string
+	Size       *string
+	Url        *PlayUrlInfo
+	SdkParams  *string
+	VBitrate   *int32
+	Resolution *string
+	Gop        *int32
+}
+
+func (e ElePlayInfo) GetUrl() *PlayUrlInfo {
+	if e.Url == nil {
+		return &PlayUrlInfo{}
+	}
+	return e.Url
+}
+
+func (e ElePlayInfo) GetSize() string {
+	if e.Size == nil {
+		return ""
+	}
+	return *e.Size
 }
 
 type PlayUrlInfo struct {

@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
+
 	"github.com/pkg/errors"
 )
 
@@ -66,23 +68,13 @@ func (l *Live) MGetStreamsPushInfo(request *MGetStreamsPushInfoRequest) (*MGetSt
 		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
 	}
 
-	resp := &mGetStreamsPushInfoResp{}
+	resp := &MGetStreamsPushInfoResp{}
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, errors.Wrap(err, "[vcloud-live] resp unmarshal failed")
 	} else {
 		resp.ResponseMetadata.Service = "live"
+		return resp, nil
 	}
-
-	if resp.Result == nil {
-		return &MGetStreamsPushInfoResp{ResponseMetadata: resp.ResponseMetadata}, nil
-	}
-	pushInfos := map[string]*PushInfo{}
-	err = json.Unmarshal(resp.Result.PushInfos, &pushInfos)
-	if err != nil {
-		return nil, errors.Wrap(err, "[vcloud-live] pushinfo unmarshal failed")
-	}
-
-	return &MGetStreamsPushInfoResp{Result: pushInfos, ResponseMetadata: resp.ResponseMetadata}, nil
 }
 
 func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (response *MGetStreamsPlayInfoResp, err error) {
@@ -93,11 +85,13 @@ func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (respons
 				_, _ = fmt.Fprintf(os.Stdout, "[vcloud-live] mget stream fall back play info failed, err=%v", fallbackErr.Error())
 				return
 			}
-			fallbackResp.ResponseMetadata = response.ResponseMetadata
-			if fallbackResp.ResponseMetadata != nil {
-				fallbackResp.ResponseMetadata.Error = nil
-			}
 
+			fallbackResp.ResponseMetadata = &base.ResponseMetadata{
+				Service: "live",
+				Region:  l.ServiceInfo.Credentials.Region,
+				Action:  "MGetStreamsPlayInfo",
+				Version: "2019-10-01",
+			}
 			response = fallbackResp
 			err = nil
 			return
@@ -116,23 +110,17 @@ func (l *Live) MGetStreamsPlayInfo(request *MGetStreamsPlayInfoRequest) (respons
 		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
 	}
 
-	resp := &mGetStreamsPlayInfoResp{}
+	resp := &MGetStreamsPlayInfoResp{}
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, errors.Wrap(err, "[vcloud-live] resp unmarshal failed")
 	} else {
 		resp.ResponseMetadata.Service = "live"
+		if resp.ResponseMetadata.Error != nil {
+			return resp, fmt.Errorf("[vcloud-live] MGetStreamsPlayInfo failed, errCodeNum:%d, errCode:%s, errMessage:%s",
+				resp.ResponseMetadata.Error.CodeN, resp.ResponseMetadata.Error.Code, resp.ResponseMetadata.Error.Message)
+		}
+		return resp, nil
 	}
-
-	if resp.Result == nil {
-		return &MGetStreamsPlayInfoResp{ResponseMetadata: resp.ResponseMetadata}, errors.New("[vcloud-live] empty result")
-	}
-	playInfos := map[string]*PlayInfo{}
-	err = json.Unmarshal(resp.Result.PlayInfos, &playInfos)
-	if err != nil {
-		return nil, errors.Wrap(err, "[vcloud-live] playinfo unmarshal failed")
-	}
-
-	return &MGetStreamsPlayInfoResp{Result: playInfos, ResponseMetadata: resp.ResponseMetadata}, nil
 }
 
 func (l *Live) GetVODs(request *GetVODsRequest) (*GetVODsResponse, error) {

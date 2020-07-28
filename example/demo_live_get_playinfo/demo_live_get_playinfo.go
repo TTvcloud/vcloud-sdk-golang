@@ -21,10 +21,13 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 	time.Sleep(2 * time.Second)
+	did := "20200723"
 	ret, err := instance.MGetStreamsPlayInfo(&live.MGetStreamsPlayInfoRequest{
-		Streams:            []string{"stream-106121422448623747"},
+		Streams:            []string{"stream-107072606641062029"},
 		EnableSSL:          false,
 		IsCustomizedStream: false,
+		EnableStreamData:   true,
+		ClientInfo:         &live.ClientInfo{DeviceId: &did},
 	})
 	if err != nil {
 		fmt.Println(err.Error())

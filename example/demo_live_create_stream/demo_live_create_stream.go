@@ -19,9 +19,12 @@ func main() {
 	// or set ak and ak as follow
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
-
+	did := "20200723"
 	ret, err := instance.CreateStream(&live.CreateStreamRequest{
 		AppID: 200002,
+		ClientInfo: &live.ClientInfo{
+			DeviceId: &did,
+		},
 	})
 	if err != nil {
 		fmt.Println(err.Error())
