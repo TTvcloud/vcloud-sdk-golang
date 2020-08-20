@@ -140,7 +140,7 @@ func (c *ImageXClient) upload(host string, storeInfo StoreInfo, imageBytes []byt
 }
 
 // 上传图片
-func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]byte) (*CommitUploadImageResult, error) {
+func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]byte, functions ...Function) (*CommitUploadImageResult, error) {
 	if params.UploadNum == 0 {
 		params.UploadNum = 1
 	}
@@ -171,6 +171,7 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 		ServiceId:  params.ServiceId,
 		SpaceName:  params.SpaceName,
 		SessionKey: applyResp.SessionKey,
+		Functions:  functions,
 	}
 	commitResp, err := c.CommitUploadImage(commitParams)
 	if err != nil {
