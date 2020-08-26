@@ -32,7 +32,16 @@ func (l *Live) mMGetStreamsFallbackPlayInfo(request *MGetStreamsPlayInfoRequest)
 
 	playContext.scheduleResult = scheduleResult
 
-	return l.deserializePlayInfos(playContext)
+	playInfos, err := l.deserializePlayInfos(playContext)
+	if err != nil {
+		return nil, err
+	}
+	if request.EnableStreamData {
+		l.fillPullData(playInfos)
+	}
+	return &MGetStreamsPlayInfoResp{Result: &MGetStreamsPlayInfoResult{
+		PlayInfos: playInfos,
+	}}, nil
 }
 
 func filterPlayStreamInfos(streamInfos map[string]*StreamInfo) map[string]*StreamInfo {
@@ -63,7 +72,7 @@ func filterPlayStreamInfos(streamInfos map[string]*StreamInfo) map[string]*Strea
 }
 
 func (l *Live) deserializePlayInfos(playContext *mGetStreamsPlayContext) (
-	*MGetStreamsPlayInfoResp, error) {
+	map[string]*PlayInfo, error) {
 	playInfosResult := make(map[string]*PlayInfo)
 
 	for _, stream := range playContext.streams {
@@ -97,9 +106,7 @@ func (l *Live) deserializePlayInfos(playContext *mGetStreamsPlayContext) (
 		}
 	}
 
-	return &MGetStreamsPlayInfoResp{
-		Result: playInfosResult,
-	}, nil
+	return playInfosResult, nil
 }
 
 func (s *StreamInfo) deserializeStreamInfo() *StreamBase {

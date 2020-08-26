@@ -19,12 +19,12 @@ func main() {
 	// or set ak and ak as follow
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
-	ret, err := instance.MGetStreamsPushInfo(&live.MGetStreamsPushInfoRequest{Streams: []string{"stream-106121510966526083"}})
+	ret, err := instance.MGetStreamsPushInfo(&live.MGetStreamsPushInfoRequest{Streams: []string{"stream-107072606641062029"}})
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println(ret.Result["stream-106121510966526083"].Main.RtmpUrl)
+	fmt.Println(ret.Result.PushInfos["stream-107072606641062029"].Main.RtmpUrl)
 
 	retString, err := json.Marshal(ret)
 	if err != nil {

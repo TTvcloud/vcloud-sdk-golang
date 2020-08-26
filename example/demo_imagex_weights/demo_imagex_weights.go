@@ -16,12 +16,12 @@ func main() {
 	})
 
 	// or set ak and ak as follow
-	//vod.NewInstance().SetAccessKey("")
-	//vod.NewInstance().SetSecretKey("")
+	// instance.SetAccessKey("")
+	// instance.SetSecretKey("")
 
 	serviceId := "your serviceId"
 
-	urls, err := imagex.NewInstance().GetImagexURL(serviceId, "your uri", "your tpl[:param]", imagex.WithHttps(), imagex.WithFormat(imagex.FORMAT_WEBP))
+	urls, err := instance.GetImagexURL(serviceId, "your uri", "your tpl[:param]", imagex.WithHttps(), imagex.WithFormat(imagex.FORMAT_WEBP))
 	if err != nil {
 		fmt.Printf("GetImagexURL err :%v\n", err)
 	} else {
