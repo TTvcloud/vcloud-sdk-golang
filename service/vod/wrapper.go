@@ -10,26 +10,38 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/pkg/errors"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 //GetPlayInfo 获取播放信息
-func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
+func (p *Vod) GetPlayInfo(vid string) (*GetPlayInfoResp, int, error) {
+	query := url.Values{}
+	query.Set("Vid", vid)
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
 		return nil, status, err
 	}
 
 	output := new(GetPlayInfoResp)
-	if err := json.Unmarshal(respBody, output); err != nil {
+	jsonTag := os.Getenv("JSON_FORMATTER")
+	switch jsonTag {
+	case base.JSON_FORMATTER_JSONITER:
+		jsonFormatter := jsoniter.ConfigCompatibleWithStandardLibrary
+		err = jsonFormatter.Unmarshal(respBody, output)
+	default:
+		err = json.Unmarshal(respBody, output)
+	}
+	if err != nil {
 		return nil, status, err
 	} else {
-		output.ResponseMetadata.Service = "vod"
 		return output, status, nil
 	}
 }
