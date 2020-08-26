@@ -311,3 +311,15 @@ type ImgUrl struct {
 	MainUrl   string
 	BackupUrl string
 }
+
+
+type GetPlayInfoReq struct {
+	Vid        string `json:"Vid"`
+	FormatType string `json:"FormatType,omitempty"`
+	CodecType  int64  `json:"CodecType,omitempty"`
+	Definition string `json:"Definition,omitempty"`
+	StreamType string `json:"StreamType,omitempty"`
+	Watermark  string `json:"Watermark,omitempty"`
+	Base64     int32  `json:"base64,omitempty"`
+	Ssl        int32  `json:"ssl,omitempty"`
+}

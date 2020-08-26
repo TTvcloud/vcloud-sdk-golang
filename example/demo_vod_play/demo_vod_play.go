@@ -23,8 +23,8 @@ func main() {
 
 	// GetPlayInfo
 	instance := vod.NewInstance()
-
-	resp, code, _ := instance.GetPlayInfo(vid)
+	query := vod.GetPlayInfoReq{Vid: vid}
+	resp, code, _ := instance.GetPlayInfo(query)
 	fmt.Printf("resp:%+v code:%d\n", resp, code)
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)

@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,9 +23,30 @@ import (
 )
 
 //GetPlayInfo 获取播放信息
-func (p *Vod) GetPlayInfo(vid string) (*GetPlayInfoResp, int, error) {
+func (p *Vod) GetPlayInfo(video GetPlayInfoReq) (*GetPlayInfoResp, int, error) {
+	vid := video.Vid
+	if len(vid) == 0 {
+		return nil, http.StatusBadRequest, errors.New("Empty Vid")
+	}
 	query := url.Values{}
-	query.Set("Vid", vid)
+	query.Set("Vid", video.Vid)
+	query.Set("CodecType", strconv.FormatInt(video.CodecType, 10))
+	query.Set("Base64", strconv.FormatInt(int64(video.Base64), 10))
+	query.Set("Ssl", strconv.FormatInt(int64(video.Ssl), 10))
+
+	if len(video.FormatType) > 0 {
+		query.Set("FormatType", video.FormatType)
+	}
+	if len(video.Definition) > 0 {
+		query.Set("Definition", video.Definition)
+	}
+	if len(video.Watermark) > 0 {
+		query.Set("Watermark", video.Watermark)
+	}
+	if len(video.StreamType) > 0 {
+		query.Set("StreamType", video.StreamType)
+	}
+
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
 		return nil, status, err
