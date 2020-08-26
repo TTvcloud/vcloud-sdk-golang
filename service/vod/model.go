@@ -15,7 +15,7 @@ type GetPlayInfoData struct {
 	VideoID        string      `json:"Vid"`
 	PosterURL      string      `json:"PosterUrl"`              //封面地址
 	VideoDuration  float32     `json:"Duration"`               //视频时长(单位：s)
-	MediaType      string      `json:"MediaType"`              //返回的媒体类型(video/audio)
+	MediaType      string      `json:"FileType"`              //返回的媒体类型(video/audio)
 	EnableAdaptive bool        `json:"EnableAdaptive"`         //是否关键帧对其
 	VideoList      []*PlayInfo `json:"PlayInfoList,omitempty"` //视频列表
 	TotalCount     int         `json:"TotalCount"`             //视频列表数量
