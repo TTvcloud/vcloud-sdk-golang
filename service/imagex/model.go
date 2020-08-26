@@ -11,6 +11,8 @@ const (
 	ActionRefresh = 0
 	ActionDisable = 1
 	ActionEnable  = 2
+
+	FunctionEncryption = "Encryption"
 )
 
 // DeleteImageUploadFiles
@@ -50,6 +52,7 @@ type CommitUploadImageParam struct {
 	SpaceName   string       `json:"-"`
 	SessionKey  string       `json:"SessionKey"`
 	OptionInfos []OptionInfo `json:"OptionInfos"`
+	Functions   []Function   `json:"Functions"`
 }
 
 type OptionInfo struct {
@@ -57,9 +60,34 @@ type OptionInfo struct {
 	FileName string `json:"FileName"`
 }
 
+type Function struct {
+	Name  string      `json:"Name"`
+	Input interface{} `json:"Input"`
+}
+
+type EncryptionInput struct {
+	Config       map[string]string `json:"Config"`
+	PolicyParams map[string]string `json:"PolicyParams"`
+}
+
 type CommitUploadImageResult struct {
+	Results    []Result    `json:"Results"`
 	RequestId  string      `json:"RequestId"`
 	ImageInfos []ImageInfo `json:"PluginResult"`
+}
+
+type Result struct {
+	Uri        string     `json:"Uri"`
+	Encryption Encryption `json:"Encryption"`
+}
+
+type Encryption struct {
+	Uri       string            `json:"Uri"`
+	SecretKey string            `json:"SecretKey"`
+	Algorithm string            `json:"Algorithm"`
+	Version   string            `json:"Version"`
+	SourceMd5 string            `json:"SourceMd5"`
+	Extra     map[string]string `json:"Extra"`
 }
 
 type ImageInfo struct {

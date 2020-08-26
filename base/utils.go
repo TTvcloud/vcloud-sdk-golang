@@ -18,17 +18,14 @@ import (
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func init() {
-	// 初始化随机种子
 	rand.Seed(time.Now().Unix())
 }
 
 func createTempAKSK() (accessKeyId string, plainSk string, err error) {
-	// 生成AccessKeyId
 	if accessKeyId, err = generateAccessKeyId("AKTP"); err != nil {
 		return
 	}
 
-	// 生成SecretKey明文
 	plainSk, err = generateSecretKey()
 	if err != nil {
 		return
@@ -37,13 +34,10 @@ func createTempAKSK() (accessKeyId string, plainSk string, err error) {
 }
 
 func generateAccessKeyId(prefix string) (string, error) {
-	// 生成uuid，如：a1fe1d4f-eb56-4a06-86e8-3e5068a1a838
 	uuid := uuid.New()
 
-	// 滤掉'-'后，做base64，输出：YTFmZTFkNGZlYjU2NGEwNjg2ZTgzZTUwNjhhMWE4Mzg=
 	uidBase64 := base64.StdEncoding.EncodeToString([]byte(strings.Replace(uuid.String(), "-", "", -1)))
 
-	// 去掉"-+/="特殊字符，加上prefix
 	s := strings.Replace(uidBase64, "=", "", -1)
 	s = strings.Replace(s, "/", "", -1)
 	s = strings.Replace(s, "+", "", -1)
@@ -61,7 +55,6 @@ func randStringRunes(n int) string {
 
 func generateSecretKey() (string, error) {
 	randString32 := randStringRunes(32)
-	// 确保key是128bit即可
 	return aesEncryptCBCWithBase64([]byte(randString32), []byte("bytedance-isgood"))
 }
 
@@ -84,7 +77,6 @@ func createInnerToken(credentials Credentials, sts *SecurityToken2, inlinePolicy
 		innerToken.PolicyString = string(b)
 	}
 
-	// sign signature
 	signStr := fmt.Sprintf("%s|%s|%d|%s|%s", innerToken.LTAccessKeyId, innerToken.AccessKeyId, innerToken.ExpiredTime, innerToken.SignedSecretAccessKey, innerToken.PolicyString)
 
 	innerToken.Signature = hex.EncodeToString(hmacSHA256(key[:], signStr))
