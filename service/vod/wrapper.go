@@ -30,12 +30,14 @@ func (p *Vod) GetPlayInfo(video GetPlayInfoReq) (*GetPlayInfoResp, int, error) {
 	}
 	query := url.Values{}
 	query.Set("Vid", video.Vid)
-	query.Set("CodecType", strconv.FormatInt(video.CodecType, 10))
-	query.Set("Base64", strconv.FormatInt(int64(video.Base64), 10))
-	query.Set("Ssl", strconv.FormatInt(int64(video.Ssl), 10))
+	query.Set("Base64", strconv.FormatInt(video.Base64, 10))
+	query.Set("Ssl", strconv.FormatInt(video.Ssl, 10))
 
 	if len(video.FormatType) > 0 {
-		query.Set("FormatType", video.FormatType)
+		query.Set("Format", video.FormatType)
+	}
+	if len(video.CodecType) > 0 {
+		query.Set("Codec", video.CodecType)
 	}
 	if len(video.Definition) > 0 {
 		query.Set("Definition", video.Definition)
