@@ -1,4 +1,4 @@
-module github.com/TTvcloud/vcloud-sdk-golang
+module github.com/TTvcloud/vcloud-sdk-golang/v2
 
 go 1.13
 
