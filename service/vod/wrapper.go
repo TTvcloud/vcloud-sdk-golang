@@ -566,3 +566,16 @@ func (p *Vod) GetVideoPlayAuthWithExpiredTime(vidList, streamTypeList, watermark
 func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) (*base.SecurityToken2, error) {
 	return p.GetVideoPlayAuthWithExpiredTime(vidList, streamTypeList, watermarkList, time.Hour)
 }
+
+func (p *Vod) GetUploadAuthWithExpiredTime(expiredTime time.Duration) (*base.SecurityToken2, error) {
+	inlinePolicy := new(base.Policy)
+	actions := []string{"vod:ApplyUpload", "vod:CommitUpload"}
+	resources := make([]string, 0)
+	statement := base.NewAllowStatement(actions, resources)
+	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
+	return p.SignSts2(inlinePolicy, expiredTime)
+}
+
+func (p *Vod) GetUploadAuth() (*base.SecurityToken2, error) {
+	return p.GetUploadAuthWithExpiredTime(time.Hour)
+}
