@@ -10,26 +10,62 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/pkg/errors"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 //GetPlayInfo 获取播放信息
-func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
+func (p *Vod) GetPlayInfo(video GetPlayInfoReq) (*GetPlayInfoResp, int, error) {
+	vid := video.Vid
+	if len(vid) == 0 {
+		return nil, http.StatusBadRequest, errors.New("Empty Vid")
+	}
+	query := url.Values{}
+	query.Set("Vid", video.Vid)
+	query.Set("Base64", strconv.FormatInt(video.Base64, 10))
+	query.Set("Ssl", strconv.FormatInt(video.Ssl, 10))
+
+	if len(video.FormatType) > 0 {
+		query.Set("Format", video.FormatType)
+	}
+	if len(video.CodecType) > 0 {
+		query.Set("Codec", video.CodecType)
+	}
+	if len(video.Definition) > 0 {
+		query.Set("Definition", video.Definition)
+	}
+	if len(video.Watermark) > 0 {
+		query.Set("Watermark", video.Watermark)
+	}
+	if len(video.StreamType) > 0 {
+		query.Set("StreamType", video.StreamType)
+	}
+
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
 		return nil, status, err
 	}
 
 	output := new(GetPlayInfoResp)
-	if err := json.Unmarshal(respBody, output); err != nil {
+	jsonTag := os.Getenv("JSON_FORMATTER")
+	switch jsonTag {
+	case base.JSON_FORMATTER_JSONITER:
+		jsonFormatter := jsoniter.ConfigCompatibleWithStandardLibrary
+		err = jsonFormatter.Unmarshal(respBody, output)
+	default:
+		err = json.Unmarshal(respBody, output)
+	}
+	if err != nil {
 		return nil, status, err
 	} else {
-		output.ResponseMetadata.Service = "vod"
 		return output, status, nil
 	}
 }
