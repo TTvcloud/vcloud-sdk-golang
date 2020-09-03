@@ -55,16 +55,7 @@ func (p *Vod) StartTranscode(req *StartTranscodeRequest) (*StartTranscodeResp, e
 		"TemplateId": []string{req.TemplateId},
 	}
 
-	reqBody := struct {
-		Vid      string
-		Input    map[string]interface{}
-		Priority int
-	}{
-		Vid:      req.Vid,
-		Input:    req.Input,
-		Priority: req.Priority,
-	}
-	body, err := json.Marshal(reqBody)
+	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "marshal body failed")
 	}

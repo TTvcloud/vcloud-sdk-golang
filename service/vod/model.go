@@ -67,10 +67,12 @@ type GetOriginVideoPlayInfoData struct {
 }
 
 type StartTranscodeRequest struct {
-	Vid        string
-	TemplateId string
-	Input      map[string]interface{}
-	Priority   int
+	Vid          string
+	TemplateId   string `json:"-"`
+	Input        map[string]interface{}
+	Priority     int
+	CallbackArgs string
+	CallbackUri  string
 }
 
 type StartTranscodeResult struct {

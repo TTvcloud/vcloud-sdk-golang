@@ -28,10 +28,12 @@ func StartTranscodeExample() {
 	}
 
 	req := &vod.StartTranscodeRequest{
-		Vid:        "your vid",
-		TemplateId: "your template id",
-		Input:      input,
-		Priority:   0,
+		Vid:          "your vid",
+		TemplateId:   "your template id",
+		Input:        input,
+		Priority:     0,
+		CallbackUri:  "rms: your rms topic",
+		CallbackArgs: "",
 	}
 
 	resp, err := instance.StartTranscode(req)
