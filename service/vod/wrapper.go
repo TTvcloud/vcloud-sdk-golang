@@ -404,7 +404,7 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 			var weightsMap map[string]int
 			var exist bool
 			resp, err := p.GetCdnDomainWeights(spaceName)
-			if err != nil || resp.ResponseMetadata.Error != nil {
+			if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
 				weightsMap = fallbackWeights
 			} else {
 				weightsMap, exist = resp.Result[spaceName]
@@ -421,15 +421,13 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 				for range time.Tick(UPDATE_INTERVAL * time.Second) {
 					var weightsMap map[string]int
 					resp, err := p.GetCdnDomainWeights(spaceName)
-					if err != nil {
+					if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
 						weightsMap = fallbackWeights
-					}
-					if err := resp.ResponseMetadata.Error; err != nil {
-						weightsMap = fallbackWeights
-					}
-					weightsMap, exist := resp.Result[spaceName]
-					if !exist || len(weightsMap) == 0 {
-						weightsMap = fallbackWeights
+					} else {
+						weightsMap, exist := resp.Result[spaceName]
+						if !exist || len(weightsMap) == 0 {
+							weightsMap = fallbackWeights
+						}
 					}
 					p.Lock.Lock()
 					p.DomainCache[spaceName] = weightsMap
