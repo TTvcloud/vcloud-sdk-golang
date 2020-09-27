@@ -53,8 +53,8 @@ type metadata struct {
 
 // 统一的JSON返回结果
 type CommonResponse struct {
-	ResponseMetadata ResponseMetadata
-	Result           interface{} `json:"Result,omitempty"`
+	ResponseMetadata ResponseMetadata `json:"ResponseMetadata"`
+	Result           interface{}      `json:"Result,omitempty"`
 }
 
 type BaseResp struct {
@@ -64,18 +64,17 @@ type BaseResp struct {
 }
 
 type ErrorObj struct {
-	CodeN   int
-	Code    string
-	Message string
+	Code    string `json:"Code,omitempty"`
+	Message string `json:"Message,omitempty"`
 }
 
 type ResponseMetadata struct {
-	RequestId string
-	Service   string    `json:",omitempty"`
-	Region    string    `json:",omitempty"`
-	Action    string    `json:",omitempty"`
-	Version   string    `json:",omitempty"`
-	Error     *ErrorObj `json:",omitempty"`
+	RequestId string    `json:"RequestId"`
+	Service   string    `json:"Service"`
+	Region    string    `json:"Region"`
+	Action    string    `json:"Action"`
+	Version   string    `json:"Version"`
+	Error     *ErrorObj `json:"Error,omitempty"`
 }
 
 type Policy struct {
