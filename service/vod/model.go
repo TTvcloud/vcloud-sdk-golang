@@ -17,7 +17,7 @@ type GetPlayInfoReq struct {
 
 // GetPlayInfo
 type GetPlayInfoResp struct {
-	ResponseMetadata *base.ResponseMetadata
+	ResponseMetadata base.ResponseMetadata `json:"ResponseMetadata"`
 	Result           *GetPlayInfoData `json:"Result,omitempty"`
 }
 

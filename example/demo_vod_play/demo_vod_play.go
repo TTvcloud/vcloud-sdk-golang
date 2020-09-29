@@ -26,7 +26,7 @@ func main() {
 	instance := vod.NewInstance()
 	query := vod.GetPlayInfoReq{Vid: vid}
 	resp, code, _ := instance.GetPlayInfo(query)
-	fmt.Printf("resp:%+v code:%d\n", resp, code)
+	fmt.Printf("resp:%+v code:%s\n", resp, code)
 	fmt.Println(code)
 	b, _ := json.Marshal(resp)
 	fmt.Println(string(b))
@@ -35,8 +35,8 @@ func main() {
 	query2 := url.Values{}
 	query2.Set("Vid", vid)
 
-	resp2, code, _ := instance.GetOriginVideoPlayInfo(query2)
-	fmt.Printf("resp:%+v code:%d\n", resp2, code)
+	resp2, code2, _ := instance.GetOriginVideoPlayInfo(query2)
+	fmt.Printf("resp:%+v code:%s\n", resp2, code2)
 	fmt.Println(code)
 	b2, _ := json.Marshal(resp2)
 	fmt.Println(string(b2))
