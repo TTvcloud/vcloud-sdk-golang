@@ -63,8 +63,6 @@ var (
 			Host:    "vod.bytedanceapi.com",
 			Header: http.Header{
 				"Accept": []string{"application/json"},
-				"X-Amz-Service": []string{"vod"},
-				"X-Amz-Region": []string{base.RegionCnNorth1},
 			},
 			Credentials: base.Credentials{Region: base.RegionCnNorth1, Service: "vod"},
 		},
@@ -73,8 +71,6 @@ var (
 			Host:    "vod.ap-singapore-1.bytedanceapi.com",
 			Header: http.Header{
 				"Accept": []string{"application/json"},
-				"X-Amz-Service": []string{"vod"},
-				"X-Amz-Region": []string{base.RegionApSingapore},
 			},
 			Credentials: base.Credentials{Region: base.RegionApSingapore, Service: "vod"},
 		},
@@ -83,8 +79,6 @@ var (
 			Host:    "vod.us-east-1.bytedanceapi.com",
 			Header: http.Header{
 				"Accept": []string{"application/json"},
-				"X-Amz-Service": []string{"vod"},
-				"X-Amz-Region": []string{base.RegionUsEast1},
 			},
 			Credentials: base.Credentials{Region: base.RegionUsEast1, Service: "vod"},
 		},
@@ -95,8 +89,6 @@ var (
 		Host:    "vod.bytedanceapi.com",
 		Header: http.Header{
 			"Accept": []string{"application/json"},
-			"X-Amz-Service": []string{"vod"},
-			"X-Amz-Region": []string{base.RegionCnNorth1},
 		},
 		Credentials: base.Credentials{Region: base.RegionCnNorth1, Service: "vod"},
 	}
