@@ -101,7 +101,7 @@ var (
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"GetPlayInfo"},
-				"Version": []string{"2019-03-15"},
+				"Version": []string{"2020-08-01"},
 			},
 		},
 		"RedirectPlay": {
