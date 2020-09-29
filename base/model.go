@@ -53,22 +53,22 @@ type metadata struct {
 
 // 统一的JSON返回结果
 type CommonResponse struct {
-	ResponseMetadata *ResponseMetadata `json:"ResponseMetadata"`
-	Result           interface{}       `json:"Result,omitempty"`
+	ResponseMetadata ResponseMetadata `json:"ResponseMetadata"`
+	Result           interface{}      `json:"Result,omitempty"`
 }
 
 type ResponseMetadata struct {
-	RequestID string         `json:"RequestId"`
-	Action    string         `json:"Action"`
-	Version   string         `json:"Version"`
-	Service   string         `json:"Service"`
-	Region    string         `json:"Region"`
-	Error     *ResponseError `json:"Error,omitempty"`
+	RequestID string    `json:"RequestId"`
+	Action    string    `json:"Action,omitempty"`
+	Version   string    `json:"Version,omitempty"`
+	Service   string    `json:"Service,omitempty"`
+	Region    string    `json:"Region,omitempty"`
+	Error     *ErrorObj `json:"Error,omitempty"`
 }
 
-type ResponseError struct {
-	Code    PublicErrorCode `json:"Code"`
-	Message string          `json:"Message"`
+type ErrorObj struct {
+	Code    string `json:"Code"`
+	Message string `json:"Message"`
 }
 
 type BaseResp struct {
