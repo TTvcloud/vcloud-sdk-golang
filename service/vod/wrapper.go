@@ -10,26 +10,62 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/pkg/errors"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 //GetPlayInfo 获取播放信息
-func (p *Vod) GetPlayInfo(query url.Values) (*GetPlayInfoResp, int, error) {
+func (p *Vod) GetPlayInfo(video GetPlayInfoReq) (*GetPlayInfoResp, int, error) {
+	vid := video.Vid
+	if len(vid) == 0 {
+		return nil, http.StatusBadRequest, errors.New("Empty Vid")
+	}
+	query := url.Values{}
+	query.Set("Vid", video.Vid)
+	query.Set("Base64", strconv.FormatInt(video.Base64, 10))
+	query.Set("Ssl", strconv.FormatInt(video.Ssl, 10))
+
+	if len(video.FormatType) > 0 {
+		query.Set("Format", video.FormatType)
+	}
+	if len(video.CodecType) > 0 {
+		query.Set("Codec", video.CodecType)
+	}
+	if len(video.Definition) > 0 {
+		query.Set("Definition", video.Definition)
+	}
+	if len(video.Watermark) > 0 {
+		query.Set("Watermark", video.Watermark)
+	}
+	if len(video.StreamType) > 0 {
+		query.Set("StreamType", video.StreamType)
+	}
+
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
 		return nil, status, err
 	}
 
 	output := new(GetPlayInfoResp)
-	if err := json.Unmarshal(respBody, output); err != nil {
+	jsonTag := os.Getenv("JSON_FORMATTER")
+	switch jsonTag {
+	case base.JSON_FORMATTER_JSONITER:
+		jsonFormatter := jsoniter.ConfigCompatibleWithStandardLibrary
+		err = jsonFormatter.Unmarshal(respBody, output)
+	default:
+		err = json.Unmarshal(respBody, output)
+	}
+	if err != nil {
 		return nil, status, err
 	} else {
-		output.ResponseMetadata.Service = "vod"
 		return output, status, nil
 	}
 }
@@ -55,7 +91,16 @@ func (p *Vod) StartTranscode(req *StartTranscodeRequest) (*StartTranscodeResp, e
 		"TemplateId": []string{req.TemplateId},
 	}
 
-	body, err := json.Marshal(req)
+	reqBody := struct {
+		Vid      string
+		Input    map[string]interface{}
+		Priority int
+	}{
+		Vid:      req.Vid,
+		Input:    req.Input,
+		Priority: req.Priority,
+	}
+	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, errors.Wrap(err, "marshal body failed")
 	}
@@ -404,13 +449,15 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 			var weightsMap map[string]int
 			var exist bool
 			resp, err := p.GetCdnDomainWeights(spaceName)
-			if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+			if err != nil {
 				weightsMap = fallbackWeights
-			} else {
-				weightsMap, exist = resp.Result[spaceName]
-				if !exist || len(weightsMap) == 0 {
-					weightsMap = fallbackWeights
-				}
+			}
+			if err := resp.ResponseMetadata.Error; err != nil {
+				weightsMap = fallbackWeights
+			}
+			weightsMap, exist = resp.Result[spaceName]
+			if !exist || len(weightsMap) == 0 {
+				weightsMap = fallbackWeights
 			}
 			p.DomainCache[spaceName] = weightsMap
 
@@ -421,13 +468,15 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 				for range time.Tick(UPDATE_INTERVAL * time.Second) {
 					var weightsMap map[string]int
 					resp, err := p.GetCdnDomainWeights(spaceName)
-					if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+					if err != nil {
 						weightsMap = fallbackWeights
-					} else {
-						weightsMap, exist := resp.Result[spaceName]
-						if !exist || len(weightsMap) == 0 {
-							weightsMap = fallbackWeights
-						}
+					}
+					if err := resp.ResponseMetadata.Error; err != nil {
+						weightsMap = fallbackWeights
+					}
+					weightsMap, exist := resp.Result[spaceName]
+					if !exist || len(weightsMap) == 0 {
+						weightsMap = fallbackWeights
 					}
 					p.Lock.Lock()
 					p.DomainCache[spaceName] = weightsMap
@@ -545,17 +594,4 @@ func (p *Vod) AddResourcesFormat(list []string, resources []string, resourceForm
 
 func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) (*base.SecurityToken2, error) {
 	return p.GetVideoPlayAuthWithExpiredTime(vidList, streamTypeList, watermarkList, time.Hour)
-}
-
-func (p *Vod) GetUploadAuthWithExpiredTime(expiredTime time.Duration) (*base.SecurityToken2, error) {
-	inlinePolicy := new(base.Policy)
-	actions := []string{"vod:ApplyUpload", "vod:CommitUpload"}
-	resources := make([]string, 0)
-	statement := base.NewAllowStatement(actions, resources)
-	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
-	return p.SignSts2(inlinePolicy, expiredTime)
-}
-
-func (p *Vod) GetUploadAuth() (*base.SecurityToken2, error) {
-	return p.GetUploadAuthWithExpiredTime(time.Hour)
 }

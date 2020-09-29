@@ -22,10 +22,9 @@ func main() {
 	vid := "your vid"
 
 	// GetPlayInfo
-	query := url.Values{}
-	query.Set("video_id", vid)
-	instance := vod.NewInstance()
 
+	instance := vod.NewInstance()
+	query := vod.GetPlayInfoReq{Vid: vid}
 	resp, code, _ := instance.GetPlayInfo(query)
 	fmt.Printf("resp:%+v code:%d\n", resp, code)
 	fmt.Println(code)

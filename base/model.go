@@ -53,28 +53,28 @@ type metadata struct {
 
 // 统一的JSON返回结果
 type CommonResponse struct {
-	ResponseMetadata ResponseMetadata `json:"ResponseMetadata"`
-	Result           interface{}      `json:"Result,omitempty"`
+	ResponseMetadata *ResponseMetadata `json:"ResponseMetadata"`
+	Result           interface{}       `json:"Result,omitempty"`
+}
+
+type ResponseMetadata struct {
+	RequestID string         `json:"RequestId"`
+	Action    string         `json:"Action"`
+	Version   string         `json:"Version"`
+	Service   string         `json:"Service"`
+	Region    string         `json:"Region"`
+	Error     *ResponseError `json:"Error,omitempty"`
+}
+
+type ResponseError struct {
+	Code    PublicErrorCode `json:"Code"`
+	Message string          `json:"Message"`
 }
 
 type BaseResp struct {
 	Status      string
 	CreatedTime int64
 	UpdatedTime int64
-}
-
-type ErrorObj struct {
-	Code    string `json:"Code,omitempty"`
-	Message string `json:"Message,omitempty"`
-}
-
-type ResponseMetadata struct {
-	RequestId string    `json:"RequestId"`
-	Service   string    `json:"Service"`
-	Region    string    `json:"Region"`
-	Action    string    `json:"Action"`
-	Version   string    `json:"Version"`
-	Error     *ErrorObj `json:"Error,omitempty"`
 }
 
 type Policy struct {
