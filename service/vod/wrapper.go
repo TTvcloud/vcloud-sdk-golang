@@ -96,6 +96,52 @@ func (p *Vod) UploadMediaByUrl(params UploadMediaByUrlParams) (*UploadMediaByUrl
 	}
 }
 
+func (p *Vod) UploadVideoByUrl(params UrlUploadParams) (*UploadVideoByUrlResp, error) {
+	query := url.Values{}
+	query.Add("SpaceName", params.SpaceName)
+	bts, err := json.Marshal(params.URLSets)
+	if err != nil {
+		return nil, err
+	}
+	query.Add("URLSets", string(bts))
+	respBody, status, err := p.Query("UploadVideoByUrl", query)
+
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
+	}
+
+	resp := &UploadVideoByUrlResp{}
+	if err := json.Unmarshal(respBody, resp); err != nil {
+		return nil, err
+	} else {
+		resp.ResponseMetadata.Service = "vod"
+		return resp, nil
+	}
+}
+
+func (p *Vod) QueryUploadTaskInfo(params UrlQueryParams) (*QueryUploadTaskInfoResp, error) {
+	query := url.Values{}
+	query.Add("JobIds", params.JobIds)
+	respBody, status, err := p.Query("QueryUploadTaskInfo", query)
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
+	}
+
+	resp := &QueryUploadTaskInfoResp{}
+	if err := json.Unmarshal(respBody, resp); err != nil {
+		return nil, err
+	} else {
+		resp.ResponseMetadata.Service = "vod"
+		return resp, nil
+	}
+}
+
 func (p *Vod) ApplyUpload(params ApplyUploadParam) (*ApplyUploadResp, error) {
 	query := url.Values{}
 	query.Add("SpaceName", params.SpaceName)
@@ -404,7 +450,7 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 			var weightsMap map[string]int
 			var exist bool
 			resp, err := p.GetCdnDomainWeights(spaceName)
-			if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+			if err != nil || resp == nil || resp.ResponseMetadata == nil || resp.ResponseMetadata.Error != nil {
 				weightsMap = fallbackWeights
 			} else {
 				weightsMap, exist = resp.Result[spaceName]
@@ -421,7 +467,7 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 				for range time.Tick(UPDATE_INTERVAL * time.Second) {
 					var weightsMap map[string]int
 					resp, err := p.GetCdnDomainWeights(spaceName)
-					if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+					if err != nil || resp == nil || resp.ResponseMetadata == nil || resp.ResponseMetadata.Error != nil {
 						weightsMap = fallbackWeights
 					} else {
 						weightsMap, exist := resp.Result[spaceName]

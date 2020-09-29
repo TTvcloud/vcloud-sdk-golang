@@ -94,6 +94,14 @@ type UploadMediaByUrlResp struct {
 	Result UploadMediaByUrlResult
 }
 
+type UploadVideoByUrlResp struct {
+	base.CommonResponse
+}
+
+type QueryUploadTaskInfoResp struct {
+	base.CommonResponse
+}
+
 type VideoFormat string
 
 const (
@@ -106,6 +114,26 @@ type UploadMediaByUrlParams struct {
 	Format       VideoFormat
 	SourceUrls   []string
 	CallbackArgs string
+}
+
+type UrlUploadParams struct {
+	SpaceName string   `json:"SpaceName"`
+	URLSets   []URLSet `json:"URLSets"`
+}
+
+type URLSet struct {
+	SourceUrl    string `json:"SourceUrl"`
+	CallbackArgs string `json:"CallbackArgs"`
+	Md5          string `json:"Md5"`
+	TemplateId   string `json:"TemplateId"`
+	Title        string `json:"Title"`
+	Description  string `json:"Description"`
+	Tags         string `json:"Tags"`
+	Category     string `json:"Category"`
+}
+
+type UrlQueryParams struct {
+	JobIds string `json:"JobIds"`
 }
 
 type FileType string

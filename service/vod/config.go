@@ -60,7 +60,9 @@ var (
 	ServiceInfoMap = map[string]*base.ServiceInfo{
 		base.RegionCnNorth1: {
 			Timeout: 5 * time.Second,
-			Host:    "vod.bytedanceapi.com",
+			//Host:    "vod.bytedanceapi.com",
+			//TODO 测试后修改回来
+			Host: "staging-openapi-boe.byted.org",
 			Header: http.Header{
 				"Accept": []string{"application/json"},
 			},
@@ -132,6 +134,22 @@ var (
 			Query: url.Values{
 				"Action":  []string{"UploadMediaByUrl"},
 				"Version": []string{"2018-01-01"},
+			},
+		},
+		"QueryUploadTaskInfo": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"QueryUploadTaskInfo"},
+				"Version": []string{"2020-08-01"},
+			},
+		},
+		"UploadVideoByUrl": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"UploadVideoByUrl"},
+				"Version": []string{"2020-08-01"},
 			},
 		},
 		"ApplyUpload": {

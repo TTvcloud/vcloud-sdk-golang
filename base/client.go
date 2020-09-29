@@ -174,6 +174,7 @@ func (client *Client) Query(api string, query url.Values) ([]byte, int, error) {
 		Path:     apiInfo.Path,
 		RawQuery: query.Encode(),
 	}
+
 	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), nil)
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
@@ -243,7 +244,6 @@ func (client *Client) makeRequest(api string, req *http.Request, timeout time.Du
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	req = req.WithContext(ctx)
-
 	resp, err := client.Client.Do(req)
 	if err != nil {
 		return []byte(""), 500, err
@@ -251,6 +251,7 @@ func (client *Client) makeRequest(api string, req *http.Request, timeout time.Du
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
 		return []byte(""), resp.StatusCode, err
 	}
