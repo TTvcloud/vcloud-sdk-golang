@@ -75,9 +75,7 @@ func Sign4(request *http.Request, credential Credentials) *http.Request {
 	// Task 3
 	signingKey := signingKeyV4(keys.SecretAccessKey, meta.date, meta.region, meta.service)
 	signature := signatureV4(signingKey, stringToSign)
-
-	request.Header.Set("X-Amz-Region", keys.Region)
-	request.Header.Set("X-Amz-Service", keys.Service)
+	
 	request.Header.Set("Authorization", buildAuthHeaderV4(signature, meta, keys))
 
 	return request
