@@ -71,19 +71,57 @@ func (p *Vod) GetPlayInfo(video GetPlayInfoReq) (*GetPlayInfoResp, int, error) {
 }
 
 //GetOriginVideoPlayInfo 获取原片播放信息
-func (p *Vod) GetOriginVideoPlayInfo(query url.Values) (*GetOriginVideoPlayInfoResp, int, error) {
+func (p *Vod) GetOriginVideoPlayInfo(req GetOriginVideoPlayInfoReq) (*GetOriginVideoPlayInfoResp, int, error) {
+	query := url.Values{}
+	query.Set("Vid", req.Vid)
+	query.Set("Base64", strconv.FormatInt(req.Base64, 10))
+	query.Set("Ssl", strconv.FormatInt(req.Ssl, 10))
 	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
 	if err != nil {
 		return nil, status, err
 	}
-
 	output := new(GetOriginVideoPlayInfoResp)
-	if err := json.Unmarshal(respBody, output); err != nil {
+	jsonTag := os.Getenv("JSON_FORMATTER")
+	switch jsonTag {
+	case base.JSON_FORMATTER_JSONITER:
+		jsonFormatter := jsoniter.ConfigCompatibleWithStandardLibrary
+		err = jsonFormatter.Unmarshal(respBody, output)
+	default:
+		err = json.Unmarshal(respBody, output)
+	}
+	if err != nil {
 		return nil, status, err
 	} else {
-		output.ResponseMetadata.Service = "vod"
 		return output, status, nil
 	}
+}
+
+
+//GetRedirectPlayUrl get redirected playback addres
+func (p *Vod) GetRedirectPlayUrl(req RedirectPlayReq) (string, error) {
+	query := url.Values{}
+	if req.Vid == "" {
+		return "", errors.New("Vid not set")
+	}
+	query.Add("Vid", req.Vid)
+	if len(req.Definition) > 0 {
+		query.Set("Definition", req.Definition)
+	}
+	if req.Watermark != "" {
+		query.Add("Watermark", req.Watermark)
+	}
+	if req.Expires != "" {
+		query.Add("X-Amz-Expires", req.Expires)
+	}
+
+	token, err := p.GetSignUrl("RedirectPlay", query)
+	if err != nil {
+		return "", err
+	}
+
+	apiInfo := p.ApiInfoList["RedirectPlay"]
+	url := fmt.Sprintf("http://%s%s?%s", p.ServiceInfo.Host, apiInfo.Path, token)
+	return url, nil
 }
 
 func (p *Vod) StartTranscode(req *StartTranscodeRequest) (*StartTranscodeResp, error) {
@@ -369,33 +407,6 @@ func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
 
 	b, _ := json.Marshal(ret)
 	return base64.StdEncoding.EncodeToString(b), nil
-}
-
-//GetRedirectPlayUrl get redirected playback addres
-func (p *Vod) GetRedirectPlayUrl(params RedirectPlayParam) (string, error) {
-	query := url.Values{}
-	if params.Vid == "" {
-		return "", errors.New("Vid not set")
-	}
-	query.Add("Vid", params.Vid)
-	if params.Definition != "" {
-		query.Add("Definition", string(params.Definition))
-	}
-	if params.Watermark != "" {
-		query.Add("Watermark", params.Watermark)
-	}
-	if params.Expires != "" {
-		query.Add("X-Amz-Expires", params.Expires)
-	}
-
-	token, err := p.GetSignUrl("RedirectPlay", query)
-	if err != nil {
-		return "", err
-	}
-
-	apiInfo := p.ApiInfoList["RedirectPlay"]
-	url := fmt.Sprintf("http://%s%s?%s", p.ServiceInfo.Host, apiInfo.Path, token)
-	return url, nil
 }
 
 func (p *Vod) GetUploadAuthToken(query url.Values) (string, error) {
