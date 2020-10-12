@@ -13,10 +13,10 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	StartTranscodeExample()
+	StartWorkflowExample()
 }
 
-func StartTranscodeExample() {
+func StartWorkflowExample() {
 	instance := vod.NewInstance()
 	instance.SetCredential(base.Credentials{
 		AccessKeyID:     "your ak",
@@ -27,16 +27,15 @@ func StartTranscodeExample() {
 		"watermark_str": "test",
 	}
 
-	req := &vod.StartTranscodeRequest{
+	req := &vod.StartWorkflowRequest{
 		Vid:          "your vid",
 		TemplateId:   "your template id",
 		Input:        input,
 		Priority:     0,
-		CallbackUri:  "rms: your rms topic",
 		CallbackArgs: "",
 	}
 
-	resp, err := instance.StartTranscode(req)
+	resp, err := instance.StartWorkflow(req)
 	if err != nil {
 		fmt.Println(err)
 		return
