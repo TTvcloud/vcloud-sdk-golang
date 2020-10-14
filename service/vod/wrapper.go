@@ -142,6 +142,58 @@ func (p *Vod) QueryUploadTaskInfo(params UrlQueryParams) (*QueryUploadTaskInfoRe
 	}
 }
 
+func (p *Vod) ApplyUploadInfo(params ApplyUploadInfoParam) (*ApplyUploadInfoResp, error) {
+	query := url.Values{}
+	query.Add("SpaceName", params.SpaceName)
+	query.Add("SessionKey", params.SessionKey)
+	if params.FileSize != 0 {
+		query.Add("FileSize", string(params.FileSize))
+	}
+	respBody, status, err := p.Query("ApplyUploadInfo", query)
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
+	}
+
+	resp := &ApplyUploadInfoResp{}
+	if err := json.Unmarshal(respBody, resp); err != nil {
+		return nil, err
+	} else {
+		resp.ResponseMetadata.Service = "vod"
+		return resp, nil
+	}
+}
+
+func (p *Vod) CommitUploadInfo(params CommitUploadInfoParam) (*CommitUploadInfoResp, error) {
+	query := url.Values{}
+	form := url.Values{}
+	form.Add("SpaceName", params.SpaceName)
+	form.Add("SessionKey", params.SessionKey)
+	if params.Functions != "" {
+		form.Add("Functions", params.Functions)
+	}
+	if params.CallbackArgs != "" {
+		form.Add("CallbackArgs", params.CallbackArgs)
+	}
+	respBody, status, err := p.Post("CommitUploadInfo", query, form)
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
+	}
+
+	resp := &CommitUploadInfoResp{}
+	if err := json.Unmarshal(respBody, resp); err != nil {
+		return nil, err
+	} else {
+		resp.ResponseMetadata.Service = "vod"
+		return resp, nil
+	}
+}
+
 func (p *Vod) ApplyUpload(params ApplyUploadParam) (*ApplyUploadResp, error) {
 	query := url.Values{}
 	query.Add("SpaceName", params.SpaceName)
@@ -287,6 +339,71 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (str
 	return oid, sessionKey, nil
 }
 
+func (p *Vod) UploadV3(fileBytes []byte, spaceName string) (string, string, error) {
+	if len(fileBytes) == 0 {
+		return "", "", fmt.Errorf("file size is zero")
+	}
+
+	params := ApplyUploadInfoParam{
+		SpaceName: spaceName,
+	}
+
+	resp, err := p.ApplyUploadInfo(params)
+	if err != nil {
+		return "", "", err
+	}
+
+	if resp.ResponseMetadata.Error != nil && resp.ResponseMetadata.Error.Code != "0" {
+		return "", "", fmt.Errorf("%+v", resp.ResponseMetadata.Error)
+	}
+
+	if len(resp.Result.UploadAddress.UploadHosts) == 0 {
+		return "", "", fmt.Errorf("no tos host found")
+	}
+	if &resp.Result.UploadAddress.StoreInfos[0] == nil {
+		return "", "", fmt.Errorf("no store info found")
+	}
+
+	// upload file
+	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(fileBytes))
+	tosHost := resp.Result.UploadAddress.UploadHosts[0]
+	oid := resp.Result.UploadAddress.StoreInfos[0].StoreUri
+	sessionKey := resp.Result.UploadAddress.SessionKey
+	auth := resp.Result.UploadAddress.StoreInfos[0].Auth
+	url := fmt.Sprintf("http://%s/%s", tosHost, oid)
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(fileBytes))
+	if err != nil {
+		return "", "", err
+	}
+	req.Header.Set("Content-CRC32", checkSum)
+	req.Header.Set("Authorization", auth)
+
+	client := &http.Client{}
+	rsp, err := client.Do(req)
+	if err != nil {
+		return "", "", err
+	}
+	if rsp.StatusCode != http.StatusOK {
+		b, _ := ioutil.ReadAll(rsp.Body)
+		return "", "", fmt.Errorf("http status=%v, body=%s, remote_addr=%v", rsp.StatusCode, string(b), req.Host)
+	}
+	defer rsp.Body.Close()
+
+	var tosResp struct {
+		Success int         `json:"success"`
+		Payload interface{} `json:"payload"`
+	}
+	err = json.NewDecoder(rsp.Body).Decode(&tosResp)
+	if err != nil {
+		return "", "", err
+	}
+
+	if tosResp.Success != 0 {
+		return "", "", fmt.Errorf("tos err:%+v", tosResp)
+	}
+	return oid, sessionKey, nil
+}
+
 func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileType FileType) (string, error) {
 	oid, _, err := p.Upload(fileBytes, spaceName, fileType)
 	if err != nil {
@@ -311,6 +428,10 @@ func (p *Vod) UploadVideoWithCallbackArgs(fileBytes []byte, spaceName string, fi
 	return p.UploadVideoInner(fileBytes, spaceName, fileType, callbackArgs, funcs...)
 }
 
+func (p *Vod) UploadVideoWithCallback(fileBytes []byte, spaceName string, callbackArgs string, funcs ...Function) (*CommitUploadInfoResp, error) {
+	return p.UploadVideoInnerV3(fileBytes, spaceName, callbackArgs, funcs...)
+}
+
 func (p *Vod) UploadVideo(fileBytes []byte, spaceName string, fileType FileType, funcs ...Function) (*CommitUploadResp, error) {
 	return p.UploadVideoInner(fileBytes, spaceName, fileType, "", funcs...)
 }
@@ -330,6 +451,31 @@ func (p *Vod) UploadVideoInner(fileBytes []byte, spaceName string, fileType File
 		},
 	}
 	commitResp, err := p.CommitUpload(param)
+	if err != nil {
+		return nil, err
+	}
+	return commitResp, nil
+}
+
+func (p *Vod) UploadVideoInnerV3(fileBytes []byte, spaceName string, callbackArgs string, funcs ...Function) (*CommitUploadInfoResp, error) {
+	_, sessionKey, err := p.UploadV3(fileBytes, spaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	fbts, err := json.Marshal(funcs)
+	if err != nil {
+		panic(err)
+	}
+
+	params := CommitUploadInfoParam{
+		SpaceName:    spaceName,
+		SessionKey:   sessionKey,
+		Functions:    string(fbts),
+		CallbackArgs: callbackArgs,
+	}
+
+	commitResp, err := p.CommitUploadInfo(params)
 	if err != nil {
 		return nil, err
 	}
@@ -596,7 +742,7 @@ func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) 
 func (p *Vod) GetUploadAuthWithExpiredTime(expiredTime time.Duration) (*base.SecurityToken2, error) {
 	inlinePolicy := new(base.Policy)
 	actions := []string{"vod:ApplyUpload", "vod:CommitUpload"}
-	resources := make([]string, 0)
+	resources := []string{"*"}
 	statement := base.NewAllowStatement(actions, resources)
 	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
 	return p.SignSts2(inlinePolicy, expiredTime)
