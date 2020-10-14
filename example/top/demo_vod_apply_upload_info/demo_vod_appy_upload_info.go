@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
@@ -21,13 +19,12 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	jobIds := make([]string, 0)
-	jobId := "cb29879f2338431d970d343257cb7da4"
-	jobIds = append(jobIds, jobId)
-	str := strings.Join(jobIds, ",")
+	space := "james-test"
 
-	params := vod.UrlQueryParams{JobIds: str}
-	resp, err := instance.QueryUploadTaskInfo(params)
+	params := vod.ApplyUploadInfoParam{
+		SpaceName: space,
+	}
+	resp, err := instance.ApplyUploadInfo(params)
 	if err != nil {
 		fmt.Printf("err:%s\n")
 	}
@@ -36,5 +33,5 @@ func main() {
 		return
 	}
 	bts, _ := json.Marshal(resp)
-	fmt.Printf("resp = %s", bts)
+	fmt.Printf("\nresp = %s", bts)
 }

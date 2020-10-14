@@ -65,6 +65,8 @@ var (
 			Host: "staging-openapi-boe.byted.org",
 			Header: http.Header{
 				"Accept": []string{"application/json"},
+				//TODO 测试 Apply 和 Commit 的时候加上这个头
+				"X-TT-ENV": []string{"boe_husky_feature"},
 			},
 			Credentials: base.Credentials{Region: base.RegionCnNorth1, Service: "vod"},
 		},
@@ -149,6 +151,22 @@ var (
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"UploadVideoByUrl"},
+				"Version": []string{"2020-08-01"},
+			},
+		},
+		"ApplyUploadInfo": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"ApplyUploadInfo"},
+				"Version": []string{"2020-08-01"},
+			},
+		},
+		"CommitUploadInfo": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"CommitUploadInfo"},
 				"Version": []string{"2020-08-01"},
 			},
 		},

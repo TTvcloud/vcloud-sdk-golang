@@ -2,6 +2,7 @@ package vod
 
 import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
+	"github.com/TTvcloud/vcloud-sdk-golang/service/vod/top"
 )
 
 type GetPlayInfoReq struct {
@@ -26,7 +27,7 @@ type GetPlayInfoData struct {
 	VideoID        string      `json:"Vid"`
 	PosterURL      string      `json:"PosterUrl"`              //封面地址
 	VideoDuration  float32     `json:"Duration"`               //视频时长(单位：s)
-	MediaType      string      `json:"FileType"`              //返回的媒体类型(video/audio)
+	MediaType      string      `json:"FileType"`               //返回的媒体类型(video/audio)
 	EnableAdaptive bool        `json:"EnableAdaptive"`         //是否关键帧对其
 	VideoList      []*PlayInfo `json:"PlayInfoList,omitempty"` //视频列表
 	TotalCount     int         `json:"TotalCount"`             //视频列表数量
@@ -184,6 +185,28 @@ type UploadAddress struct {
 	AdvanceOption AdvanceOption
 }
 
+type ApplyUploadInfoParam struct {
+	SpaceName  string
+	SessionKey string
+	FileSize   int
+}
+
+type CommitUploadInfoParam struct {
+	SpaceName    string
+	SessionKey   string
+	CallbackArgs string
+	Functions    string
+}
+
+type ApplyUploadInfoResp struct {
+	ResponseMetadata *base.ResponseMetadata `json:"ResponseMetadata"`
+	Result           top.ApplyData          `json:"Result,omitempty"`
+}
+
+type CommitUploadInfoResp struct {
+	base.CommonResponse
+}
+
 type VideoDefinition string
 
 const (
@@ -258,8 +281,8 @@ type CommitUploadBody struct {
 }
 
 type Function struct {
-	Name  string
-	Input interface{}
+	Name  string      `json:"Name"`
+	Input interface{} `json:"Input,,omitempty"`
 }
 
 type SnapshotInput struct {
