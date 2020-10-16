@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/crc32"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -175,8 +177,8 @@ func (p *Vod) ModifyVideoInfo(body ModifyVideoInfoBody) (*ModifyVideoInfoResp, e
 	}
 }
 
-func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (string, string, error) {
-	if len(fileBytes) == 0 {
+func (p *Vod) Upload(rd io.Reader, size int64, spaceName string, fileType FileType) (string, string, error) {
+	if size == 0 {
 		return "", "", fmt.Errorf("file size is zero")
 	}
 
@@ -202,47 +204,214 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (str
 	}
 
 	// upload file
-	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(fileBytes))
 	tosHost := resp.Result.UploadAddress.UploadHosts[0]
 	oid := resp.Result.UploadAddress.StoreInfos[0].StoreUri
 	sessionKey := resp.Result.UploadAddress.SessionKey
 	auth := resp.Result.UploadAddress.StoreInfos[0].Auth
-	url := fmt.Sprintf("http://%s/%s", tosHost, oid)
-	req, err := http.NewRequest("PUT", url, bytes.NewReader(fileBytes))
-	if err != nil {
-		return "", "", err
-	}
-	req.Header.Set("Content-CRC32", checkSum)
-	req.Header.Set("Authorization", auth)
-
 	client := &http.Client{}
-	rsp, err := client.Do(req)
-	if err != nil {
-		return "", "", err
-	}
-	if rsp.StatusCode != http.StatusOK {
-		b, _ := ioutil.ReadAll(rsp.Body)
-		return "", "", fmt.Errorf("http status=%v, body=%s, remote_addr=%v", rsp.StatusCode, string(b), req.Host)
-	}
-	defer rsp.Body.Close()
-
-	var tosResp struct {
-		Success int         `json:"success"`
-		Payload interface{} `json:"payload"`
-	}
-	err = json.NewDecoder(rsp.Body).Decode(&tosResp)
-	if err != nil {
-		return "", "", err
-	}
-
-	if tosResp.Success != 0 {
-		return "", "", fmt.Errorf("tos err:%+v", tosResp)
+	if int(size) < MinChunckSize {
+		bts, err := ioutil.ReadAll(rd)
+		if err != nil {
+			return "", "", err
+		}
+		if err := p.directUpload(tosHost, oid, auth, bts, client); err != nil {
+			return "", "", err
+		}
+	} else {
+		uploadPart := UploadPartCommon{
+			TosHost: tosHost,
+			Oid:     oid,
+			Auth:    auth,
+		}
+		if err := p.chunkUpload(rd, uploadPart, client); err != nil {
+			return "", "", err
+		}
 	}
 	return oid, sessionKey, nil
 }
 
+func (p *Vod) directUpload(tosHost string, oid string, auth string, fileBytes []byte, client *http.Client) error {
+	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(fileBytes))
+	url := fmt.Sprintf("http://%s/%s", tosHost, oid)
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(fileBytes))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-CRC32", checkSum)
+	req.Header.Set("Authorization", auth)
+
+	rsp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	b, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return err
+	}
+	res := &UploadPartCommonResponse{}
+	if err := json.Unmarshal(b, res); err != nil {
+		return err
+	}
+	if res.Success != 0 {
+		return errors.New(res.Error.Message)
+	}
+	return nil
+}
+
+func (p *Vod) chunkUpload(rd io.Reader, uploadPart UploadPartCommon, client *http.Client) error {
+	uploadID, err := p.initUploadPart(uploadPart.TosHost, uploadPart.Oid, uploadPart.Auth, client)
+	if err != nil {
+		return err
+	}
+	pre, cur := make([]byte, MinChunckSize), make([]byte, MinChunckSize)
+	parts := make([]string, 0)
+
+	n, err := io.ReadFull(rd, pre) // 保留前一个分片，避免最后的分片小于MinChunkSize上传失败
+	if err != nil {
+		return err
+	}
+	pre = pre[:n]
+	i := 0
+	for ; ; i++ {
+		n, err = io.ReadFull(rd, cur)
+		if err == io.EOF {
+			break
+		}
+		if err == io.ErrUnexpectedEOF {
+			//当 io 本身出现问题时，n = 0，n =0 正确情况只有EOF， ErrUnexpectedEOF 为错误，不处理会发生上传不完整情况
+			if n == 0 {
+				return err
+			}
+		} else if err != nil {
+			return err
+		}
+
+		// UploadPart要求分片不能小于MinChunkSize，否则会报错
+		// 所以如果当前分片小于MinChunkSize，表示文件已经读到末尾，当前分片与前一片合起来一起上传。
+		if int64(n) < MinChunckSize {
+			pre = append(pre, cur[:n]...)
+			break
+		}
+
+		part, err := p.uploadPart(uploadPart, uploadID, i, pre, client)
+		if err != nil { // retry part
+			part, err = p.uploadPart(uploadPart, uploadID, i, pre, client)
+		}
+		if err != nil {
+			return err
+		}
+		parts = append(parts, part)
+		copy(pre, cur[:n])
+		pre = pre[:n]
+	}
+	// 退出的条件有两个：文件读EOF；读字节数小于MinChunkSize；这两种情况都需要把pre保存下来的分片上传
+	part, err := p.uploadPart(uploadPart, uploadID, i, pre, client)
+	if err != nil {
+		return err
+	}
+	parts = append(parts, part)
+	return p.uploadMergePart(uploadPart, uploadID, parts, client)
+}
+
+func (p *Vod) initUploadPart(tosHost string, oid string, auth string, client *http.Client) (string, error) {
+	url := fmt.Sprintf("http://%s/%s?uploads", tosHost, oid)
+	req, err := http.NewRequest("PUT", url, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", auth)
+	rsp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	b, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return "", err
+	}
+	res := &UploadPartResponse{}
+	if err := json.Unmarshal(b, res); err != nil {
+		return "", err
+	}
+	if res.Success != 0 {
+		return "", errors.New(res.Error.Message)
+	}
+	return res.PayLoad.UploadID, nil
+}
+
+func (p *Vod) uploadPart(uploadPart UploadPartCommon, uploadID string, partNumber int, data []byte, client *http.Client) (string, error) {
+	url := fmt.Sprintf("http://%s/%s?partNumber=%d&uploadID=%s", uploadPart.TosHost, uploadPart.Oid, partNumber, uploadID)
+	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(data))
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(data))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-CRC32", checkSum)
+	req.Header.Set("Authorization", uploadPart.Auth)
+
+	rsp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	b, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return "", err
+	}
+	res := &UploadPartResponse{}
+	if err := json.Unmarshal(b, res); err != nil {
+		return "", err
+	}
+	if res.Success != 0 {
+		return "", errors.New(res.Error.Message)
+	}
+	return checkSum, nil
+}
+
+func (p *Vod) uploadMergePart(uploadPart UploadPartCommon, uploadID string, checkSum []string, client *http.Client) error {
+	url := fmt.Sprintf("http://%s/%s?uploadID=%s", uploadPart.TosHost, uploadPart.Oid, uploadID)
+	body, err := p.genMergeBody(checkSum)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("PUT", url, bytes.NewReader([]byte(body)))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", uploadPart.Auth)
+	rsp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	b, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return err
+	}
+	res := &UploadMergeResponse{}
+	if err := json.Unmarshal(b, res); err != nil {
+		return err
+	}
+	if res.Success != 0 {
+		return errors.New(res.Error.Message)
+	}
+	return nil
+}
+
+func (p *Vod) genMergeBody(checkSum []string) (string, error) {
+	if len(checkSum) == 0 {
+		return "", errors.New("body crc32 empty")
+	}
+	s := make([]string, len(checkSum))
+	for partNumber, crc := range checkSum {
+		s[partNumber] = fmt.Sprintf("%d:%s", partNumber, crc)
+	}
+	return strings.Join(s, ","), nil
+}
+
 func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileType FileType) (string, error) {
-	oid, _, err := p.Upload(fileBytes, spaceName, fileType)
+	oid, _, err := p.Upload(bytes.NewReader(fileBytes), int64(len(fileBytes)), spaceName, fileType)
 	if err != nil {
 		return "", err
 	}
@@ -261,16 +430,21 @@ func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileT
 	return oid, nil
 }
 
-func (p *Vod) UploadVideoWithCallbackArgs(fileBytes []byte, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
-	return p.UploadVideoInner(fileBytes, spaceName, fileType, callbackArgs, funcs...)
+func (p *Vod) UploadVideoWithCallbackArgs(filePath string, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	return p.UploadVideoInner(file, stat.Size(), spaceName, fileType, callbackArgs, funcs...)
 }
 
-func (p *Vod) UploadVideo(fileBytes []byte, spaceName string, fileType FileType, funcs ...Function) (*CommitUploadResp, error) {
-	return p.UploadVideoInner(fileBytes, spaceName, fileType, "", funcs...)
-}
-
-func (p *Vod) UploadVideoInner(fileBytes []byte, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
-	_, sessionKey, err := p.Upload(fileBytes, spaceName, fileType)
+func (p *Vod) UploadVideoInner(rd io.Reader, size int64, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
+	_, sessionKey, err := p.Upload(rd, size, spaceName, fileType)
 	if err != nil {
 		return nil, err
 	}
@@ -404,7 +578,7 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 			var weightsMap map[string]int
 			var exist bool
 			resp, err := p.GetCdnDomainWeights(spaceName)
-			if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+			if err != nil || resp == nil || resp.ResponseMetadata == nil || resp.ResponseMetadata.Error != nil {
 				weightsMap = fallbackWeights
 			} else {
 				weightsMap, exist = resp.Result[spaceName]
@@ -421,7 +595,7 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 				for range time.Tick(UPDATE_INTERVAL * time.Second) {
 					var weightsMap map[string]int
 					resp, err := p.GetCdnDomainWeights(spaceName)
-					if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+					if err != nil || resp == nil || resp.ResponseMetadata == nil || resp.ResponseMetadata.Error != nil {
 						weightsMap = fallbackWeights
 					} else {
 						weightsMap, exist := resp.Result[spaceName]

@@ -2,9 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
@@ -22,22 +19,18 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	spaceName := "your spaceName"
-	filePath := "your filePath"
+	spaceName := "your space name"
+	filePath := "your file path"
 
 	snapShotFunc := vod.Function{Name: "Snapshot", Input: vod.SnapshotInput{SnapshotTime: 2.3}}
 	getMetaFunc := vod.Function{Name: "GetMeta"}
 
-	dat, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		fmt.Printf("read file from %s error %v", filePath, err)
-		os.Exit(-1)
-	}
-
-	resp, err := instance.UploadVideoWithCallbackArgs(dat, spaceName, vod.VIDEO, "my callback args", getMetaFunc, snapShotFunc)
+	resp, err := instance.UploadVideoWithCallbackArgs(filePath, spaceName, vod.VIDEO, "my callback args", getMetaFunc, snapShotFunc)
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {
 		fmt.Printf("success %v", resp)
 	}
+
+	fmt.Println(resp.Result.Results[0].Vid)
 }

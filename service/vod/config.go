@@ -11,6 +11,7 @@ import (
 
 const (
 	UPDATE_INTERVAL = 10
+	MinChunckSize   = 1024 * 1024 * 20
 )
 
 type Vod struct {
