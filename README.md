@@ -116,7 +116,7 @@ return SignSts2(inlinePolicy, expiredTime)
 [GetPosterUrl](https://open.bytedance.com/docs/4/5335/)
 
 #### token相关
-上传 非STS2 token[GetUploadAuthToken](https://www.byteoc.com/docs/4/6971/)
+上传 非STS2 token: [GetUploadAuthToken](https://www.byteoc.com/docs/4/6971/)
 
 上传 STS2 token: [参考STS2的示例](./example/demo_vod_sts2_upload/demo_vod_sts2_upload.go)
 
