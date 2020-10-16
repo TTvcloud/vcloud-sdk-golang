@@ -35,7 +35,7 @@ func main() {
 		os.Exit(-1)
 	}
 
-	resp, err := instance.UploadVideoWithCallback(dat, spaceName, "my callback args", getMetaFunc, snapShotFunc)
+	resp, err := instance.UploadVideoWithCallback(dat, spaceName, "my callback", getMetaFunc, snapShotFunc)
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {
