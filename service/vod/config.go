@@ -58,6 +58,7 @@ func NewInstanceWithRegion(region string) *Vod {
 
 var (
 	ServiceInfoMap = map[string]*base.ServiceInfo{
+		//TODO ADD BOE
 		base.RegionCnNorth1: {
 			Timeout: 5 * time.Second,
 			//Host:    "vod.bytedanceapi.com",
@@ -67,6 +68,7 @@ var (
 				"Accept": []string{"application/json"},
 				//TODO 测试 Apply 和 Commit 的时候加上这个头
 				"X-TT-ENV": []string{"boe_husky_feature"},
+				//TODO user-agent = golang
 			},
 			Credentials: base.Credentials{Region: base.RegionCnNorth1, Service: "vod"},
 		},

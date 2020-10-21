@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	//TODO golang 检测引发冲突
+
 	// call below method if you dont set ak and sk in ～/.vcloud/config
 	instance := vod.NewInstance()
 	instance.SetCredential(base.Credentials{
@@ -26,6 +28,7 @@ func main() {
 	spaceName := "james-test"
 	filePath := "/Users/bytedance/Downloads/objects.mp4"
 
+	//TODO 预定义Function
 	snapShotFunc := vod.Function{Name: "Snapshot", Input: vod.SnapshotInput{SnapshotTime: 2.3}}
 	getMetaFunc := vod.Function{Name: "GetMeta"}
 

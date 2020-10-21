@@ -24,6 +24,7 @@ func main() {
 	urlSets := make([]vod.URLSet, 0)
 	urlSet := vod.URLSet{
 		SourceUrl: "https://stream7.iqilu.com/10339/upload_transcode/202002/18/20200218114723HDu3hhxqIT.mp4",
+		Md5:       "12234",
 	}
 	urlSets = append(urlSets, urlSet)
 

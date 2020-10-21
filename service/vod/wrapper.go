@@ -742,7 +742,7 @@ func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) 
 func (p *Vod) GetUploadAuthWithExpiredTime(expiredTime time.Duration) (*base.SecurityToken2, error) {
 	inlinePolicy := new(base.Policy)
 	actions := []string{"vod:ApplyUpload", "vod:CommitUpload"}
-	resources := make([]string, 0)
+	resources := []string{"*"}
 	statement := base.NewAllowStatement(actions, resources)
 	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
 	return p.SignSts2(inlinePolicy, expiredTime)

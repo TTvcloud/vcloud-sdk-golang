@@ -111,11 +111,13 @@ type UploadMediaByUrlResp struct {
 }
 
 type UploadVideoByUrlResp struct {
-	base.CommonResponse
+	ResponseMetadata *base.ResponseMetadata `json:"ResponseMetadata"`
+	Result           top.UrlUploadResponse  `json:"Result,omitempty"`
 }
 
 type QueryUploadTaskInfoResp struct {
-	base.CommonResponse
+	ResponseMetadata *base.ResponseMetadata `json:"ResponseMetadata"`
+	Result           top.UrlQueryData       `json:"Result,omitempty"`
 }
 
 type VideoFormat string
@@ -204,7 +206,8 @@ type ApplyUploadInfoResp struct {
 }
 
 type CommitUploadInfoResp struct {
-	base.CommonResponse
+	ResponseMetadata *base.ResponseMetadata `json:"ResponseMetadata"`
+	Result           top.CommitData         `json:"Result,omitempty"`
 }
 
 type VideoDefinition string
