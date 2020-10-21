@@ -404,7 +404,7 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 			var weightsMap map[string]int
 			var exist bool
 			resp, err := p.GetCdnDomainWeights(spaceName)
-			if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+			if err != nil || resp == nil || resp.ResponseMetadata == nil || resp.ResponseMetadata.Error != nil {
 				weightsMap = fallbackWeights
 			} else {
 				weightsMap, exist = resp.Result[spaceName]
@@ -421,7 +421,7 @@ func (p *Vod) GetDomainInfo(spaceName string, fallbackWeights map[string]int) (*
 				for range time.Tick(UPDATE_INTERVAL * time.Second) {
 					var weightsMap map[string]int
 					resp, err := p.GetCdnDomainWeights(spaceName)
-					if err != nil || resp == nil || resp.ResponseMetadata == nil ||resp.ResponseMetadata.Error != nil {
+					if err != nil || resp == nil || resp.ResponseMetadata == nil || resp.ResponseMetadata.Error != nil {
 						weightsMap = fallbackWeights
 					} else {
 						weightsMap, exist := resp.Result[spaceName]
@@ -550,7 +550,7 @@ func (p *Vod) GetVideoPlayAuth(vidList, streamTypeList, watermarkList []string) 
 func (p *Vod) GetUploadAuthWithExpiredTime(expiredTime time.Duration) (*base.SecurityToken2, error) {
 	inlinePolicy := new(base.Policy)
 	actions := []string{"vod:ApplyUpload", "vod:CommitUpload"}
-	resources := make([]string, 0)
+	resources := []string{"*"}
 	statement := base.NewAllowStatement(actions, resources)
 	inlinePolicy.Statement = append(inlinePolicy.Statement, statement)
 	return p.SignSts2(inlinePolicy, expiredTime)
