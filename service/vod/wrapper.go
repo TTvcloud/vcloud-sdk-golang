@@ -86,31 +86,24 @@ func (p *Vod) GetOriginVideoPlayInfo(query url.Values) (*GetOriginVideoPlayInfoR
 	}
 }
 
-func (p *Vod) StartTranscode(req *StartTranscodeRequest) (*StartTranscodeResp, error) {
-	query := url.Values{
-		"TemplateId": []string{req.TemplateId},
+func (p *Vod) StartWorkflow(req *StartWorkflowRequest) (*StartWorkflowResp, error) {
+	form := url.Values{
+		"TemplateId":   []string{req.TemplateId},
+		"Vid":          []string{req.Vid},
+		"Priority":     []string{strconv.Itoa(req.Priority)},
+		"CallbackArgs": []string{req.CallbackArgs},
 	}
-
-	reqBody := struct {
-		Vid      string
-		Input    map[string]interface{}
-		Priority int
-	}{
-		Vid:      req.Vid,
-		Input:    req.Input,
-		Priority: req.Priority,
-	}
-	body, err := json.Marshal(reqBody)
+	inputStr, err := json.Marshal(req.Input)
 	if err != nil {
-		return nil, errors.Wrap(err, "marshal body failed")
+		return nil, errors.Wrap(err, "marshal input params failed")
 	}
-
-	respBody, status, err := p.Json("StartTranscode", query, string(body))
+	form.Add("Input", string(inputStr))
+	respBody, status, err := p.Post("StartWorkflow", url.Values{}, form)
 	if err != nil || status != http.StatusOK {
 		return nil, errors.Wrap(err, "query error")
 	}
 
-	resp := new(StartTranscodeResp)
+	resp := new(StartWorkflowResp)
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, errors.Wrap(err, "unmarshal body failed")
 	}
