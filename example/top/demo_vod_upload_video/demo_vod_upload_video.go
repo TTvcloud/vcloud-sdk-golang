@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/TTvcloud/vcloud-sdk-golang/service/vod/top/functions"
 	"io/ioutil"
 	"os"
 
@@ -29,8 +30,8 @@ func main() {
 	filePath := "/Users/bytedance/Downloads/objects.mp4"
 
 	//TODO 预定义Function
-	snapShotFunc := vod.Function{Name: "Snapshot", Input: vod.SnapshotInput{SnapshotTime: 2.3}}
-	getMetaFunc := vod.Function{Name: "GetMeta"}
+	snapShotFunc := functions.SnapshotFunc(2.3)
+	getMetaFunc := functions.GetMeatFunc()
 
 	dat, err := ioutil.ReadFile(filePath)
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"net/url"
 )
 
-// helper func
+// helper functions
 func (p *Iam) commonHandler(api string, query url.Values, resp interface{}) (int, error) {
 	respBody, statusCode, err := p.Query(api, query)
 	if err != nil {
