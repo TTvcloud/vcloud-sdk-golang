@@ -80,6 +80,7 @@ type QueryDataResponse struct {
 	VideoInfoList  []URLSet `json:"VideoInfoList"`
 	NotExistJobIds []string `json:"NotExistJobIds"`
 }
+
 type URLSet struct {
 	RequestId  string                 `json:"RequestId"`
 	JobId      string                 `json:"JobId"`
