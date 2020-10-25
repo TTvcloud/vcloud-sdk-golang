@@ -118,12 +118,12 @@ var (
 				"Version": []string{"2018-01-01"},
 			},
 		},
-		"StartTranscode": {
+		"StartWorkflow": {
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"StartTranscode"},
-				"Version": []string{"2018-01-01"},
+				"Action":  []string{"StartWorkflow"},
+				"Version": []string{"2020-08-01"},
 			},
 		},
 		"UploadMediaByUrl": {

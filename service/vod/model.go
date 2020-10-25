@@ -95,22 +95,21 @@ type RedirectPlayReq struct {
 	Expires    string
 }
 
-type StartTranscodeRequest struct {
+type StartWorkflowRequest struct {
 	Vid          string
-	TemplateId   string `json:"-"`
+	TemplateId   string
 	Input        map[string]interface{}
 	Priority     int
 	CallbackArgs string
-	CallbackUri  string
 }
 
-type StartTranscodeResult struct {
+type StartWorkflowResult struct {
 	RunId string
 }
 
-type StartTranscodeResp struct {
+type StartWorkflowResp struct {
 	ResponseMetadata *base.ResponseMetadata
-	Result           *StartTranscodeResult `json:",omitempty"`
+	Result           *StartWorkflowResult `json:",omitempty"`
 }
 
 type UploadMediaByUrlResult struct {

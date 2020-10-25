@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -89,59 +90,25 @@ func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) 
 	}
 }
 
-//
-////GetRedirectPlayUrl get redirected playback addres
-//func (p *Vod) GetRedirectPlayUrl(req RedirectPlayReq) (string, error) {
-//	query := url.Values{}
-//	if req.Vid == "" {
-//		return "", errors.New("Vid not set")
-//	}
-//	query.Add("Vid", req.Vid)
-//	if len(req.Definition) > 0 {
-//		query.Set("Definition", req.Definition)
-//	}
-//	if req.Watermark != "" {
-//		query.Add("Watermark", req.Watermark)
-//	}
-//	if req.Expires != "" {
-//		query.Add("X-Amz-Expires", req.Expires)
-//	}
-//
-//	token, err := p.GetSignUrl("RedirectPlay", query)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	apiInfo := p.ApiInfoList["RedirectPlay"]
-//	url := fmt.Sprintf("http://%s%s?%s", p.ServiceInfo.Host, apiInfo.Path, token)
-//	return url, nil
-//}
 
-func (p *Vod) StartTranscode(req *StartTranscodeRequest) (*StartTranscodeResp, error) {
-	query := url.Values{
-		"TemplateId": []string{req.TemplateId},
+func (p *Vod) StartWorkflow(req *StartWorkflowRequest) (*StartWorkflowResp, error) {
+	form := url.Values{
+		"TemplateId":   []string{req.TemplateId},
+		"Vid":          []string{req.Vid},
+		"Priority":     []string{strconv.Itoa(req.Priority)},
+		"CallbackArgs": []string{req.CallbackArgs},
 	}
-
-	reqBody := struct {
-		Vid      string
-		Input    map[string]interface{}
-		Priority int
-	}{
-		Vid:      req.Vid,
-		Input:    req.Input,
-		Priority: req.Priority,
-	}
-	body, err := json.Marshal(reqBody)
+	inputStr, err := json.Marshal(req.Input)
 	if err != nil {
-		return nil, errors.Wrap(err, "marshal body failed")
+		return nil, errors.Wrap(err, "marshal input params failed")
 	}
-
-	respBody, status, err := p.Json("StartTranscode", query, string(body))
+	form.Add("Input", string(inputStr))
+	respBody, status, err := p.Post("StartWorkflow", url.Values{}, form)
 	if err != nil || status != http.StatusOK {
 		return nil, errors.Wrap(err, "query error")
 	}
 
-	resp := new(StartTranscodeResp)
+	resp := new(StartWorkflowResp)
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, errors.Wrap(err, "unmarshal body failed")
 	}
