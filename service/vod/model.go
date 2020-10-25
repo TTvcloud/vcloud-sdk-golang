@@ -10,7 +10,7 @@ type GetPlayInfoReq struct {
 	CodecType  string `json:"Codec,omitempty"`
 	Definition string `json:"Definition,omitempty"`
 	StreamType string `json:"StreamType,omitempty"`
-	Watermark  string `json:"Watermark,omitempty"`
+	Watermark  string `json:"LogoType,omitempty"`
 	Base64     int64  `json:"Base64,omitempty"`
 	Ssl        int64  `json:"Ssl,omitempty"`
 }
@@ -49,7 +49,7 @@ type PlayInfo struct {
 	MainURL         string `json:"MainPlayUrl"`     //主播放地址
 	BackupURL       string `json:"BackupPlayUrl"`   //备用播放地址
 	FileID          string `json:"FileID"`          //视频file id，用于在p2p点播作为文件唯一标记
-	P2pVerifyURL    string `json:"P2pVerifyURL"`    //p2p点播时，校验文件地址
+	P2pVerifyURL    string `json:"P2pVerifyUrl"`    //p2p点播时，校验文件地址
 	PreloadInterval int64  `json:"PreloadInterval"` //间隔,提前加载时长
 	PreloadMaxStep  int64  `json:"PreloadMaxStep"`  //最大步长， 点播sdk未使用
 	PreloadMinStep  int64  `json:"PreloadMinStep"`  //最小步长， 点播sdk未使用
@@ -62,23 +62,37 @@ type PlayInfo struct {
 }
 
 // GetOriginVideoPlayInfo
+type GetOriginVideoPlayInfoReq struct {
+	Vid    string `json:"Vid"`
+	Base64 int64  `json:"Base64,omitempty"`
+	Ssl    int64  `json:"Ssl,omitempty"`
+}
+
+// GetOriginVideoPlayInfo
 type GetOriginVideoPlayInfoResp struct {
 	ResponseMetadata *base.ResponseMetadata
-	Result           *GetOriginVideoPlayInfoData `json:",omitempty"`
+	Result           *GetOriginVideoPlayInfoData `json:"Result,omitempty"`
 }
 
 type GetOriginVideoPlayInfoData struct {
-	MediaType     string
-	Duration      float64
-	Size          int64
-	Height        int64
-	Width         int64
-	Format        string
-	CodecType     string
-	Bitrate       int64
-	FileHash      string
-	MainPlayUrl   string
-	BackupPlayUrl string
+	FileType      string  `json:"FileType"`
+	Duration      float64 `json:"Duration"`
+	Size          int64   `json:"Size"`
+	Height        int64   `json:"Height"`
+	Width         int64   `json:"Width"`
+	Format        string  `json:"Format"`
+	Codec         string  `json:"Codec"`
+	Bitrate       float64 `json:"Bitrate"`
+	FileHash      string  `json:"FileHash"`
+	MainPlayURL   string  `json:"MainPlayUrl"`
+	BackupPlayURL string  `json:"BackupPlayUrl"`
+}
+
+type RedirectPlayReq struct {
+	Vid        string `json:"Vid"`
+	Definition string `json:"Definition"` //视频分辨率
+	Watermark  string `json:"LogoType,omitempty"`
+	Expires    string
 }
 
 type StartWorkflowRequest struct {
@@ -165,13 +179,6 @@ const (
 	D360P  VideoDefinition = "360p"
 	D240P  VideoDefinition = "240p"
 )
-
-type RedirectPlayParam struct {
-	Vid        string
-	Definition VideoDefinition
-	Watermark  string
-	Expires    string
-}
 
 type StoreInfo struct {
 	StoreUri string
