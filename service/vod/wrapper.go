@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/TTvcloud/vcloud-sdk-golang/models"
-	"github.com/golang/protobuf/jsonpb"
+	"google.golang.org/protobuf/encoding/protojson"
 	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
@@ -53,10 +53,10 @@ func (p *Vod) GetPlayInfo(video *models.VodGetPlayInfoRequest) (*models.VodGetPl
 		return nil, status, err
 	}
 	output := &models.VodGetPlayInfoResponse{}
-	unmarshaler := jsonpb.Unmarshaler{
-		AllowUnknownFields: true,
+	unmarshaler := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
 	}
-	err = unmarshaler.Unmarshal(bytes.NewReader(respBody), output)
+	err = unmarshaler.Unmarshal(respBody, output)
 	if err != nil {
 		return nil, status, err
 	} else {
@@ -79,10 +79,10 @@ func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) 
 		return nil, status, err
 	}
 	output := &models.VodGetOriginalPlayInfoResponse{}
-	unmarshaler := jsonpb.Unmarshaler{
-		AllowUnknownFields: true,
+	unmarshaler := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
 	}
-	err = unmarshaler.Unmarshal(bytes.NewReader(respBody), output)
+	err = unmarshaler.Unmarshal(respBody, output)
 	if err != nil {
 		return nil, status, err
 	} else {
