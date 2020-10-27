@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/TTvcloud/vcloud-sdk-golang/models"
-	"github.com/golang/protobuf/jsonpb"
+	"google.golang.org/protobuf/encoding/protojson"
 	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
@@ -29,8 +29,8 @@ func (p *Vod) GetPlayInfo(video *models.VodGetPlayInfoRequest) (*models.VodGetPl
 	}
 	query := url.Values{}
 	query.Set("Vid", vid)
-	query.Set("Base64", video.GetBase64())
-	query.Set("Ssl", video.GetSsl())
+	query.Set("Base64", strconv.FormatInt(video.GetBase64(), 10))
+	query.Set("Ssl", strconv.FormatInt(video.GetSsl(), 10))
 
 	if len(video.GetFormat()) > 0 {
 		query.Set("Format", video.GetFormat())
@@ -53,10 +53,10 @@ func (p *Vod) GetPlayInfo(video *models.VodGetPlayInfoRequest) (*models.VodGetPl
 		return nil, status, err
 	}
 	output := &models.VodGetPlayInfoResponse{}
-	unmarshaler := jsonpb.Unmarshaler{
-		AllowUnknownFields: true,
+	unmarshaler := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
 	}
-	err = unmarshaler.Unmarshal(bytes.NewReader(respBody), output)
+	err = unmarshaler.Unmarshal(respBody, output)
 	if err != nil {
 		return nil, status, err
 	} else {
@@ -72,17 +72,17 @@ func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) 
 	}
 	query := url.Values{}
 	query.Set("Vid", vid)
-	query.Set("Base64", req.GetBase64())
-	query.Set("Ssl", req.GetSsl())
+	query.Set("Base64", strconv.FormatInt(req.GetBase64(), 10))
+	query.Set("Ssl", strconv.FormatInt(req.GetSsl(), 10))
 	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
 	if err != nil {
 		return nil, status, err
 	}
 	output := &models.VodGetOriginalPlayInfoResponse{}
-	unmarshaler := jsonpb.Unmarshaler{
-		AllowUnknownFields: true,
+	unmarshaler := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
 	}
-	err = unmarshaler.Unmarshal(bytes.NewReader(respBody), output)
+	err = unmarshaler.Unmarshal(respBody, output)
 	if err != nil {
 		return nil, status, err
 	} else {
