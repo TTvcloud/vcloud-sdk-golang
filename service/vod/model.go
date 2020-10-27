@@ -4,94 +4,10 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
-type GetPlayInfoReq struct {
-	Vid        string `json:"Vid"`
-	FormatType string `json:"Format,omitempty"`
-	CodecType  string `json:"Codec,omitempty"`
-	Definition string `json:"Definition,omitempty"`
-	StreamType string `json:"StreamType,omitempty"`
-	Watermark  string `json:"LogoType,omitempty"`
-	Base64     int64  `json:"Base64,omitempty"`
-	Ssl        int64  `json:"Ssl,omitempty"`
-}
-
-// GetPlayInfo
-type GetPlayInfoResp struct {
-	ResponseMetadata base.ResponseMetadata `json:"ResponseMetadata"`
-	Result           *GetPlayInfoData      `json:"Result,omitempty"`
-}
-
-type GetPlayInfoData struct {
-	Status         int64       `json:"Status"` //视频状态
-	VideoID        string      `json:"Vid"`
-	PosterURL      string      `json:"PosterUrl"`              //封面地址
-	VideoDuration  float32     `json:"Duration"`               //视频时长(单位：s)
-	MediaType      string      `json:"FileType"`               //返回的媒体类型(video/audio)
-	EnableAdaptive bool        `json:"EnableAdaptive"`         //是否关键帧对其
-	VideoList      []*PlayInfo `json:"PlayInfoList,omitempty"` //视频列表
-	TotalCount     int         `json:"TotalCount"`             //视频列表数量
-}
-
-type PlayInfo struct {
-	Bitrate    float32 `json:"Bitrate"`    //码率(Kbps)
-	FileHash   string  `json:"FileHash"`   //hash值
-	Size       int64   `json:"Size"`       //视频文件大小
-	Height     int64   `json:"Height"`     //视频高度
-	Width      int64   `json:"Width"`      //视频宽度
-	Format     string  `json:"Format"`     //视频格式
-	CodecType  string  `json:"Codec"`      //编码类型
-	LogoType   string  `json:"LogoType"`   //水印类型
-	Definition string  `json:"Definition"` //视频分辨率
-	Quality    string  `json:"Quality"`    //音频质量
-
-	PlayerAccessKey string `json:"PlayAuth"`        //加密过的秘钥
-	SecretKeyID     string `json:"PlayAuthID"`      //密钥keyID
-	MainURL         string `json:"MainPlayUrl"`     //主播放地址
-	BackupURL       string `json:"BackupPlayUrl"`   //备用播放地址
-	FileID          string `json:"FileID"`          //视频file id，用于在p2p点播作为文件唯一标记
-	P2pVerifyURL    string `json:"P2pVerifyUrl"`    //p2p点播时，校验文件地址
-	PreloadInterval int64  `json:"PreloadInterval"` //间隔,提前加载时长
-	PreloadMaxStep  int64  `json:"PreloadMaxStep"`  //最大步长， 点播sdk未使用
-	PreloadMinStep  int64  `json:"PreloadMinStep"`  //最小步长， 点播sdk未使用
-	PreloadSize     int64  `json:"PreloadSize"`     //预加载大小，用户未点播，SDK异步提前预加载的大小
-
-	MediaType  string `json:"FileType,omitempty"`   //dash 媒体类型 video/audio
-	InitRange  string `json:"InitRange,omitempty"`  //dash segment_base 分片信息， fmp4 ftyp+moof range范围
-	IndexRange string `json:"IndexRange,omitempty"` //dash segment_base 芬片信息， sidx box range 范围
-	CheckInfo  string `json:"CheckInfo"`            //劫持校验信息
-}
-
-// GetOriginVideoPlayInfo
-type GetOriginVideoPlayInfoReq struct {
-	Vid    string `json:"Vid"`
-	Base64 int64  `json:"Base64,omitempty"`
-	Ssl    int64  `json:"Ssl,omitempty"`
-}
-
-// GetOriginVideoPlayInfo
-type GetOriginVideoPlayInfoResp struct {
-	ResponseMetadata *base.ResponseMetadata
-	Result           *GetOriginVideoPlayInfoData `json:"Result,omitempty"`
-}
-
-type GetOriginVideoPlayInfoData struct {
-	FileType      string  `json:"FileType"`
-	Duration      float64 `json:"Duration"`
-	Size          int64   `json:"Size"`
-	Height        int64   `json:"Height"`
-	Width         int64   `json:"Width"`
-	Format        string  `json:"Format"`
-	Codec         string  `json:"Codec"`
-	Bitrate       float64 `json:"Bitrate"`
-	FileHash      string  `json:"FileHash"`
-	MainPlayURL   string  `json:"MainPlayUrl"`
-	BackupPlayURL string  `json:"BackupPlayUrl"`
-}
-
 type RedirectPlayReq struct {
 	Vid        string `json:"Vid"`
 	Definition string `json:"Definition"` //视频分辨率
-	Watermark  string `json:"LogoType,omitempty"`
+	LogoType   string `json:"LogoType,omitempty"`
 	Expires    string
 }
 
