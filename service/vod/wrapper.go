@@ -29,8 +29,8 @@ func (p *Vod) GetPlayInfo(video *models.VodGetPlayInfoRequest) (*models.VodGetPl
 	}
 	query := url.Values{}
 	query.Set("Vid", vid)
-	query.Set("Base64", strconv.FormatInt(video.GetBase64(), 10))
-	query.Set("Ssl", strconv.FormatInt(video.GetSsl(), 10))
+	query.Set("Base64", video.GetBase64())
+	query.Set("Ssl", video.GetSsl())
 
 	if len(video.GetFormat()) > 0 {
 		query.Set("Format", video.GetFormat())
@@ -72,8 +72,8 @@ func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) 
 	}
 	query := url.Values{}
 	query.Set("Vid", vid)
-	query.Set("Base64", strconv.FormatInt(req.GetBase64(), 10))
-	query.Set("Ssl", strconv.FormatInt(req.GetSsl(), 10))
+	query.Set("Base64", req.GetBase64())
+	query.Set("Ssl", req.GetSsl())
 	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
 	if err != nil {
 		return nil, status, err
