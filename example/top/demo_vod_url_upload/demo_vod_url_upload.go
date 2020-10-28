@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
+	"github.com/TTvcloud/vcloud-sdk-golang/service/vod/top/models"
 )
 
 func main() {
@@ -21,18 +21,18 @@ func main() {
 	//vod.NewInstance().SetSecretKey("")
 
 	spaceName := "james-test"
-	urlSets := make([]vod.URLSet, 0)
-	urlSet := vod.URLSet{
+	urlSets := make([]*models.URLSet, 0)
+	urlSet := &models.URLSet{
 		SourceUrl: "https://stream7.iqilu.com/10339/upload_transcode/202002/18/20200218114723HDu3hhxqIT.mp4",
-		Md5:       "12234",
 	}
 	urlSets = append(urlSets, urlSet)
 
-	params := vod.UrlUploadParams{
+	urlRequest := models.VodUrlUploadRequest{
 		SpaceName: spaceName,
 		URLSets:   urlSets,
 	}
-	resp, err := instance.UploadVideoByUrl(params)
+
+	resp, err := instance.UploadVideoByUrl(urlRequest)
 	if err != nil {
 		fmt.Printf("err:%s\n")
 	}
@@ -42,4 +42,5 @@ func main() {
 	}
 	bts, _ := json.Marshal(resp)
 	fmt.Printf("resp = %s", bts)
+
 }

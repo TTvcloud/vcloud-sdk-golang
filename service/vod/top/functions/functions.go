@@ -26,7 +26,7 @@ func StartWorkflowFunc(templateId string) vod.Function {
 
 func EncryptionFunc(encryption vod.EntryptionInput) vod.Function {
 	return vod.Function{
-		Name:  "Entryption",
+		Name:  "Encryption",
 		Input: encryption,
 	}
 }

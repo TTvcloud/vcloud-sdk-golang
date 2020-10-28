@@ -22,7 +22,7 @@ func main() {
 	//vod.NewInstance().SetSecretKey("")
 
 	jobIds := make([]string, 0)
-	jobId := "4a2763cc85ed4f3da99e8be611c2b791"
+	jobId := "45be782c3c2042e6abd22cf172a61f0a"
 	jobIds = append(jobIds, jobId)
 	str := strings.Join(jobIds, ",")
 
