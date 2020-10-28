@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/TTvcloud/vcloud-sdk-golang/service/vod/top/models"
 	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
@@ -97,7 +96,7 @@ func (p *Vod) UploadMediaByUrl(params UploadMediaByUrlParams) (*UploadMediaByUrl
 	}
 }
 
-func (p *Vod) UploadVideoByUrl(request models.VodUrlUploadRequest) (*UploadVideoByUrlResp, error) {
+func (p *Vod) UploadVideoByUrl(request UrlUploadParams) (*UploadVideoByUrlResp, error) {
 	query := url.Values{}
 	query.Add("SpaceName", request.SpaceName)
 	bts, err := json.Marshal(request.URLSets)

@@ -13,23 +13,20 @@ import (
 )
 
 func main() {
-	//TODO golang 检测引发冲突
-
 	// call below method if you dont set ak and sk in ～/.vcloud/config
 	instance := vod.NewInstance()
 	instance.SetCredential(base.Credentials{
-		AccessKeyID:     "AKLTNDQ2YTRlNTBiYTg1NDcyNmE3MDA1MTUzNzc5MWMwNmI",
-		SecretAccessKey: "1ZOtyBZ89VERZdOfiUrPf24a3tTjRo1XIJbzccVHMrBvZo1jEn60LjClP2t05qWz",
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk",
 	})
 
 	// or set ak and ak as follow
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	spaceName := "james-test"
-	filePath := "/Users/bytedance/Downloads/objects.mp4"
+	spaceName := "your space"
+	filePath := "file path"
 
-	//TODO 预定义Function
 	snapShotFunc := functions.SnapshotFunc(2.3)
 	getMetaFunc := functions.GetMeatFunc()
 

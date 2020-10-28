@@ -5,29 +5,28 @@ import (
 	"fmt"
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
-	"github.com/TTvcloud/vcloud-sdk-golang/service/vod/top/models"
 )
 
 func main() {
 	// call below method if you dont set ak and sk in ～/.vcloud/config
 	instance := vod.NewInstance()
 	instance.SetCredential(base.Credentials{
-		AccessKeyID:     "AKLTNDQ2YTRlNTBiYTg1NDcyNmE3MDA1MTUzNzc5MWMwNmI",
-		SecretAccessKey: "1ZOtyBZ89VERZdOfiUrPf24a3tTjRo1XIJbzccVHMrBvZo1jEn60LjClP2t05qWz",
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk",
 	})
 
 	// or set ak and ak as follow
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	spaceName := "james-test"
-	urlSets := make([]*models.URLSet, 0)
-	urlSet := &models.URLSet{
-		SourceUrl: "https://stream7.iqilu.com/10339/upload_transcode/202002/18/20200218114723HDu3hhxqIT.mp4",
+	spaceName := "your space name"
+	urlSets := make([]vod.URLSet, 0)
+	urlSet := vod.URLSet{
+		SourceUrl: "url",
 	}
 	urlSets = append(urlSets, urlSet)
 
-	urlRequest := models.VodUrlUploadRequest{
+	urlRequest := vod.UrlUploadParams{
 		SpaceName: spaceName,
 		URLSets:   urlSets,
 	}
