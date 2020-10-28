@@ -1,7 +1,6 @@
-package base
+package vod
 
 type PublicErrorCode string
-
 
 // General
 const (

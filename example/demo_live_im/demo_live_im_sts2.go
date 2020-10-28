@@ -2,7 +2,7 @@ package demo_live_im
 
 import (
 	"fmt"
-	"github.com/malongit/vcloud-sdk-golang/base"
+	"github.com/TTvcloud/vcloud-sdk-golang/base"
 	"net/http"
 	"time"
 )
@@ -30,7 +30,7 @@ var (
     },
     "status_code": 0
 }
- */
+*/
 func GenerateSts() (map[string]interface{}, error) {
 	response := make(map[string]interface{})
 
@@ -56,7 +56,7 @@ func GenerateSts() (map[string]interface{}, error) {
 	return response, nil
 }
 
-func main()  {
+func main() {
 	sts, err := GenerateSts()
 	if err != nil {
 		fmt.Printf("GenerateSts err: %v\n", err)
