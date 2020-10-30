@@ -11,8 +11,8 @@ import (
 func main() {
 	instance := vod.NewInstance()
 	instance.SetCredential(base.Credentials{
-		AccessKeyID:     "AKLTZDI1NTZkYWI2MzEwNGI5MGE1MmRjNGJmYzg2MmQyYmE",
-		SecretAccessKey: "D+5K+SOYf+L232Se+h4yRbhZu/P7pVeti9QNF138R4zSVFWeqtClX4XAdgcGplt+",
+		AccessKeyID:     "your ak",
+		SecretAccessKey: "your sk",
 	})
 	ret, _ := instance.GetUploadAuth()
 	b, _ := json.Marshal(ret)
