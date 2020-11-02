@@ -51,7 +51,7 @@ func (c *ImageXClient) GetImagexURL(serviceId, uri, tpl string, opts ...OptionFu
 
 	if opt.sigKey != "" {
 		h := hmac.New(sha1.New, []byte(opt.sigKey))
-		h.Write([]byte(sigTxt))
+		h.Write([]byte(sigTxt + "?"))
 		sig := base64.URLEncoding.EncodeToString(h.Sum(nil))
 		if opt.kv == nil {
 			opt.kv = url.Values{}
