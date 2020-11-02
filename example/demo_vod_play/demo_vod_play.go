@@ -43,7 +43,7 @@ func main() {
 	fmt.Println(string(b))
 
 
-	// GetOriginVideoPlayInfo
+	// GetOriginalPlayInfo
 	query2 := &request.VodGetOriginalPlayInfoRequest{Vid: vid}
 
 	resp2, code2, _ := instance.GetOriginalPlayInfo(query2)

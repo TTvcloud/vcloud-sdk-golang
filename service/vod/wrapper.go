@@ -26,11 +26,11 @@ import (
 /**
  * GetPlayInfo.
  *
- * @param input *models.request.GetPlayInfoRequest
- * @return *models.response.GetPlayInfoResponse, int, error
+ * @param input *models.request.VodGetPlayInfoRequest
+ * @return *models.response.VodGetPlayInfoResponse, int, error
  * @throws Exception the exception
  */
-func (p *Vod) GetPlayInfo(req *request.GetPlayInfoRequest) (*response.GetPlayInfoResponse, int, error) {
+func (p *Vod) GetPlayInfo(req *request.VodGetPlayInfoRequest) (*response.VodGetPlayInfoResponse, int, error) {
 	query := url.Values{}
 	form := url.Values{}
 	marshaler := protojson.MarshalOptions{
@@ -95,7 +95,7 @@ func (p *Vod) GetPlayInfo(req *request.GetPlayInfoRequest) (*response.GetPlayInf
 	if err != nil {
 		return nil, status, err
 	}
-	output := &response.GetPlayInfoResponse{}
+	output := &response.VodGetPlayInfoResponse{}
 	unmarshaler := protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
@@ -110,11 +110,11 @@ func (p *Vod) GetPlayInfo(req *request.GetPlayInfoRequest) (*response.GetPlayInf
 /**
  * GetOriginalPlayInfo.
  *
- * @param input *models.request.GetOriginalPlayInfoRequest
- * @return *models.response.GetOriginalPlayInfoResponse, int, error
+ * @param input *models.request.VodGetOriginalPlayInfoRequest
+ * @return *models.response.VodGetOriginalPlayInfoResponse, int, error
  * @throws Exception the exception
  */
-func (p *Vod) GetOriginalPlayInfo(req *request.GetOriginalPlayInfoRequest) (*response.GetOriginalPlayInfoResponse, int, error) {
+func (p *Vod) GetOriginalPlayInfo(req *request.VodGetOriginalPlayInfoRequest) (*response.VodGetOriginalPlayInfoResponse, int, error) {
 	query := url.Values{}
 	form := url.Values{}
 	marshaler := protojson.MarshalOptions{
@@ -179,7 +179,7 @@ func (p *Vod) GetOriginalPlayInfo(req *request.GetOriginalPlayInfoRequest) (*res
 	if err != nil {
 		return nil, status, err
 	}
-	output := &response.GetOriginalPlayInfoResponse{}
+	output := &response.VodGetOriginalPlayInfoResponse{}
 	unmarshaler := protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}

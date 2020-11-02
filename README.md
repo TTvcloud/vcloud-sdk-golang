@@ -108,7 +108,7 @@ return SignSts2(inlinePolicy, expiredTime)
 #### 播放
 [GetPlayInfo](https://open.bytedance.com/docs/4/2918/)
 
-[GetOriginVideoPlayInfo](https://open.bytedance.com/docs/4/11148/)
+[GetOriginalPlayInfo](https://open.bytedance.com/docs/4/11148/)
 
 [GetRedirectPlay](https://open.bytedance.com/docs/4/9205/)
 
