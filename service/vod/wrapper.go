@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/TTvcloud/vcloud-sdk-golang/models"
-	"google.golang.org/protobuf/encoding/protojson"
 	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
@@ -17,42 +15,87 @@ import (
 	"time"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
+	"github.com/TTvcloud/vcloud-sdk-golang/models/vod/request"
+	"github.com/TTvcloud/vcloud-sdk-golang/models/vod/response"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/pkg/errors"
 )
 
-//GetPlayInfo 获取播放信息
-func (p *Vod) GetPlayInfo(video *models.VodGetPlayInfoRequest) (*models.VodGetPlayInfoResponse, int, error) {
-	vid := video.GetVid()
-	if len(vid) == 0 {
-		return nil, http.StatusBadRequest, errors.New(string(invalidParameter))
-	}
-	query := url.Values{}
-	query.Set("Vid", vid)
-	query.Set("Base64", video.GetBase64())
-	query.Set("Ssl", video.GetSsl())
 
-	if len(video.GetFormat()) > 0 {
-		query.Set("Format", video.GetFormat())
+/**
+ * GetPlayInfo.
+ *
+ * @param input *models.request.GetPlayInfoRequest
+ * @return *models.response.GetPlayInfoResponse, int, error
+ * @throws Exception the exception
+ */
+func (p *Vod) GetPlayInfo(req *request.GetPlayInfoRequest) (*response.GetPlayInfoResponse, int, error) {
+	query := url.Values{}
+	form := url.Values{}
+	marshaler := protojson.MarshalOptions{
+		Multiline:       false,
+		AllowPartial:    false,
+		UseProtoNames:   true,
+		UseEnumNumbers:  false,
+		EmitUnpopulated: false,
 	}
-	if len(video.GetCodec()) > 0 {
-		query.Set("Codec", video.GetCodec())
+	jsonData := marshaler.Format(req)
+	reqMap := map[string]interface{}{}
+	err := json.Unmarshal([]byte(jsonData), &reqMap)
+	if err != nil {
+		return nil, 0, err
 	}
-	if len(video.GetDefinition()) > 0 {
-		query.Set("Definition", video.GetDefinition())
-	}
-	if len(video.GetLogoType()) > 0 {
-		query.Set("LogoType", video.GetLogoType())
-	}
-	if len(video.GetFileType()) > 0 {
-		query.Set("FileType", video.GetFileType())
+	for k, v := range reqMap {
+		var sv string
+		switch ov := v.(type) {
+		case string:
+			sv = ov
+		case int:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int8:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint8:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int16:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint16:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int32:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint32:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int64:
+			sv = strconv.FormatInt(ov, 10)
+		case uint64:
+			sv = strconv.FormatUint(ov, 10)
+		case bool:
+			sv = strconv.FormatBool(ov)
+		case float32:
+			sv = strconv.FormatFloat(float64(ov), 'f', -1, 32)
+		case float64:
+			sv = strconv.FormatFloat(ov, 'f', -1, 64)
+		case []byte:
+			sv = string(ov)
+		default:
+			v2, e2 := json.Marshal(ov)
+			if e2 != nil {
+				return nil, 0, e2
+			}
+			sv = string(v2)
+		}
+		query.Set(k, sv)
+		form.Add(k, sv)
 	}
 
 	respBody, status, err := p.Query("GetPlayInfo", query)
+
 	if err != nil {
 		return nil, status, err
 	}
-	output := &models.VodGetPlayInfoResponse{}
+	output := &response.GetPlayInfoResponse{}
 	unmarshaler := protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
@@ -64,21 +107,79 @@ func (p *Vod) GetPlayInfo(video *models.VodGetPlayInfoRequest) (*models.VodGetPl
 	}
 }
 
-//GetOriginVideoPlayInfo 获取原片播放信息
-func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) (*models.VodGetOriginalPlayInfoResponse, int, error) {
-	vid := req.GetVid()
-	if len(vid) == 0 {
-		return nil, http.StatusBadRequest, errors.New(string(invalidParameter))
-	}
+/**
+ * GetOriginalPlayInfo.
+ *
+ * @param input *models.request.GetOriginalPlayInfoRequest
+ * @return *models.response.GetOriginalPlayInfoResponse, int, error
+ * @throws Exception the exception
+ */
+func (p *Vod) GetOriginalPlayInfo(req *request.GetOriginalPlayInfoRequest) (*response.GetOriginalPlayInfoResponse, int, error) {
 	query := url.Values{}
-	query.Set("Vid", vid)
-	query.Set("Base64", req.GetBase64())
-	query.Set("Ssl", req.GetSsl())
-	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
+	form := url.Values{}
+	marshaler := protojson.MarshalOptions{
+		Multiline:       false,
+		AllowPartial:    false,
+		UseProtoNames:   true,
+		UseEnumNumbers:  false,
+		EmitUnpopulated: false,
+	}
+	jsonData := marshaler.Format(req)
+	reqMap := map[string]interface{}{}
+	err := json.Unmarshal([]byte(jsonData), &reqMap)
+	if err != nil {
+		return nil, 0, err
+	}
+	for k, v := range reqMap {
+		var sv string
+		switch ov := v.(type) {
+		case string:
+			sv = ov
+		case int:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int8:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint8:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int16:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint16:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int32:
+			sv = strconv.FormatInt(int64(ov), 10)
+		case uint32:
+			sv = strconv.FormatUint(uint64(ov), 10)
+		case int64:
+			sv = strconv.FormatInt(ov, 10)
+		case uint64:
+			sv = strconv.FormatUint(ov, 10)
+		case bool:
+			sv = strconv.FormatBool(ov)
+		case float32:
+			sv = strconv.FormatFloat(float64(ov), 'f', -1, 32)
+		case float64:
+			sv = strconv.FormatFloat(ov, 'f', -1, 64)
+		case []byte:
+			sv = string(ov)
+		default:
+			v2, e2 := json.Marshal(ov)
+			if e2 != nil {
+				return nil, 0, e2
+			}
+			sv = string(v2)
+		}
+		query.Set(k, sv)
+		form.Add(k, sv)
+	}
+
+	respBody, status, err := p.Query("GetOriginalPlayInfo", query)
+
 	if err != nil {
 		return nil, status, err
 	}
-	output := &models.VodGetOriginalPlayInfoResponse{}
+	output := &response.GetOriginalPlayInfoResponse{}
 	unmarshaler := protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
@@ -89,6 +190,7 @@ func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) 
 		return output, status, nil
 	}
 }
+
 
 
 func (p *Vod) StartWorkflow(req *StartWorkflowRequest) (*StartWorkflowResp, error) {
