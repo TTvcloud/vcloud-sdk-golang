@@ -19,13 +19,12 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	vid := "v0c2c369007abu04ru8riko30uo9n73g"
+	vid := "your vid"
 
 	// GetPlayInfo
 
 	instance := vod.NewInstance()
-	instance.SetAccessKey("AKLTMjM4YjQ5MGEzOWY4NGVlOWEwZmZlOTcxZGE4ZmM3MTE")
-	instance.SetSecretKey("vNSPHqjRBOzWZfUZrUxjD+1sJ8bcO8pS1K3qRZcQuNSoP/iauCH2iEPEpcOm1VWB")
+
 	query := &request.VodGetPlayInfoRequest{
 		Vid:        vid,
 		Format:     "",
