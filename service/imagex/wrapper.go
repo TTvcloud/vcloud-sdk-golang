@@ -47,6 +47,8 @@ func (c *ImageXClient) GetImagexURL(serviceId, uri, tpl string, opts ...OptionFu
 			return nil, ErrKvSig
 		}
 		sigTxt = fmt.Sprintf("%s?%s", path, opt.kv.Encode())
+	} else {
+		sigTxt = path + "?"
 	}
 
 	if opt.sigKey != "" {
