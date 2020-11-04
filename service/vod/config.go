@@ -103,14 +103,6 @@ var (
 				"Version": []string{"2020-08-01"},
 			},
 		},
-		"RedirectPlay": {
-			Method: http.MethodGet,
-			Path:   "/",
-			Query: url.Values{
-				"Action":  []string{"RedirectPlay"},
-				"Version": []string{"2020-08-01"},
-			},
-		},
 		"GetOriginalPlayInfo": {
 			Method: http.MethodGet,
 			Path:   "/",
