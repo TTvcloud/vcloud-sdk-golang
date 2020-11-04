@@ -6,12 +6,11 @@ package vod
 
 import (
 	"encoding/json"
-	"net/url"
-	"strconv"
-
 	"github.com/TTvcloud/vcloud-sdk-golang/models/vod/request"
 	"github.com/TTvcloud/vcloud-sdk-golang/models/vod/response"
 	"google.golang.org/protobuf/encoding/protojson"
+	"net/url"
+	"strconv"
 )
 
 /**
