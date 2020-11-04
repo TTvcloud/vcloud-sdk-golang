@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
-
+	"github.com/TTvcloud/vcloud-sdk-golang/models/vod/business"
+	"github.com/TTvcloud/vcloud-sdk-golang/models/vod/request"
 	"github.com/TTvcloud/vcloud-sdk-golang/service/vod"
 )
 
@@ -23,11 +24,9 @@ func StartWorkflowExample() {
 		SecretAccessKey: "your sk",
 	})
 
-	input := map[string]interface{}{
-		"watermark_str": "test",
-	}
+	input := new(business.WorkflowParams)
 
-	req := &vod.StartWorkflowRequest{
+	req := &request.VodStartWorkflowRequest{
 		Vid:          "your vid",
 		TemplateId:   "your template id",
 		Input:        input,
@@ -35,8 +34,9 @@ func StartWorkflowExample() {
 		CallbackArgs: "",
 	}
 
-	resp, err := instance.StartWorkflow(req)
+	resp, httpCode, err := instance.StartWorkflow(req)
 	if err != nil {
+		fmt.Println(httpCode)
 		fmt.Println(err)
 		return
 	}
