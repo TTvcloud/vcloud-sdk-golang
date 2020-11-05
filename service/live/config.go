@@ -135,6 +135,14 @@ var (
 				"Version": []string{"2019-10-01"},
 			},
 		},
+		"MGetStreamsInfo": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"MGetStreamsInfo"},
+				"Version": []string{"2019-10-01"},
+			},
+		},
 		"MGetStreamsPlayInfo": {
 			Method: http.MethodPost,
 			Path:   "/",
@@ -148,6 +156,14 @@ var (
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"GetVODs"},
+				"Version": []string{"2019-10-01"},
+			},
+		},
+		"CreateVOD": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"CreateVOD"},
 				"Version": []string{"2019-10-01"},
 			},
 		},
