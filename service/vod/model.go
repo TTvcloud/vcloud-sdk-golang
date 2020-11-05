@@ -4,12 +4,6 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 )
 
-type RedirectPlayReq struct {
-	Vid        string `json:"Vid"`
-	Definition string `json:"Definition"` //视频分辨率
-	LogoType   string `json:"LogoType,omitempty"`
-	Expires    string
-}
 
 type StartWorkflowRequest struct {
 	Vid          string

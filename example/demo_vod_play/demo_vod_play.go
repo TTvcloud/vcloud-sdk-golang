@@ -22,7 +22,6 @@ func main() {
 	vid := "your vid"
 
 	// GetPlayInfo
-
 	instance := vod.NewInstance()
 
 	query := &request.VodGetPlayInfoRequest{
@@ -35,19 +34,18 @@ func main() {
 		Base64:     "1",
 		Ssl:        "",
 	}
-	resp, code, _ := instance.GetPlayInfo(query)
-	fmt.Printf("resp:%+v code:%s\n", resp, code)
+	resp, code, err := instance.GetPlayInfo(query)
 	fmt.Println(code)
+	fmt.Println(err)
 	b, _ := json.Marshal(resp)
 	fmt.Println(string(b))
 
 
 	// GetOriginalPlayInfo
 	query2 := &request.VodGetOriginalPlayInfoRequest{Vid: vid}
-
-	resp2, code2, _ := instance.GetOriginalPlayInfo(query2)
-	fmt.Printf("resp:%+v code:%s\n", resp2, code2)
-	fmt.Println(code)
+	resp2, code2, err2 := instance.GetOriginalPlayInfo(query2)
+	fmt.Println(code2)
+	fmt.Println(err2)
 	b2, _ := json.Marshal(resp2)
 	fmt.Println(string(b2))
 
