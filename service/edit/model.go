@@ -3,6 +3,9 @@ package edit
 import "github.com/TTvcloud/vcloud-sdk-golang/base"
 
 type SubmitDirectEditTaskRequest struct {
+	Uploader     string      `json:"Uploader,omitempty"`
+	Application  string      `json:"Application,omitempty"`
+	VideoName    string      `json:"VideoName,omitempty"`
 	Param        interface{} `json:"EditParam"`
 	Priority     int32       `json:"Priority"`
 	CallbackUri  string      `json:"CallbackUri,omitempty"`
