@@ -251,12 +251,12 @@ type CommitUploadResult struct {
 }
 
 type UploadResult struct {
-	Vid         string
-	VideoMeta   VideoMeta
-	ImageMeta   ImageMeta
-	ObjectMeta  ObjectMeta
-	Encryption  Encryption
-	SnapshotUri string
+	Vid        string
+	VideoMeta  VideoMeta
+	ImageMeta  ImageMeta
+	ObjectMeta ObjectMeta
+	Encryption Encryption
+	PosterUri  string
 }
 type VideoMeta struct {
 	Uri      string
