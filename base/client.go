@@ -34,6 +34,7 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 		MaxIdleConns:        1000,
 		MaxIdleConnsPerHost: 100,
 		IdleConnTimeout:     10 * time.Second,
+		Proxy:               http.ProxyFromEnvironment,
 	}
 
 	c := http.Client{Transport: transport}
