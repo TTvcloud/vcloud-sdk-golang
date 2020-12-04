@@ -223,7 +223,11 @@ func (p *Vod) Upload(rd io.Reader, size int64, spaceName string, fileType FileTy
 			Oid:     oid,
 			Auth:    auth,
 		}
-		if err := p.chunkUpload(rd, uploadPart, client); err != nil {
+		isLargeFile := false
+		if size > LargeFileSize {
+			isLargeFile = true
+		}
+		if err := p.chunkUpload(rd, uploadPart, client, isLargeFile); err != nil {
 			return "", "", err
 		}
 	}
@@ -259,8 +263,8 @@ func (p *Vod) directUpload(tosHost string, oid string, auth string, fileBytes []
 	return nil
 }
 
-func (p *Vod) chunkUpload(rd io.Reader, uploadPart UploadPartCommon, client *http.Client) error {
-	uploadID, err := p.initUploadPart(uploadPart.TosHost, uploadPart.Oid, uploadPart.Auth, client)
+func (p *Vod) chunkUpload(rd io.Reader, uploadPart UploadPartCommon, client *http.Client, isLargeFile bool) error {
+	uploadID, err := p.initUploadPart(uploadPart.TosHost, uploadPart.Oid, uploadPart.Auth, client, isLargeFile)
 	if err != nil {
 		return err
 	}
@@ -294,9 +298,9 @@ func (p *Vod) chunkUpload(rd io.Reader, uploadPart UploadPartCommon, client *htt
 			break
 		}
 
-		part, err := p.uploadPart(uploadPart, uploadID, i, pre, client)
+		part, err := p.uploadPart(uploadPart, uploadID, i, pre, client, isLargeFile)
 		if err != nil { // retry part
-			part, err = p.uploadPart(uploadPart, uploadID, i, pre, client)
+			part, err = p.uploadPart(uploadPart, uploadID, i, pre, client, isLargeFile)
 		}
 		if err != nil {
 			return err
@@ -306,21 +310,24 @@ func (p *Vod) chunkUpload(rd io.Reader, uploadPart UploadPartCommon, client *htt
 		pre = pre[:n]
 	}
 	// 退出的条件有两个：文件读EOF；读字节数小于MinChunkSize；这两种情况都需要把pre保存下来的分片上传
-	part, err := p.uploadPart(uploadPart, uploadID, i, pre, client)
+	part, err := p.uploadPart(uploadPart, uploadID, i, pre, client, isLargeFile)
 	if err != nil {
 		return err
 	}
 	parts = append(parts, part)
-	return p.uploadMergePart(uploadPart, uploadID, parts, client)
+	return p.uploadMergePart(uploadPart, uploadID, parts, client, isLargeFile)
 }
 
-func (p *Vod) initUploadPart(tosHost string, oid string, auth string, client *http.Client) (string, error) {
+func (p *Vod) initUploadPart(tosHost string, oid string, auth string, client *http.Client, isLargeFile bool) (string, error) {
 	url := fmt.Sprintf("http://%s/%s?uploads", tosHost, oid)
 	req, err := http.NewRequest("PUT", url, nil)
 	if err != nil {
 		return "", err
 	}
 	req.Header.Set("Authorization", auth)
+	if isLargeFile {
+		req.Header.Set("X-Storage-Mode", "gateway")
+	}
 	rsp, err := client.Do(req)
 	if err != nil {
 		return "", err
@@ -340,7 +347,7 @@ func (p *Vod) initUploadPart(tosHost string, oid string, auth string, client *ht
 	return res.PayLoad.UploadID, nil
 }
 
-func (p *Vod) uploadPart(uploadPart UploadPartCommon, uploadID string, partNumber int, data []byte, client *http.Client) (string, error) {
+func (p *Vod) uploadPart(uploadPart UploadPartCommon, uploadID string, partNumber int, data []byte, client *http.Client, isLargeFile bool) (string, error) {
 	url := fmt.Sprintf("http://%s/%s?partNumber=%d&uploadID=%s", uploadPart.TosHost, uploadPart.Oid, partNumber, uploadID)
 	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(data))
 	req, err := http.NewRequest("PUT", url, bytes.NewReader(data))
@@ -349,6 +356,9 @@ func (p *Vod) uploadPart(uploadPart UploadPartCommon, uploadID string, partNumbe
 	}
 	req.Header.Set("Content-CRC32", checkSum)
 	req.Header.Set("Authorization", uploadPart.Auth)
+	if isLargeFile {
+		req.Header.Set("X-Storage-Mode", "gateway")
+	}
 
 	rsp, err := client.Do(req)
 	if err != nil {
@@ -369,7 +379,7 @@ func (p *Vod) uploadPart(uploadPart UploadPartCommon, uploadID string, partNumbe
 	return checkSum, nil
 }
 
-func (p *Vod) uploadMergePart(uploadPart UploadPartCommon, uploadID string, checkSum []string, client *http.Client) error {
+func (p *Vod) uploadMergePart(uploadPart UploadPartCommon, uploadID string, checkSum []string, client *http.Client, isLargeFile bool) error {
 	url := fmt.Sprintf("http://%s/%s?uploadID=%s", uploadPart.TosHost, uploadPart.Oid, uploadID)
 	body, err := p.genMergeBody(checkSum)
 	if err != nil {
@@ -380,6 +390,9 @@ func (p *Vod) uploadMergePart(uploadPart UploadPartCommon, uploadID string, chec
 		return err
 	}
 	req.Header.Set("Authorization", uploadPart.Auth)
+	if isLargeFile {
+		req.Header.Set("X-Storage-Mode", "gateway")
+	}
 	rsp, err := client.Do(req)
 	if err != nil {
 		return err

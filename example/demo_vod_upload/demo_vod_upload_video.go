@@ -19,8 +19,8 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	spaceName := "your space name"
-	filePath := "your file path"
+	spaceName := "your space"
+	filePath := "file path"
 
 	snapShotFunc := vod.Function{Name: "Snapshot", Input: vod.SnapshotInput{SnapshotTime: 2.3}}
 	getMetaFunc := vod.Function{Name: "GetMeta"}
