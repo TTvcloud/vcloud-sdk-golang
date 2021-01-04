@@ -51,6 +51,7 @@ type CommitUploadImageParam struct {
 	ServiceId   string       `json:"-"`
 	SpaceName   string       `json:"-"`
 	SessionKey  string       `json:"SessionKey"`
+	SuccessOids []string     `json:"SuccessOids"`
 	OptionInfos []OptionInfo `json:"OptionInfos"`
 	Functions   []Function   `json:"Functions"`
 }
@@ -78,6 +79,7 @@ type CommitUploadImageResult struct {
 
 type Result struct {
 	Uri        string     `json:"Uri"`
+	UriStatus  int        `json:"UriStatus"`
 	Encryption Encryption `json:"Encryption"`
 }
 
