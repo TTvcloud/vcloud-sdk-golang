@@ -39,7 +39,7 @@ func (p *Rtc) ByteTranscodeChangeLayout(body map[string]interface{}) (*ByteTrans
 }
 
 func (p *Rtc) commonPostJson(api string, query url.Values, body string, out interface{}) (int, error) {
-	respBody, status, err := p.Json("ByteStartTranscode", nil, body)
+	respBody, status, err := p.Json(api, query, body)
 	if err != nil {
 		return status, err
 	}
