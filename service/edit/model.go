@@ -46,3 +46,27 @@ type GetDirectEditResultResponse struct {
 		TaskId       string      `json:"TaskId"`
 	} `json:"Result"`
 }
+
+type SubmitTemplateTaskAsyncResponse struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           []string `json:"Result"`
+}
+
+type TemplateParamItem struct {
+	Name     string  `json:"Name,omitempty"`
+	Type     string  `json:"Type"`
+	Position string  `json:"Position"`
+	Text     *string `json:"Text,omitempty"`
+	Source   *string `json:"Source,omitempty"`
+}
+
+type SubmitTemplateTaskAsyncRequest struct {
+	TemplateId   string                 `json:"TemplateId" valid:"required"`
+	Space        string                 `json:"Space" valid:"required"`
+	VideoName    []string               `json:"VideoName" valid:"-"`
+	Params       [][]*TemplateParamItem `json:"Params" valid:"required"`
+	Priority     int                    `json:"Priority" valid:"-"`
+	CallbackUri  string                 `json:"CallbackUri" valid:"-"`
+	CallbackArgs string                 `json:"CallbackArgs" valid:"-"`
+	Type         int                    `json:"Type" valid:"-"`
+}

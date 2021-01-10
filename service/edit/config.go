@@ -65,5 +65,13 @@ var (
 				"Version": []string{"2018-01-01"},
 			},
 		},
+		"SubmitTemplateTaskAsync": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"SubmitTemplateTaskAsync"},
+				"Version": []string{"2018-01-01"},
+			},
+		},
 	}
 )
