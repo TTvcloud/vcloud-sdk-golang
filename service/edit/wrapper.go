@@ -76,3 +76,26 @@ func (e *Edit) GetDirectEditResult(request *GetDirectEditResultRequest) (*GetDir
 		return resp, nil
 	}
 }
+
+func (e *Edit) SubmitTemplateTaskAsync(request *SubmitTemplateTaskAsyncRequest) (*SubmitTemplateTaskAsyncResponse, error) {
+	bts, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+
+	respBody, status, err := e.Json("SubmitTemplateTaskAsync", nil, string(bts))
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
+	}
+
+	resp := &SubmitTemplateTaskAsyncResponse{}
+	if err := json.Unmarshal(respBody, resp); err != nil {
+		return nil, err
+	} else {
+		resp.ResponseMetadata.Service = "edit"
+		return resp, nil
+	}
+}

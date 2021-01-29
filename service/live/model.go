@@ -173,6 +173,27 @@ type ElePushInfo struct {
 	RtmpUrl   string
 }
 
+// MGetStreamsInfo
+type MGetStreamsInfoRequest struct {
+	Streams []string
+}
+
+type MGetStreamsInfoResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           *MGetStreamsInfoResult `json:",omitempty"`
+}
+
+type MGetStreamsInfoResult struct {
+	Infos map[string]*Info
+}
+
+type Info struct {
+	AppId      int64
+	Status     EStreamStatus
+	Stream     string
+	CreateTime int64
+}
+
 // MGetStreamsPlayInfo
 type MGetStreamsPlayInfoRequest struct {
 	Streams            []string
@@ -266,6 +287,17 @@ type VOD struct {
 	Duration  float64
 	StartTime int64
 	EndTime   int64
+}
+
+// CreateVOD
+type CreateVODRequest struct {
+	Stream    string // required
+	StartTime int64  // optional, unix time second
+	EndTime   int64  // optional, unix time second
+}
+
+type CreateVODResponse struct {
+	ResponseMetadata *base.ResponseMetadata
 }
 
 // GetRecords
