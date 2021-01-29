@@ -165,6 +165,7 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 				fmt.Printf("Fail to do upload for host %s, uri %s, %v\n", host, info.StoreUri, err)
 			} else {
 				success = append(success, info.StoreUri)
+				break
 			}
 		}
 	}
