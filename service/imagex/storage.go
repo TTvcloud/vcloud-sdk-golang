@@ -58,7 +58,7 @@ func (c *ImageXClient) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUp
 
 	respBody, _, err := c.Query("ApplyImageUpload", query)
 	if err != nil {
-		return nil, fmt.Errorf("fail to request api ApplyImageUpload, %v", err)
+		return nil, fmt.Errorf("fail to request api ApplyImageUpload, %s, %v", string(respBody), err)
 	}
 
 	result := new(struct {
@@ -79,6 +79,7 @@ func (c *ImageXClient) CommitUploadImage(params *CommitUploadImageParam) (*Commi
 	if params.SpaceName != "" {
 		query.Add("SpaceName", params.SpaceName)
 	}
+	query.Add("SkipMeta", fmt.Sprintf("%v", params.SkipMeta))
 
 	bts, err := json.Marshal(params)
 	if err != nil {
@@ -87,7 +88,7 @@ func (c *ImageXClient) CommitUploadImage(params *CommitUploadImageParam) (*Commi
 
 	respBody, _, err := c.Json("CommitImageUpload", query, string(bts))
 	if err != nil {
-		return nil, fmt.Errorf("fail to request api CommitImageUpload, %v", err)
+		return nil, fmt.Errorf("fail to request api CommitImageUpload, %s, %v", string(respBody), err)
 	}
 
 	result := new(CommitUploadImageResult)
@@ -172,6 +173,7 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 	commitParams := &CommitUploadImageParam{
 		ServiceId:   params.ServiceId,
 		SpaceName:   params.SpaceName,
+		SkipMeta:    params.SkipMeta,
 		SessionKey:  applyResp.SessionKey,
 		SuccessOids: success,
 		Functions:   functions,

@@ -32,6 +32,7 @@ type ApplyUploadImageParam struct {
 	SessionKey string
 	UploadNum  int
 	StoreKeys  []string
+	SkipMeta   bool
 }
 
 type ApplyUploadImageResult struct {
@@ -50,6 +51,7 @@ type StoreInfo struct {
 type CommitUploadImageParam struct {
 	ServiceId   string       `json:"-"`
 	SpaceName   string       `json:"-"`
+	SkipMeta    bool         `json:"-"`
 	SessionKey  string       `json:"SessionKey"`
 	SuccessOids []string     `json:"SuccessOids"`
 	OptionInfos []OptionInfo `json:"OptionInfos"`
@@ -98,6 +100,10 @@ type ImageInfo struct {
 	ImageWidth  int    `json:"ImageWidth"`
 	ImageHeight int    `json:"ImageHeight"`
 	ImageMd5    string `json:"ImageMd5"`
+	ImageFormat string `json:"ImageFormat"`
+	ImageSize   int    `json:"ImageSize"`
+	FrameCnt    int    `json:"FrameCnt"`
+	Duration    int    `json:"Duration"`
 }
 
 // UpdateImageUploadFiles
