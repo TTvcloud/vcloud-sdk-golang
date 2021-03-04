@@ -1,4 +1,4 @@
-package demo_imagex_extract
+package main
 
 import (
 	"fmt"
