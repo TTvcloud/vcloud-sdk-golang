@@ -61,12 +61,13 @@ type TemplateParamItem struct {
 }
 
 type SubmitTemplateTaskAsyncRequest struct {
-	TemplateId   string                 `json:"TemplateId" valid:"required"`
-	Space        string                 `json:"Space" valid:"required"`
-	VideoName    []string               `json:"VideoName" valid:"-"`
-	Params       [][]*TemplateParamItem `json:"Params" valid:"required"`
-	Priority     int                    `json:"Priority" valid:"-"`
-	CallbackUri  string                 `json:"CallbackUri" valid:"-"`
-	CallbackArgs string                 `json:"CallbackArgs" valid:"-"`
-	Type         int                    `json:"Type" valid:"-"`
+	TemplateId   string                   `json:"TemplateId"`
+	Space        string                   `json:"Space"`
+	VideoName    []string                 `json:"VideoName"`
+	Params       [][]*TemplateParamItem   `json:"Params"`
+	ExtraParams  []map[string]interface{} `json:"ExtraParams"`
+	Priority     int                      `json:"Priority"`
+	CallbackUri  string                   `json:"CallbackUri"`
+	CallbackArgs string                   `json:"CallbackArgs"`
+	Type         int                      `json:"Type"`
 }
