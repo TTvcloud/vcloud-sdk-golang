@@ -53,11 +53,12 @@ type SubmitTemplateTaskAsyncResponse struct {
 }
 
 type TemplateParamItem struct {
-	Name     string  `json:"Name,omitempty"`
-	Type     string  `json:"Type"`
-	Position string  `json:"Position"`
-	Text     *string `json:"Text,omitempty"`
-	Source   *string `json:"Source,omitempty"`
+	Name          string   `json:"Name,omitempty"`
+	Type          string   `json:"Type"`
+	Position      string   `json:"Position"`
+	Text          *string  `json:"Text,omitempty"`
+	Source        *string  `json:"Source,omitempty"`
+	SelfStartTime *float64 `json:"SelfStartTime,omitempty"`
 }
 
 type SubmitTemplateTaskAsyncRequest struct {
