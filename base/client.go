@@ -62,6 +62,10 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	return client
 }
 
+func (client *Client) AddHeader(key, value string) {
+	client.ServiceInfo.Header.Add(key, value)
+}
+
 // SetAccessKey 设置AK
 func (client *Client) SetAccessKey(ak string) {
 	if ak != "" {
