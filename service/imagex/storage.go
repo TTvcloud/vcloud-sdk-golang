@@ -2,6 +2,7 @@ package imagex
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -103,6 +104,8 @@ func (c *ImageXClient) upload(host string, storeInfo StoreInfo, imageBytes []byt
 		return fmt.Errorf("file size is zero")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), c.ServiceInfo.Timeout)
+	defer cancel()
 	checkSum := fmt.Sprintf("%x", crc32.ChecksumIEEE(imageBytes))
 	url := fmt.Sprintf("http://%s/%s", host, storeInfo.StoreUri)
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(imageBytes))
@@ -111,6 +114,7 @@ func (c *ImageXClient) upload(host string, storeInfo StoreInfo, imageBytes []byt
 	}
 	req.Header.Set("Content-CRC32", checkSum)
 	req.Header.Set("Authorization", storeInfo.Auth)
+	req = req.WithContext(ctx)
 
 	rsp, err := http.DefaultClient.Do(req)
 	if err != nil {
