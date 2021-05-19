@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -25,6 +26,7 @@ const (
 type Client struct {
 	Client      http.Client
 	ServiceInfo *ServiceInfo
+	mu          sync.Mutex
 	ApiInfoList map[string]*ApiInfo
 }
 
@@ -82,6 +84,9 @@ func (cred Credentials) Clone() Credentials {
 }
 
 func (client *Client) AddHeader(key, value string) {
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	client.ServiceInfo.Header.Del(key)
 	client.ServiceInfo.Header.Add(key, value)
 }
 
