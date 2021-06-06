@@ -15,6 +15,24 @@ const (
 	FunctionEncryption = "Encryption"
 )
 
+//GetImageOCR
+type GetImageOCRResult struct {
+	Scene     string                          `json:"Scene"`
+	OCRResult map[string]*GetImageOCRTextInfo `json:"OCR_result"`
+}
+
+type GetImageOCRTextInfo struct {
+	Content  string `json:"Content"`
+	Location string `json:"Location"`
+}
+
+type GetImageOCRParam struct {
+	ServiceId string
+	Scene     string
+	StoreUri  string
+	Image     []byte
+}
+
 // GetImageThemeColor
 type GetImageThemeColorResult struct {
 	Color string `json:"color"`

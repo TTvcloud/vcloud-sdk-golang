@@ -271,6 +271,31 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 	return client.makeRequest(api, req, timeout)
 }
 
+// binary 发起binary的post请求
+func (client *Client) Binary(api string, query url.Values, body string) ([]byte, int, error) {
+	apiInfo := client.ApiInfoList[api]
+
+	if apiInfo == nil {
+		return []byte(""), 500, errors.New("相关api不存在")
+	}
+	timeout := getTimeout(client.ServiceInfo.Timeout, apiInfo.Timeout)
+	header := mergeHeader(client.ServiceInfo.Header, apiInfo.Header)
+	query = mergeQuery(query, apiInfo.Query)
+
+	u := url.URL{
+		Scheme:   client.ServiceInfo.Scheme,
+		Host:     client.ServiceInfo.Host,
+		Path:     apiInfo.Path,
+		RawQuery: query.Encode(),
+	}
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), strings.NewReader(body))
+	if err != nil {
+		return []byte(""), 500, errors.New("构建request失败")
+	}
+	req.Header = header
+	return client.makeRequest(api, req, timeout)
+}
+
 func (client *Client) makeRequest(api string, req *http.Request, timeout time.Duration) ([]byte, int, error) {
 	req = client.ServiceInfo.Credentials.Sign(req)
 

@@ -8,9 +8,9 @@ import (
 )
 
 /*
- * get image theme color
+ * get image ocr
  */
-func main() {
+ func main() {
 	// default region cn-north-1, for other region, call imagex.NewInstanceWithRegion(region)
 	instance := imagex.NewInstance()
 
@@ -24,9 +24,21 @@ func main() {
 	//instance.SetAccessKey("")
 	//instance.SetSecretKey("")
 
-	uri := "your uri expected to extract theme color"
+	//use the param when image is stored in tos
+	param := &imagex.GetImageOCRParam{
+		ServiceId: "xx",
+		Scene: "license",
+		StoreUri: "xx",
+	}
 
-	resp, err := instance.GetImageThemeColor(uri)
+	//use the param when post binary data of a image
+	// param := &imagex.GetImageOCRParam{
+	// 	ServiceId: "xx",
+	// 	Scene: "license",
+	// 	Image: []byte("图片数据"),
+	// }
+
+	resp, err := instance.GetImageOCR(param)
 	if err != nil {
 		fmt.Printf("error %v", err)
 	} else {

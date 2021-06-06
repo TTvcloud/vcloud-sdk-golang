@@ -184,11 +184,12 @@ var (
 				"Version": []string{ImageXDomainWeightsVersion},
 			},
 		},
-		"GetImageThemeColor": {
-			Method: http.MethodGet,
+		
+		"GetImageOCR": {
+			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"GetImageThemeColor"},
+				"Action":  []string{"GetImageOCR"},
 				"Version": []string{ImageXApiVersion},
 			},
 		},
