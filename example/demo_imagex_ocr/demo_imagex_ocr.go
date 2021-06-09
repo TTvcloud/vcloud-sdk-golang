@@ -27,17 +27,17 @@ func main() {
 	//use the param when image is stored in tos
 	param := &imagex.GetImageOCRParam{
 		ServiceId: "xx",
-		Scene:     "license",
+		Scene:     imagex.LicenseScene,
 		StoreUri:  "xx",
-		AccountId: "1000000245",
+		AccountId: "",
 	}
 
 	//use the param when post binary data of a image
 	// param := &imagex.GetImageOCRParam{
 	// 	ServiceId: "xx",
-	// 	Scene: "license",
+	// 	Scene: "",
 	// 	Image: []byte("图片数据"),
-	// 	AccountId: "1000000245",
+	// 	AccountId: "",
 	// }
 
 	resp, err := instance.GetImageOCR(param)

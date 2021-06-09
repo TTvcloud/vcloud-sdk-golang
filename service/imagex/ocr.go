@@ -6,6 +6,8 @@ import (
 	"net/url"
 )
 
+const LicenseScene = "license"
+
 func (c *ImageXClient) GetImageOCR(param *GetImageOCRParam) (*GetImageOCRResult, error) {
 	u := url.Values{}
 	c.ServiceInfo.Header.Add("X-Top-Account-Id", param.AccountId)
