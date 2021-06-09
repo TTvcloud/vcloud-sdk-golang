@@ -23,7 +23,7 @@ type GetImageOCRResult struct {
 
 type GetImageOCRTextInfo struct {
 	Content  string `json:"Content"`
-	Location string `json:"Location"`
+	Location []int  `json:"Location"`
 }
 
 type GetImageOCRParam struct {
@@ -31,6 +31,7 @@ type GetImageOCRParam struct {
 	Scene     string
 	StoreUri  string
 	Image     []byte
+	AccountId string
 }
 
 // GetImageThemeColor

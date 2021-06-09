@@ -10,7 +10,7 @@ import (
 /*
  * get image ocr
  */
- func main() {
+func main() {
 	// default region cn-north-1, for other region, call imagex.NewInstanceWithRegion(region)
 	instance := imagex.NewInstance()
 
@@ -27,8 +27,9 @@ import (
 	//use the param when image is stored in tos
 	param := &imagex.GetImageOCRParam{
 		ServiceId: "xx",
-		Scene: "license",
-		StoreUri: "xx",
+		Scene:     "license",
+		StoreUri:  "xx",
+		AccountId: "1000000245",
 	}
 
 	//use the param when post binary data of a image
@@ -36,6 +37,7 @@ import (
 	// 	ServiceId: "xx",
 	// 	Scene: "license",
 	// 	Image: []byte("图片数据"),
+	// 	AccountId: "1000000245",
 	// }
 
 	resp, err := instance.GetImageOCR(param)
