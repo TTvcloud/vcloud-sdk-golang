@@ -34,11 +34,6 @@ type GetImageOCRParam struct {
 	AccountId string
 }
 
-// GetImageThemeColor
-type GetImageThemeColorResult struct {
-	Color string `json:"color"`
-}
-
 // DeleteImageUploadFiles
 type DeleteImageParam struct {
 	StoreUris []string `json:"StoreUris"`
