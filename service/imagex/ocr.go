@@ -1,6 +1,7 @@
 package imagex
 
 import (
+	"bytes"
 	"fmt"
 	"net/url"
 )
@@ -12,7 +13,7 @@ func (c *ImageXClient) GetImageOCR(param *GetImageOCRParam) (*GetImageOCRResult,
 	u.Set("Scene", param.Scene)
 	u.Set("ServiceId", param.ServiceId)
 	u.Set("StoreUri", param.StoreUri)
-	data, _, err := c.Binary("GetImageOCR", u, string(param.Image))
+	data, _, err := c.PostWithBody("GetImageOCR", u, bytes.NewReader(param.Image))
 	if err != nil {
 		return nil, fmt.Errorf("fail to request api GetImageOCR, %v\n", err)
 	}

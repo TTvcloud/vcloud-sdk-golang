@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -272,7 +273,7 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 }
 
 // binary 发起binary的post请求
-func (client *Client) Binary(api string, query url.Values, body string) ([]byte, int, error) {
+func (client *Client) PostWithBody(api string, query url.Values, body io.Reader) ([]byte, int, error) {
 	apiInfo := client.ApiInfoList[api]
 
 	if apiInfo == nil {
@@ -288,7 +289,7 @@ func (client *Client) Binary(api string, query url.Values, body string) ([]byte,
 		Path:     apiInfo.Path,
 		RawQuery: query.Encode(),
 	}
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), strings.NewReader(body))
+	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), body)
 	if err != nil {
 		return []byte(""), 500, errors.New("构建request失败")
 	}
