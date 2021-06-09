@@ -272,7 +272,6 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 	return client.makeRequest(api, req, timeout)
 }
 
-// binary 发起binary的post请求
 func (client *Client) PostWithBody(api string, query url.Values, body io.Reader) ([]byte, int, error) {
 	apiInfo := client.ApiInfoList[api]
 
