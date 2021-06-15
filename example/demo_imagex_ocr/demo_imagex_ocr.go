@@ -32,14 +32,6 @@ func main() {
 		AccountId: "",
 	}
 
-	//use the param when post binary data of a image
-	// param := &imagex.GetImageOCRParam{
-	// 	ServiceId: "xx",
-	// 	Scene: "",
-	// 	Image: []byte("图片数据"),
-	// 	AccountId: "",
-	// }
-
 	resp, err := instance.GetImageOCR(param)
 	if err != nil {
 		fmt.Printf("error %v", err)

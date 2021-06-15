@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -269,30 +268,6 @@ func (client *Client) Post(api string, query url.Values, form url.Values) ([]byt
 	req.Header = header
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	return client.makeRequest(api, req, timeout)
-}
-
-func (client *Client) PostWithBody(api string, query url.Values, body io.Reader) ([]byte, int, error) {
-	apiInfo := client.ApiInfoList[api]
-
-	if apiInfo == nil {
-		return []byte(""), 500, errors.New("相关api不存在")
-	}
-	timeout := getTimeout(client.ServiceInfo.Timeout, apiInfo.Timeout)
-	header := mergeHeader(client.ServiceInfo.Header, apiInfo.Header)
-	query = mergeQuery(query, apiInfo.Query)
-
-	u := url.URL{
-		Scheme:   client.ServiceInfo.Scheme,
-		Host:     client.ServiceInfo.Host,
-		Path:     apiInfo.Path,
-		RawQuery: query.Encode(),
-	}
-	req, err := http.NewRequest(strings.ToUpper(apiInfo.Method), u.String(), body)
-	if err != nil {
-		return []byte(""), 500, errors.New("构建request失败")
-	}
-	req.Header = header
 	return client.makeRequest(api, req, timeout)
 }
 
