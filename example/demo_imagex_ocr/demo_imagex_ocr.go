@@ -29,7 +29,6 @@ func main() {
 		ServiceId: "xx",
 		Scene:     imagex.LicenseScene,
 		StoreUri:  "xx",
-		AccountId: "",
 	}
 
 	resp, err := instance.GetImageOCR(param)

@@ -30,7 +30,6 @@ type GetImageOCRParam struct {
 	ServiceId string
 	Scene     string
 	StoreUri  string
-	AccountId string
 }
 
 // DeleteImageUploadFiles
