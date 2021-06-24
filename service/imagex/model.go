@@ -15,9 +15,21 @@ const (
 	FunctionEncryption = "Encryption"
 )
 
-// GetImageThemeColor
-type GetImageThemeColorResult struct {
-	Color string `json:"color"`
+//GetImageOCR
+type GetImageOCRResult struct {
+	Scene     string                          `json:"Scene"`
+	OCRResult map[string]*GetImageOCRTextInfo `json:"OCR_result"`
+}
+
+type GetImageOCRTextInfo struct {
+	Content  string `json:"Content"`
+	Location []int  `json:"Location"`
+}
+
+type GetImageOCRParam struct {
+	ServiceId string
+	Scene     string
+	StoreUri  string
 }
 
 // DeleteImageUploadFiles
