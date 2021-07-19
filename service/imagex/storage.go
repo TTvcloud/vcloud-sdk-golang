@@ -106,7 +106,7 @@ func (c *ImageXClient) upload(host string, storeInfo StoreInfo, imageBytes []byt
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.ServiceInfo.Timeout)
 	defer cancel()
-	checkSum := fmt.Sprintf("%x", crc32.ChecksumIEEE(imageBytes))
+	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(imageBytes))
 	url := fmt.Sprintf("http://%s/%s", host, storeInfo.StoreUri)
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(imageBytes))
 	if err != nil {
