@@ -13,13 +13,10 @@ import (
 const (
 	updateInterval = 10
 
-	ImageXHostCn = "imagex.bytedanceapi.com"
-	ImageXHostVa = "imagex.us-east-1.bytedanceapi.com"
-	ImageXHostSg = "imagex.ap-singapore-1.bytedanceapi.com"
-
-	ImageXInnerHostCn = "imagex.byted.org"
-	ImageXInnerHostVa = "imagex.us-east-1.byted.org"
-	ImageXInnerHostSg = "imagex.ap-singapore-1.byted.org"
+	ImageXHostCn  = "imagex.bytedanceapi.com"
+	ImageXHostVa  = "imagex.us-east-1.bytedanceapi.com"
+	ImageXHostSg  = "imagex.ap-singapore-1.bytedanceapi.com"
+	ImageXHostGcp = "imagex-us-east-2.bytevcloudapi.com"
 
 	ImageXTimeout              = 10 * time.Second
 	ImageXServiceName          = "ImageX"
@@ -93,39 +90,15 @@ var (
 				Service: ImageXServiceName,
 			},
 		},
-		base.InnerRegionCnNorth1: {
+		base.RegionUsEast2: {
 			Timeout: ImageXTimeout,
-			Scheme:  "http",
-			Host:    ImageXInnerHostCn,
+			Scheme:  "https",
+			Host:    ImageXHostGcp,
 			Header: http.Header{
 				"Accept": []string{"application/json"},
 			},
 			Credentials: base.Credentials{
-				Region:  base.RegionCnNorth1,
-				Service: ImageXServiceName,
-			},
-		},
-		base.InnerRegionUsEast1: {
-			Timeout: ImageXTimeout,
-			Scheme:  "http",
-			Host:    ImageXInnerHostVa,
-			Header: http.Header{
-				"Accept": []string{"application/json"},
-			},
-			Credentials: base.Credentials{
-				Region:  base.RegionUsEast1,
-				Service: ImageXServiceName,
-			},
-		},
-		base.InnerRegionApSingapore: {
-			Timeout: ImageXTimeout,
-			Scheme:  "http",
-			Host:    ImageXInnerHostSg,
-			Header: http.Header{
-				"Accept": []string{"application/json"},
-			},
-			Credentials: base.Credentials{
-				Region:  base.RegionApSingapore,
+				Region:  base.RegionUsEast2,
 				Service: ImageXServiceName,
 			},
 		},
@@ -184,7 +157,7 @@ var (
 				"Version": []string{ImageXDomainWeightsVersion},
 			},
 		},
-		
+
 		"GetImageOCR": {
 			Method: http.MethodPost,
 			Path:   "/",
