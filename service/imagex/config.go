@@ -184,5 +184,14 @@ var (
 				"Version": []string{ImageXDomainWeightsVersion},
 			},
 		},
+		//图片转存
+		"FetchImageUrl": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"FetchImageUrl"},
+				"Version": []string{ImageXApiVersion},
+			},
+		},
 	}
 )

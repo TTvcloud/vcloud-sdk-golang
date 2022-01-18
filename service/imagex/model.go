@@ -168,3 +168,15 @@ func UnmarshalResultInto(data []byte, result interface{}) error {
 	}
 	return nil
 }
+
+// FetchImageUrl
+type FetchImageUrlParam struct {
+	ServiceId string `json:"serviceId"`
+	Url       string `json:"Url"`
+}
+
+type FetchImageUrlResult struct {
+	Url      string `json:"Url"`
+	StoreUri string `json:"StoreUri"`
+	FSize    int64  `json:"FSize"`
+}

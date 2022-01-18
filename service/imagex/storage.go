@@ -278,3 +278,26 @@ func (c *ImageXClient) DisableImageUrls(serviceId string, urls []string) ([]stri
 	}
 	return c.updateImageUrls(serviceId, req)
 }
+
+// FetchImageUrl 图片转存
+func (c *ImageXClient) FetchImageUrl(serviceId string, url string) (*FetchImageUrlResult, error) {
+	param := new(FetchImageUrlParam)
+	param.ServiceId = serviceId
+	param.Url = url
+
+	body, err := json.Marshal(param)
+	if err != nil {
+		return nil, fmt.Errorf("fail to marshal request, %v", err)
+	}
+
+	data, _, err := c.Json("FetchImageUrl", nil, string(body))
+	if err != nil {
+		return nil, fmt.Errorf("fail to request api FetchImageUrl, %v", err)
+	}
+
+	result := new(FetchImageUrlResult)
+	if err := UnmarshalResultInto(data, result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}

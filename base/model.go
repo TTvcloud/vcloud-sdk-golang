@@ -7,10 +7,9 @@ import (
 )
 
 const (
-	RegionCnNorth1    = "cn-north-1"
-	RegionUsEast1     = "us-east-1"
-	RegionApSingapore = "ap-singapore-1"
-
+	RegionCnNorth1         = "cn-north-1"
+	RegionUsEast1          = "us-east-1"
+	RegionApSingapore      = "ap-singapore-1"
 	InnerRegionCnNorth1    = "cn-north-1-inner"
 	InnerRegionUsEast1     = "us-east-1-inner"
 	InnerRegionApSingapore = "ap-singapore-1-inner"
