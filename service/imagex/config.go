@@ -157,12 +157,20 @@ var (
 				"Version": []string{ImageXDomainWeightsVersion},
 			},
 		},
-
 		"GetImageOCR": {
 			Method: http.MethodPost,
 			Path:   "/",
 			Query: url.Values{
 				"Action":  []string{"GetImageOCR"},
+				"Version": []string{ImageXApiVersion},
+			},
+		},
+		//图片转存
+		"FetchImageUrl": {
+			Method: http.MethodPost,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"FetchImageUrl"},
 				"Version": []string{ImageXApiVersion},
 			},
 		},
