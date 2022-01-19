@@ -15,6 +15,23 @@ const (
 	FunctionEncryption = "Encryption"
 )
 
+//GetImageOCR
+type GetImageOCRResult struct {
+	Scene     string                          `json:"Scene"`
+	OCRResult map[string]*GetImageOCRTextInfo `json:"OCR_result"`
+}
+
+type GetImageOCRTextInfo struct {
+	Content  string `json:"Content"`
+	Location []int  `json:"Location"`
+}
+
+type GetImageOCRParam struct {
+	ServiceId string
+	Scene     string
+	StoreUri  string
+}
+
 // DeleteImageUploadFiles
 type DeleteImageParam struct {
 	StoreUris []string `json:"StoreUris"`
@@ -32,6 +49,7 @@ type ApplyUploadImageParam struct {
 	SessionKey string
 	UploadNum  int
 	StoreKeys  []string
+	SkipMeta   bool
 }
 
 type ApplyUploadImageResult struct {
@@ -50,6 +68,7 @@ type StoreInfo struct {
 type CommitUploadImageParam struct {
 	ServiceId   string       `json:"-"`
 	SpaceName   string       `json:"-"`
+	SkipMeta    bool         `json:"-"`
 	SessionKey  string       `json:"SessionKey"`
 	SuccessOids []string     `json:"SuccessOids"`
 	OptionInfos []OptionInfo `json:"OptionInfos"`
@@ -98,6 +117,10 @@ type ImageInfo struct {
 	ImageWidth  int    `json:"ImageWidth"`
 	ImageHeight int    `json:"ImageHeight"`
 	ImageMd5    string `json:"ImageMd5"`
+	ImageFormat string `json:"ImageFormat"`
+	ImageSize   int    `json:"ImageSize"`
+	FrameCnt    int    `json:"FrameCnt"`
+	Duration    int    `json:"Duration"`
 }
 
 // UpdateImageUploadFiles

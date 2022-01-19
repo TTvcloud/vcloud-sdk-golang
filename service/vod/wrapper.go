@@ -107,6 +107,9 @@ func (p *Vod) ApplyUpload(params ApplyUploadParam) (*ApplyUploadResp, error) {
 	if params.UploadNum > 0 {
 		query.Add("UploadNum", string(params.UploadNum))
 	}
+	if params.FileName != "" {
+		query.Add("TosKeys", params.FileName)
+	}
 
 	respBody, status, err := p.Query("ApplyUpload", query)
 	if err != nil {
@@ -175,7 +178,7 @@ func (p *Vod) ModifyVideoInfo(body ModifyVideoInfoBody) (*ModifyVideoInfoResp, e
 	}
 }
 
-func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (string, string, error) {
+func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType, fileName string) (string, string, error) {
 	if len(fileBytes) == 0 {
 		return "", "", fmt.Errorf("file size is zero")
 	}
@@ -183,6 +186,7 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (str
 	params := ApplyUploadParam{
 		SpaceName: spaceName,
 		FileType:  fileType,
+		FileName:  fileName,
 	}
 
 	resp, err := p.ApplyUpload(params)
@@ -242,7 +246,7 @@ func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (str
 }
 
 func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileType FileType) (string, error) {
-	oid, _, err := p.Upload(fileBytes, spaceName, fileType)
+	oid, _, err := p.Upload(fileBytes, spaceName, fileType, "")
 	if err != nil {
 		return "", err
 	}
@@ -262,15 +266,19 @@ func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileT
 }
 
 func (p *Vod) UploadVideoWithCallbackArgs(fileBytes []byte, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
-	return p.UploadVideoInner(fileBytes, spaceName, fileType, callbackArgs, funcs...)
+	return p.UploadVideoInner(fileBytes, spaceName, fileType, "", callbackArgs, funcs...)
+}
+
+func (p *Vod) UploadObjectWithCallbackArgs(fileBytes []byte, spaceName string, callbackArgs, fileName string) (*CommitUploadResp, error) {
+	return p.UploadVideoInner(fileBytes, spaceName, OBJECT, fileName, callbackArgs, Function{Name: "GetMeta"})
 }
 
 func (p *Vod) UploadVideo(fileBytes []byte, spaceName string, fileType FileType, funcs ...Function) (*CommitUploadResp, error) {
-	return p.UploadVideoInner(fileBytes, spaceName, fileType, "", funcs...)
+	return p.UploadVideoInner(fileBytes, spaceName, fileType, "", "", funcs...)
 }
 
-func (p *Vod) UploadVideoInner(fileBytes []byte, spaceName string, fileType FileType, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
-	_, sessionKey, err := p.Upload(fileBytes, spaceName, fileType)
+func (p *Vod) UploadVideoInner(fileBytes []byte, spaceName string, fileType FileType, fileName string, callbackArgs string, funcs ...Function) (*CommitUploadResp, error) {
+	_, sessionKey, err := p.Upload(fileBytes, spaceName, fileType, fileName)
 	if err != nil {
 		return nil, err
 	}

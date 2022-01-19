@@ -23,8 +23,10 @@ func main() {
 	//vod.NewInstance().SetAccessKey("")
 	//vod.NewInstance().SetSecretKey("")
 
-	// your param
+	// add custom header, for example
+	// instance.AddHeader("X-TT-LOGID", "logid")
 
+	// your param
 	param := &edit.TemplateParamItem{
 		Type:     "image",
 		Position: "0",

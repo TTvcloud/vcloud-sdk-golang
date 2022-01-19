@@ -2,6 +2,7 @@ package imagex
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -58,7 +59,7 @@ func (c *ImageXClient) ApplyUploadImage(params *ApplyUploadImageParam) (*ApplyUp
 
 	respBody, _, err := c.Query("ApplyImageUpload", query)
 	if err != nil {
-		return nil, fmt.Errorf("fail to request api ApplyImageUpload, %v", err)
+		return nil, fmt.Errorf("fail to request api ApplyImageUpload, %s, %v", string(respBody), err)
 	}
 
 	result := new(struct {
@@ -79,6 +80,7 @@ func (c *ImageXClient) CommitUploadImage(params *CommitUploadImageParam) (*Commi
 	if params.SpaceName != "" {
 		query.Add("SpaceName", params.SpaceName)
 	}
+	query.Add("SkipMeta", fmt.Sprintf("%v", params.SkipMeta))
 
 	bts, err := json.Marshal(params)
 	if err != nil {
@@ -87,7 +89,7 @@ func (c *ImageXClient) CommitUploadImage(params *CommitUploadImageParam) (*Commi
 
 	respBody, _, err := c.Json("CommitImageUpload", query, string(bts))
 	if err != nil {
-		return nil, fmt.Errorf("fail to request api CommitImageUpload, %v", err)
+		return nil, fmt.Errorf("fail to request api CommitImageUpload, %s, %v", string(respBody), err)
 	}
 
 	result := new(CommitUploadImageResult)
@@ -102,7 +104,9 @@ func (c *ImageXClient) upload(host string, storeInfo StoreInfo, imageBytes []byt
 		return fmt.Errorf("file size is zero")
 	}
 
-	checkSum := fmt.Sprintf("%x", crc32.ChecksumIEEE(imageBytes))
+	ctx, cancel := context.WithTimeout(context.Background(), c.ServiceInfo.Timeout)
+	defer cancel()
+	checkSum := fmt.Sprintf("%08x", crc32.ChecksumIEEE(imageBytes))
 	url := fmt.Sprintf("http://%s/%s", host, storeInfo.StoreUri)
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(imageBytes))
 	if err != nil {
@@ -110,6 +114,7 @@ func (c *ImageXClient) upload(host string, storeInfo StoreInfo, imageBytes []byt
 	}
 	req.Header.Set("Content-CRC32", checkSum)
 	req.Header.Set("Authorization", storeInfo.Auth)
+	req = req.WithContext(ctx)
 
 	rsp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -164,6 +169,7 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 				fmt.Printf("Fail to do upload for host %s, uri %s, %v\n", host, info.StoreUri, err)
 			} else {
 				success = append(success, info.StoreUri)
+				break
 			}
 		}
 	}
@@ -172,6 +178,7 @@ func (c *ImageXClient) UploadImages(params *ApplyUploadImageParam, images [][]by
 	commitParams := &CommitUploadImageParam{
 		ServiceId:   params.ServiceId,
 		SpaceName:   params.SpaceName,
+		SkipMeta:    params.SkipMeta,
 		SessionKey:  applyResp.SessionKey,
 		SuccessOids: success,
 		Functions:   functions,

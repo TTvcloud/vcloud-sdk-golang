@@ -239,7 +239,7 @@ func (l *Live) GetOnlineUserNum(request *GetOnlineUserNumRequest) (*GetOnlineUse
 	query.Add("StartTime", strconv.FormatInt(request.StartTime, 10))
 	query.Add("EndTime", strconv.FormatInt(request.EndTime, 10))
 
-	respBody, status, err := l.Query("GetStreamTimeShiftInfo", query)
+	respBody, status, err := l.Query("GetOnlineUserNum", query)
 	if err != nil {
 		return nil, err
 	}

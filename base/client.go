@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -25,6 +26,7 @@ const (
 type Client struct {
 	Client      http.Client
 	ServiceInfo *ServiceInfo
+	mu          sync.Mutex
 	ApiInfoList map[string]*ApiInfo
 }
 
@@ -37,7 +39,7 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	}
 
 	c := http.Client{Transport: transport}
-	client := &Client{Client: c, ServiceInfo: info, ApiInfoList: apiInfoList}
+	client := &Client{Client: c, ServiceInfo: info.Clone(), ApiInfoList: apiInfoList}
 
 	if client.ServiceInfo.Scheme == "" {
 		client.ServiceInfo.Scheme = defaultScheme
@@ -60,6 +62,32 @@ func NewClient(info *ServiceInfo, apiInfoList map[string]*ApiInfo) *Client {
 	}
 
 	return client
+}
+
+func (serviceInfo *ServiceInfo) Clone() *ServiceInfo {
+	ret := new(ServiceInfo)
+	ret.Timeout = serviceInfo.Timeout
+	ret.Host = serviceInfo.Host
+	ret.Scheme = serviceInfo.Scheme
+	ret.Credentials = serviceInfo.Credentials.Clone()
+	ret.Header = serviceInfo.Header.Clone()
+	return ret
+}
+
+func (cred Credentials) Clone() Credentials {
+	return Credentials{
+		Service:         cred.Service,
+		Region:          cred.Region,
+		SecretAccessKey: cred.SecretAccessKey,
+		AccessKeyID:     cred.AccessKeyID,
+	}
+}
+
+func (client *Client) AddHeader(key, value string) {
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	client.ServiceInfo.Header.Del(key)
+	client.ServiceInfo.Header.Add(key, value)
 }
 
 // SetAccessKey 设置AK
@@ -101,6 +129,12 @@ func (client *Client) SetCredential(c Credentials) {
 
 	if c.Region != "" {
 		client.ServiceInfo.Credentials.Region = c.Region
+	}
+}
+
+func (client *Client) SetTimeout(timeout time.Duration) {
+	if timeout > 0 {
+		client.ServiceInfo.Timeout = timeout
 	}
 }
 

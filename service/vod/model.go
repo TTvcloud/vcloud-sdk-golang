@@ -121,6 +121,7 @@ type ApplyUploadParam struct {
 	SessionKey string
 	FileType   FileType
 	FileSize   int
+	FileName   string
 	UploadNum  int
 }
 
